@@ -1,0 +1,156 @@
+<section class="gift-builder">
+  <!-- Loading -->
+  @if (loadState() === 'loading') {
+    <div class="gift-builder__loading">
+      <div class="gift-builder__loading-spinner"></div>
+      <p>{{ 'giftBuilder.loading' | translate }}</p>
+    </div>
+  }
+
+  @if (loadState() === 'error') {
+    <div class="gift-builder__error">
+      <p>{{ 'giftBuilder.errorTitle' | translate }}</p>
+      <button type="button" (click)="loadAll()">
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  }
+
+  @if (loadState() === 'ready') {
+    <!-- Hero -->
+    <header class="gift-builder__hero" appRevealOnScroll>
+      <p class="gift-builder__eyebrow">{{ 'giftBuilder.eyebrow' | translate }}</p>
+      <h1 class="gift-builder__title">{{ 'giftBuilder.title' | translate }}</h1>
+      <p class="gift-builder__subtitle">{{ 'giftBuilder.subtitle' | translate }}</p>
+    </header>
+
+    <!-- Layout -->
+    <div class="gift-builder__layout">
+      <!-- LEFT: Steps -->
+      <div class="gift-builder__main">
+        <!-- Step indicator -->
+        <ol class="gift-steps">
+          @for (s of steps; track s.key; let last = $last) {
+            <li
+              class="gift-steps__item"
+              [class.is-active]="step() === s.key"
+              [class.is-complete]="s.num < currentStepNum()"
+              [class.is-clickable]="s.num < currentStepNum()"
+            >
+              <button
+                type="button"
+                class="gift-steps__btn"
+                (click)="goToStep(s.key)"
+                [disabled]="s.num > currentStepNum()"
+              >
+                <span class="gift-steps__dot">
+                  @if (s.num < currentStepNum()) {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                  } @else {
+                    {{ s.num }}
+                  }
+                </span>
+                <span class="gift-steps__label">{{ s.labelKey | translate }}</span>
+              </button>
+              @if (!last) {
+                <span class="gift-steps__line" aria-hidden="true"></span>
+              }
+            </li>
+          }
+        </ol>
+
+        <!-- Step content -->
+        <div class="gift-builder__content">
+          @switch (step()) {
+            @case ('box') {
+              <div appRevealOnScroll>
+                <app-gift-box-picker
+                  [boxes]="boxes()"
+                  [selectedId]="box()?._id ?? null"
+                  (select)="onSelectBox($event)"
+                />
+              </div>
+            }
+            @case ('items') {
+              <div appRevealOnScroll>
+                <app-gift-item-picker
+                  [products]="products()"
+                  [selectedItems]="items()"
+                  [remaining]="remaining()"
+                  [isFull]="isFull()"
+                  (addItem)="onAddItem($event)"
+                  (removeItem)="onRemoveItem($event)"
+                />
+              </div>
+            }
+            @case ('wrap') {
+              <div appRevealOnScroll>
+                <app-gift-wrap-picker
+                  [wrapStyles]="wrapStyles()"
+                  [ribbons]="ribbons()"
+                  [selectedWrapId]="wrapStyle()?._id ?? null"
+                  [selectedRibbonId]="ribbon()?._id ?? null"
+                  [note]="selection().note"
+                  (selectWrap)="onSelectWrap($event)"
+                  (selectRibbon)="onSelectRibbon($event)"
+                  (noteChange)="onNoteChange($event)"
+                />
+              </div>
+            }
+            @case ('review') {
+              <div appRevealOnScroll>
+                <app-gift-review-panel
+                  [box]="box()"
+                  [items]="items()"
+                  [wrapStyle]="wrapStyle()"
+                  [ribbon]="ribbon()"
+                  [note]="selection().note"
+                  [subtotal]="subtotal()"
+                />
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Navigation -->
+        <footer class="gift-builder__nav">
+          <button
+            type="button"
+            class="gift-builder__nav-btn gift-builder__nav-btn--ghost"
+            (click)="back()"
+            [disabled]="currentStepNum() === 1"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            {{ 'common.back' | translate }}
+          </button>
+
+          @if (step() !== 'review') {
+            <button
+              type="button"
+              class="gift-builder__nav-btn gift-builder__nav-btn--primary"
+              (click)="next()"
+              [disabled]="!canProceed()"
+            >
+              {{ 'common.next' | translate }}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          }
+        </footer>
+      </div>
+
+      <!-- RIGHT: Live Preview -->
+      <aside class="gift-builder__aside" appRevealOnScroll variant="fade">
+        <app-gift-box-preview
+          [box]="box()"
+          [items]="items()"
+          [wrapStyle]="wrapStyle()"
+          [ribbon]="ribbon()"
+          [subtotal]="subtotal()"
+          [itemCount]="itemCount()"
+          [capacity]="capacity()"
+          (reset)="onReset()"
+        />
+      </aside>
+    </div>
+  }
+</section>

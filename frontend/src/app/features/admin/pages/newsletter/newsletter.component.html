@@ -1,0 +1,140 @@
+<div class="admin-newsletter">
+  <header class="admin-newsletter__header">
+    <div>
+      <h1 class="admin-newsletter__title">{{ 'admin.newsletter.title' | translate }}</h1>
+      <p class="admin-newsletter__subtitle">
+        {{ 'admin.newsletter.subtitle' | translate }}
+        @if (state() === 'success') {
+          <strong>{{ activeCount() }}</strong> {{ 'admin.newsletter.active' | translate }}
+        }
+      </p>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="admin-newsletter__toolbar">
+    <div class="admin-newsletter__search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input
+        type="search"
+        class="admin-newsletter__search-input"
+        [placeholder]="'admin.newsletter.searchPlaceholder' | translate"
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Filter pills -->
+  <div class="admin-newsletter__filters" role="tablist">
+    @for (opt of statusOptions; track opt.value) {
+      <button
+        type="button"
+        class="admin-newsletter__filter"
+        [class.is-active]="statusFilter() === opt.value"
+        (click)="setStatus(opt.value)"
+      >
+        {{ opt.labelKey | translate }}
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (state() === 'loading') {
+    <div class="admin-newsletter__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  <!-- Error -->
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.newsletter.errorTitle' | translate"
+      [message]="'admin.newsletter.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  <!-- Empty -->
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.newsletter.emptyTitle' | translate"
+      [message]="'admin.newsletter.emptyText' | translate"
+    />
+  }
+
+  <!-- Table -->
+  @if (state() === 'success') {
+    <div class="admin-newsletter__table-wrap">
+      <table class="admin-newsletter__table">
+        <thead>
+          <tr>
+            <th>{{ 'admin.newsletter.colEmail' | translate }}</th>
+            <th>{{ 'admin.newsletter.colSubscribed' | translate }}</th>
+            <th>{{ 'admin.newsletter.colStatus' | translate }}</th>
+            <th class="admin-newsletter__col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sub of filteredSubscribers(); track sub._id) {
+            <tr>
+              <td>
+<button
+  type="button"
+  class="admin-newsletter__email"
+  [class.is-copied]="copiedEmail() === sub.email"
+  (click)="copyEmail(sub.email)"
+  [attr.title]="'admin.newsletter.copyHint' | translate"
+>
+  @if (copiedEmail() === sub.email) {
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display: inline; vertical-align: middle; margin-inline-end: 4px;"><path d="M20 6 9 17l-5-5"/></svg>
+  }
+  {{ sub.email }}
+</button>
+              </td>
+              <td>
+                <span class="admin-newsletter__date">{{ sub.subscribedAt | date:'mediumDate' }}</span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="admin-newsletter__status"
+                  [class.is-active]="sub.isActive"
+                  (click)="toggleActive(sub)"
+                  [disabled]="processingId() === sub._id"
+                >
+                  <span class="admin-newsletter__status-dot"></span>
+                  {{ sub.isActive ? ('admin.newsletter.active' | translate) : ('admin.newsletter.inactive' | translate) }}
+                </button>
+              </td>
+              <td class="admin-newsletter__col-actions">
+                <button
+                  type="button"
+                  class="admin-newsletter__action admin-newsletter__action--danger"
+                  (click)="remove(sub)"
+                  [disabled]="processingId() === sub._id"
+                  [attr.aria-label]="'common.delete' | translate"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="admin-newsletter__pagination">
+        <app-pagination
+          [page]="page()"
+          [totalPages]="totalPages()"
+          (pageChange)="onPageChange($event)"
+        />
+      </div>
+    }
+  }
+</div>

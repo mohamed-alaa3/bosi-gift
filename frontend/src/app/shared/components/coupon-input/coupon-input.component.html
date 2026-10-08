@@ -1,0 +1,79 @@
+<div class="coupon-input">
+  <label class="coupon-input__label" for="coupon-code-field">
+    {{ 'coupon.label' | translate }}
+  </label>
+
+  @if (applied(); as coupon) {
+    <div class="coupon-input__applied" role="status">
+      <span class="coupon-input__badge" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82zM7 7h.01"/></svg>
+      </span>
+
+      <div class="coupon-input__applied-info">
+        <span class="coupon-input__applied-code">{{ coupon.code }}</span>
+        <span class="coupon-input__applied-desc">
+          @if (coupon.type === 'percentage' && coupon.value !== null) {
+            {{ 'coupon.percentOff' | translate: { value: coupon.value } }}
+          } @else {
+            {{ 'coupon.amountOff' | translate: { amount: (coupon.discount | price) } }}
+          }
+        </span>
+      </div>
+
+      <button
+        type="button"
+        class="coupon-input__remove"
+        (click)="remove()"
+        [attr.aria-label]="'coupon.remove' | translate"
+        [title]="'coupon.remove' | translate"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+  } @else {
+    <div class="coupon-input__row">
+      <input
+        id="coupon-code-field"
+        type="text"
+        class="coupon-input__field"
+        [class.has-error]="error() !== null"
+        [value]="code()"
+        (input)="onInput($event)"
+        (keydown.enter)="apply()"
+        [placeholder]="'coupon.placeholder' | translate"
+        [attr.aria-invalid]="error() !== null ? 'true' : null"
+        [attr.aria-describedby]="error() !== null ? 'coupon-code-error' : null"
+        autocomplete="off"
+        autocapitalize="characters"
+        spellcheck="false"
+        maxlength="32"
+      />
+      <button
+        type="button"
+        class="coupon-input__apply"
+        (click)="apply()"
+        [disabled]="!code().trim() || applying()"
+      >
+        @if (applying()) {
+          <span class="coupon-input__spinner" aria-hidden="true"></span>
+          <span class="coupon-input__sr">{{ 'common.loading' | translate }}</span>
+        } @else {
+          {{ 'coupon.apply' | translate }}
+        }
+      </button>
+    </div>
+  }
+
+  @if (error(); as reason) {
+    <p id="coupon-code-error" class="coupon-input__error" role="alert">
+      {{ 'coupon.errors.' + reason | translate: { amount: (minOrderAmount() | price) } }}
+    </p>
+  }
+
+  @if (removedReason(); as reason) {
+    <p class="coupon-input__notice" role="status">
+      {{ 'coupon.removed' | translate }}
+      {{ 'coupon.errors.' + reason | translate: { amount: (minOrderAmount() | price) } }}
+    </p>
+  }
+</div>

@@ -1,0 +1,138 @@
+.app-search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 0.875rem;
+    height: 42px;
+    width: 100%;
+    max-width: 420px;
+    background-color: var(--bg-muted);
+    border: 1.5px solid transparent;
+    border-radius: var(--radius-full);
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+
+    &:hover {
+        background-color: var(--surface-hover);
+    }
+
+    &.is-focused {
+        background-color: var(--surface);
+        border-color: var(--brand-primary);
+        box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), 0.15);
+    }
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        flex-shrink: 0;
+    }
+
+    &__input {
+        flex: 1;
+        min-width: 0;
+        background: transparent;
+        border: none;
+        outline: none;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        color: var(--text);
+
+        &::placeholder {
+            color: var(--text-subtle);
+        }
+
+        // Remove native search clear
+        &::-webkit-search-cancel-button {
+            -webkit-appearance: none;
+            appearance: none;
+        }
+    }
+
+    &__clear {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: var(--radius-full);
+        background-color: var(--border-strong);
+        color: var(--surface);
+        border: none;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background-color var(--transition-fast);
+
+        &:hover {
+            background-color: var(--brand-primary);
+        }
+                  &:active {
+                      transform: scale(0.9);
+                  }
+    }
+
+    &__shortcut {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.125rem 0.375rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        flex-shrink: 0;
+        font-family: 'Inter', system-ui, sans-serif;
+        letter-spacing: 0.02em;
+    }
+
+    &__close {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.25rem 0.5rem;
+        cursor: pointer;
+        flex-shrink: 0;
+
+        &:hover {
+            color: var(--text);
+            border-color: var(--border-strong);
+        }
+    }
+}
+
+// Expanded (modal-like)
+.app-search-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--overlay);
+    backdrop-filter: blur(4px);
+    z-index: var(--z-modal);
+    display: flex;
+    justify-content: center;
+    padding-top: 12vh;
+    animation: fade-in var(--motion-duration-base) var(--motion-ease-out) both;
+
+    &__inner {
+        width: 100%;
+        max-width: 640px;
+        padding: 0 1rem;
+    }
+
+    .app-search {
+        max-width: none;
+        height: 52px;
+        background-color: var(--surface);
+        border-color: var(--brand-primary);
+        box-shadow: var(--shadow-xl);
+    }
+}
+
+// RTL — clear button position adjusts automatically (logical flow)

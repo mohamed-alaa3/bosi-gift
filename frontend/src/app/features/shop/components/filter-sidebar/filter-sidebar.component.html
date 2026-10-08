@@ -1,0 +1,157 @@
+<div class="filters">
+  <!-- Quick picks -->
+  <div class="filters__group">
+    <h3 class="filters__title">{{ 'shop.filterQuick' | translate }}</h3>
+    <ul class="filters__list filters__list--chips">
+      <li>
+        <button type="button" class="filters__option" [class.is-active]="draft().trending" [attr.aria-pressed]="!!draft().trending" (click)="toggleFlag('trending')">
+          🔥 {{ 'shop.trending' | translate }}
+        </button>
+      </li>
+      <li>
+        <button type="button" class="filters__option" [class.is-active]="draft().dailyOffer" [attr.aria-pressed]="!!draft().dailyOffer" (click)="toggleFlag('dailyOffer')">
+          🏷️ {{ 'shop.dailyOffers' | translate }}
+        </button>
+      </li>
+      <li>
+        <button type="button" class="filters__option" [class.is-active]="draft().readyBox" [attr.aria-pressed]="!!draft().readyBox" (click)="toggleFlag('readyBox')">
+          🎁 {{ 'shop.readyBoxes' | translate }}
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Recipient -->
+  <div class="filters__group">
+    <h3 class="filters__title">{{ 'shop.filterRecipient' | translate }}</h3>
+    <ul class="filters__list filters__list--chips">
+      @for (r of recipients; track r.slug) {
+        <li>
+          <button type="button" class="filters__option" [class.is-active]="draft().recipient === r.slug" [attr.aria-pressed]="draft().recipient === r.slug" (click)="toggleRecipient(r.slug)">
+            <span aria-hidden="true">{{ r.emoji }}</span> {{ r.labelKey | translate }}
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <!-- Occasion -->
+  <div class="filters__group">
+    <h3 class="filters__title">{{ 'shop.filterOccasion' | translate }}</h3>
+    <ul class="filters__list filters__list--chips">
+      @for (o of occasions; track o.slug) {
+        <li>
+          <button type="button" class="filters__option" [class.is-active]="draft().occasion === o.slug" [attr.aria-pressed]="draft().occasion === o.slug" (click)="toggleOccasion(o.slug)">
+            <span aria-hidden="true">{{ o.emoji }}</span> {{ o.labelKey | translate }}
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <!-- Categories -->
+  <div class="filters__group">
+    <h3 class="filters__title">{{ 'shop.filterCategories' | translate }}</h3>
+    <ul class="filters__list">
+      <li>
+        <button
+          type="button"
+          class="filters__option"
+          [class.is-active]="!draft().category"
+          (click)="draft().category ? toggleCategory(draft().category!) : null"
+        >
+          {{ 'shop.allProducts' | translate }}
+        </button>
+      </li>
+      @for (cat of categories(); track cat._id) {
+        <li>
+          <button
+            type="button"
+            class="filters__option"
+            [class.is-active]="isCategoryActive(cat._id)"
+            (click)="toggleCategory(cat._id)"
+          >
+            {{ cat.name | localized }}
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <!-- Price -->
+  <div class="filters__group">
+    <h3 class="filters__title">{{ 'shop.filterPrice' | translate }}</h3>
+    <div class="filters__price">
+      <input
+        type="number"
+        class="filters__price-input"
+        [placeholder]="'shop.min' | translate"
+        [value]="minPriceInput() ?? ''"
+        (input)="minPriceInput.set(+($any($event.target).value) || null)"
+        min="0"
+      />
+      <span class="filters__price-sep">—</span>
+      <input
+        type="number"
+        class="filters__price-input"
+        [placeholder]="'shop.max' | translate"
+        [value]="maxPriceInput() ?? ''"
+        (input)="maxPriceInput.set(+($any($event.target).value) || null)"
+        min="0"
+      />
+    </div>
+    <button type="button" class="filters__apply" (click)="applyPrice()">
+      {{ 'shop.applyPrice' | translate }}
+    </button>
+  </div>
+
+  <!-- Rating -->
+  <div class="filters__group">
+    <h3 class="filters__title">{{ 'shop.filterRating' | translate }}</h3>
+    <ul class="filters__list">
+      @for (r of ratingOptions; track r) {
+        <li>
+          <button
+            type="button"
+            class="filters__option"
+            [class.is-active]="isRatingActive(r)"
+            (click)="toggleRating(r)"
+          >
+            {{ r }}★ & {{ 'shop.andUp' | translate }}
+          </button>
+        </li>
+      }
+    </ul>
+  </div>
+
+  <!-- Availability -->
+  <div class="filters__group">
+    <h3 class="filters__title">{{ 'shop.filterAvailability' | translate }}</h3>
+    <ul class="filters__list">
+      <li>
+        <button
+          type="button"
+          class="filters__option"
+          [class.is-active]="draft().inStock"
+          (click)="toggleInStock()"
+        >
+          {{ 'shop.inStock' | translate }}
+        </button>
+      </li>
+      <li>
+        <button
+          type="button"
+          class="filters__option"
+          [class.is-active]="draft().onSale"
+          (click)="toggleOnSale()"
+        >
+          {{ 'shop.onSale' | translate }}
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <button type="button" class="filters__reset" (click)="reset()">
+    {{ 'shop.resetFilters' | translate }}
+  </button>
+</div>

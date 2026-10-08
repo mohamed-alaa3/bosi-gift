@@ -1,0 +1,573 @@
+<section class="checkout">
+  <!-- CONFIRMATION -->
+  @if (flowState() === 'confirmed' && createdOrder(); as order) {
+    <app-checkout-order-confirmation
+      [order]="order"
+      [whatsappMessage]="whatsappMessage()"
+      [whatsappNumber]="whatsappNumber"
+    />
+  }
+
+  <!-- LOADING -->
+  @if (flowState() !== 'confirmed' && loadState() === 'loading') {
+    <div class="checkout__loader">
+      <app-loader size="lg" variant="spinner" [label]="'common.loading' | translate" />
+    </div>
+  }
+
+  <!-- ERROR -->
+  @if (flowState() !== 'confirmed' && loadState() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'checkout.errorTitle' | translate"
+      [message]="'checkout.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="retry()"
+    />
+  }
+
+  <!-- EMPTY -->
+  @if (flowState() !== 'confirmed' && loadState() === 'empty') {
+    <app-empty-state
+      icon="cart"
+      [title]="'cart.emptyTitle' | translate"
+      [message]="'cart.emptyText' | translate"
+      [actionLabel]="'cart.continueShopping' | translate"
+      [actionLink]="'/shop'"
+    />
+  }
+
+  <!-- FORM -->
+  @if (flowState() !== 'confirmed' && loadState() === 'ready') {
+    <header class="checkout__header" appRevealOnScroll>
+      <div class="checkout__header-top">
+        <a routerLink="/cart" class="checkout__back">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          {{ 'checkout.returnToCart' | translate }}
+        </a>
+      </div>
+      <h1 class="checkout__title">{{ 'checkout.title' | translate }}</h1>
+    </header>
+
+    <app-checkout-step-indicator [current]="currentStep()" />
+
+    @if (priceChangedNotice()) {
+      <div class="checkout__notice" role="alert">
+        {{ 'checkout.priceChanged' | translate }}
+      </div>
+    }
+
+    <div class="checkout__layout" appRevealOnScroll [stagger]="true">
+      <div class="checkout__main">
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- STEP 1: INFORMATION                               -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        @if (currentStep() === 'information') {
+          <form class="checkout__form" [formGroup]="form" novalidate>
+            @if (savedAddresses().length > 0) {
+              <section class="checkout__section">
+                <h2 class="checkout__section-title">
+                  {{ 'checkout.savedAddresses' | translate }}
+                </h2>
+                <div class="checkout__addresses">
+                  @for (addr of savedAddresses(); track addr._id) {
+                    <button
+                      type="button"
+                      class="checkout__address-card"
+                      [class.is-active]="selectedAddressId() === addr._id"
+                      (click)="applyAddress(addr)"
+                    >
+                      <div class="checkout__address-head">
+                        <p class="checkout__address-name">{{ addr.fullName }}</p>
+                        @if (addr.isDefault) {
+                          <span class="checkout__address-badge">
+                            {{ 'checkout.default' | translate }}
+                          </span>
+                        }
+                      </div>
+                      <p class="checkout__address-line">{{ addr.street }}{{ addr.building ? ', ' + addr.building : '' }}</p>
+                      <p class="checkout__address-line">{{ addr.city }}{{ addr.country ? ', ' + addr.country : '' }}</p>
+                      <p class="checkout__address-line">{{ addr.phone }}</p>
+                    </button>
+                  }
+                </div>
+              </section>
+            }
+
+            <section class="checkout__section">
+              <h2 class="checkout__section-title">
+                <span class="checkout__section-num">1</span>
+                {{ 'checkout.contactInfo' | translate }}
+              </h2>
+
+              <app-input
+                formControlName="email"
+                type="email"
+                [label]="'checkout.email' | translate"
+                [placeholder]="'checkout.emailPlaceholder' | translate"
+                [error]="showError('email') ? errorFor('email') : ''"
+                autocomplete="email"
+              />
+            </section>
+
+            <section class="checkout__section">
+              <h2 class="checkout__section-title">
+                <span class="checkout__section-num">2</span>
+                {{ 'checkout.shippingAddress' | translate }}
+              </h2>
+
+              <div class="checkout__grid">
+                <app-input
+                  formControlName="fullName"
+                  [label]="'checkout.fullName' | translate"
+                  [error]="showError('fullName') ? errorFor('fullName') : ''"
+                  autocomplete="name"
+                />
+                <app-input
+                  formControlName="phone"
+                  type="tel"
+                  [label]="'checkout.phone' | translate"
+                  [error]="showError('phone') ? errorFor('phone') : ''"
+                  autocomplete="tel"
+                />
+              </div>
+
+              <div class="checkout__grid">
+                <app-input
+                  formControlName="country"
+                  [label]="'checkout.country' | translate"
+                  [error]="showError('country') ? errorFor('country') : ''"
+                  autocomplete="country"
+                />
+                <app-select
+                  formControlName="governorate"
+                  [label]="'checkout.governorate' | translate"
+                  [placeholder]="'checkout.governoratePlaceholder' | translate"
+                  [options]="governorateOptions()"
+                  [error]="showError('governorate') ? errorFor('governorate') : ''"
+                  [required]="true"
+                />
+              </div>
+
+              <div class="checkout__grid">
+                <app-input
+                  formControlName="city"
+                  [label]="'checkout.city' | translate"
+                  [error]="showError('city') ? errorFor('city') : ''"
+                  autocomplete="address-level2"
+                />
+                <app-input
+                  formControlName="area"
+                  [label]="'checkout.area' | translate"
+                  autocomplete="address-level3"
+                />
+              </div>
+
+              <app-input
+                formControlName="street"
+                [label]="'checkout.street' | translate"
+                [error]="showError('street') ? errorFor('street') : ''"
+                autocomplete="address-line1"
+              />
+
+              <div class="checkout__grid">
+                <app-input
+                  formControlName="building"
+                  [label]="'checkout.building' | translate"
+                />
+                <app-input
+                  formControlName="apartment"
+                  [label]="'checkout.apartment' | translate"
+                />
+              </div>
+
+              <app-input
+                formControlName="postalCode"
+                [label]="'checkout.postalCode' | translate"
+                autocomplete="postal-code"
+              />
+            </section>
+
+            <section class="checkout__section">
+              <h2 class="checkout__section-title">
+                <span class="checkout__section-num">3</span>
+                {{ 'checkout.additionalNotes' | translate }}
+              </h2>
+              <app-textarea
+                formControlName="notes"
+                [label]="'checkout.notes' | translate"
+                [placeholder]="'checkout.notesPlaceholder' | translate"
+                [rows]="4"
+              />
+            </section>
+
+            <div class="checkout__form-actions">
+              <button
+                type="button"
+                class="checkout__btn checkout__btn--primary"
+                (click)="continueFromInformation()"
+              >
+                {{ 'common.continue' | translate }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </form>
+        }
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- STEP 2: SHIPPING                                  -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        @if (currentStep() === 'shipping') {
+          <section class="checkout__section">
+            <h2 class="checkout__section-title">
+              {{ 'checkout.shippingSummary' | translate }}
+            </h2>
+
+            @if (selectedGovernorate(); as gov) {
+              <div class="checkout__shipping-card">
+                <div class="checkout__shipping-row">
+                  <span>{{ 'checkout.governorate' | translate }}</span>
+                  <strong>{{ gov.name.ar }} / {{ gov.name.en }}</strong>
+                </div>
+                <div class="checkout__shipping-row">
+                  <span>{{ 'cart.shipping' | translate }}</span>
+                  <strong class="checkout__shipping-fee">
+                    @if (gov.fee === 0) {
+                      {{ 'admin.settings.shipping.free' | translate }}
+                    } @else {
+                      {{ gov.fee | price }}
+                    }
+                  </strong>
+                </div>
+              </div>
+
+              <p class="checkout__hint">
+                {{ 'checkout.shippingHint' | translate }}
+              </p>
+            }
+
+            <div class="checkout__form-actions">
+              <button
+                type="button"
+                class="checkout__btn checkout__btn--ghost"
+                (click)="backToStep('information')"
+              >
+                {{ 'common.back' | translate }}
+              </button>
+              <button
+                type="button"
+                class="checkout__btn checkout__btn--primary"
+                (click)="continueFromShipping()"
+              >
+                {{ 'common.continue' | translate }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </section>
+        }
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- STEP 3: COUPON                                    -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        @if (currentStep() === 'coupon') {
+          <section class="checkout__section">
+            <h2 class="checkout__section-title">
+              {{ 'checkout.couponTitle' | translate }}
+            </h2>
+            <p class="checkout__hint">
+              {{ 'checkout.couponHint' | translate }}
+            </p>
+
+            <div class="checkout__coupon">
+              @if (couponCode()) {
+                <div class="checkout__coupon-applied">
+                  <div class="checkout__coupon-info">
+                    <span class="checkout__coupon-code">{{ couponCode() }}</span>
+                    <span class="checkout__coupon-savings">
+                      -{{ couponDiscount() | price }}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    class="checkout__coupon-remove"
+                    (click)="couponStore.clear(); refreshQuote()"
+                  >
+                    {{ 'coupon.remove' | translate }}
+                  </button>
+                </div>
+              } @else {
+                <app-checkout-coupon-input
+                  (applied)="applyCouponInput($event)"
+                />
+              }
+            </div>
+
+            <div class="checkout__form-actions">
+              <button
+                type="button"
+                class="checkout__btn checkout__btn--ghost"
+                (click)="backToStep('shipping')"
+              >
+                {{ 'common.back' | translate }}
+              </button>
+              <button
+                type="button"
+                class="checkout__btn checkout__btn--primary"
+                (click)="continueFromCoupon()"
+              >
+                {{ 'common.continue' | translate }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </section>
+        }
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- STEP 4: PAYMENT                                   -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        @if (currentStep() === 'payment') {
+          <section class="checkout__section">
+            <app-checkout-payment-method
+              [value]="paymentMethod()"
+              [options]="paymentOptions()"
+              (valueChange)="onPaymentMethodChange($event)"
+            />
+
+            <div class="checkout__form-actions">
+              <button
+                type="button"
+                class="checkout__btn checkout__btn--ghost"
+                (click)="backToStep('coupon')"
+              >
+                {{ 'common.back' | translate }}
+              </button>
+              <button
+                type="button"
+                class="checkout__btn checkout__btn--primary"
+                [disabled]="!paymentMethod()"
+                (click)="continueFromPayment()"
+              >
+                {{ 'common.continue' | translate }}
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </section>
+        }
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- STEP 5: PAYMENT PROOF                             -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        @if (currentStep() === 'proof') {
+          @if (quote(); as q) {
+            <section class="checkout__section">
+              <app-checkout-payment-proof
+                [amountDueNow]="q.amountDueNow"
+                [numbers]="{
+                  vodafoneCashNumber: vodafoneCashNumber(),
+                  instapayNumber: instapayNumber()
+                }"
+                (methodChange)="onPaymentProofMethodChange($event)"
+                (fileChange)="onPaymentProofComponentFile($event)"
+              />
+
+              <div class="checkout__form-actions">
+                <button
+                  type="button"
+                  class="checkout__btn checkout__btn--ghost"
+                  (click)="backToStep('payment')"
+                >
+                  {{ 'common.back' | translate }}
+                </button>
+                <button
+                  type="button"
+                  class="checkout__btn checkout__btn--primary"
+                  [disabled]="!paymentProofMethod() || !paymentProofFile()"
+                  (click)="continueFromProof()"
+                >
+                  {{ 'common.continue' | translate }}
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+            </section>
+          }
+        }
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- STEP 6: REVIEW                                    -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        @if (currentStep() === 'review') {
+          <app-checkout-order-review
+            [items]="items()"
+            [address]="form.getRawValue()"
+            [notes]="form.controls.notes.value"
+            [paymentMethod]="paymentMethod()"
+            [paymentProofMethod]="paymentProofMethod()"
+            [quote]="quote()"
+          />
+
+          <div class="checkout__form-actions checkout__form-actions--stack">
+            <button
+              type="button"
+              class="checkout__btn checkout__btn--ghost"
+              (click)="backToStep(paymentMethod() === 'cod' ? 'payment' : 'proof')"
+              [disabled]="submitting()"
+            >
+              {{ 'common.back' | translate }}
+            </button>
+
+            <button
+              type="button"
+              class="checkout__btn checkout__btn--primary checkout__btn--whatsapp"
+              (click)="placeOrder()"
+              [disabled]="submitting() || !canPlaceOrder()"
+            >
+              @if (submitting()) {
+                <span class="checkout__spinner" aria-hidden="true"></span>
+                {{ 'checkout.placing' | translate }}
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                {{ 'checkout.placeOrderWhatsApp' | translate }}
+              }
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- SUMMARY SIDEBAR -->
+      <aside class="checkout__summary" aria-label="Order summary">
+        <h2 class="checkout__summary-title">{{ 'cart.summary' | translate }}</h2>
+
+        <ul class="checkout__summary-list">
+          @for (item of items(); track item._id) {
+            @if (item.type === 'gift-box' && item.giftBox) {
+              <li class="checkout__summary-item checkout__summary-item--gift">
+                <div class="checkout__summary-media">
+                  @if (item.giftBox.boxImageUrl) {
+                    <img
+                      [src]="item.giftBox.boxImageUrl | safeImage"
+                      [alt]="item.giftBox.boxName | localized"
+                      class="checkout__summary-image img-fallback"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  } @else {
+                    <div class="checkout__summary-image img-fallback" aria-hidden="true"></div>
+                  }
+                </div>
+                <div class="checkout__summary-info">
+                  <p class="checkout__summary-name">{{ item.giftBox.boxName | localized }}</p>
+                  <p class="checkout__summary-meta">
+                    {{ item.giftBox.items.length }} {{ 'giftBuilder.items' | translate }}
+                  </p>
+                </div>
+                <span class="checkout__summary-price">{{ item.lineTotal ?? 0 | price }}</span>
+              </li>
+            } @else {
+              <li class="checkout__summary-item">
+                <div class="checkout__summary-media">
+                  @if (item.product?.imageUrl) {
+                    <img
+                      [src]="item.product!.imageUrl | safeImage"
+                      [alt]="item.product!.name | localized"
+                      class="checkout__summary-image img-fallback"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  } @else {
+                    <div class="checkout__summary-image img-fallback" aria-hidden="true"></div>
+                  }
+                  <span class="checkout__summary-qty">{{ item.quantity }}</span>
+                </div>
+                <div class="checkout__summary-info">
+                  <p class="checkout__summary-name">
+                    {{ item.product ? (item.product.name | localized) : 'Item' }}
+                  </p>
+                </div>
+                <span class="checkout__summary-price">{{ item.lineTotal ?? 0 | price }}</span>
+              </li>
+            }
+          }
+        </ul>
+
+        <div class="checkout__summary-divider"></div>
+
+        <div class="checkout__summary-row">
+          <span>{{ 'cart.subtotal' | translate }}</span>
+          <span>{{ subtotal() | price }}</span>
+        </div>
+
+        @if (quote(); as q) {
+          @if (q.coupon) {
+            <div class="checkout__summary-row checkout__summary-row--discount">
+              <span>{{ 'cart.discount' | translate }} ({{ q.coupon.code }})</span>
+              <span>-{{ q.coupon.discount | price }}</span>
+            </div>
+          }
+          @if (q.paymentDiscount > 0) {
+            <div class="checkout__summary-row checkout__summary-row--discount">
+              <span>{{ 'checkout.paymentDiscountLine' | translate }}</span>
+              <span>-{{ q.paymentDiscount | price }}</span>
+            </div>
+          }
+          <div class="checkout__summary-row">
+            <span>{{ 'cart.shipping' | translate }}</span>
+            <span>
+              @if (q.shippingFee === 0) {
+                {{ 'admin.settings.shipping.free' | translate }}
+              } @else {
+                {{ q.shippingFee | price }}
+              }
+            </span>
+          </div>
+          @if (q.tax > 0) {
+            <div class="checkout__summary-row">
+              <span>{{ 'checkout.tax' | translate }}</span>
+              <span>{{ q.tax | price }}</span>
+            </div>
+          }
+
+          <div class="checkout__summary-divider"></div>
+
+          <div class="checkout__summary-total">
+            <span>{{ 'cart.total' | translate }}</span>
+            <span>{{ q.total | price }}</span>
+          </div>
+
+          @if (q.amountDueNow > 0) {
+            <div class="checkout__summary-row checkout__summary-row--due">
+              <span>{{ 'checkout.amountDueNow' | translate }}</span>
+              <span>{{ q.amountDueNow | price }}</span>
+            </div>
+            <div class="checkout__summary-row">
+              <span>{{ 'checkout.remainingOnDelivery' | translate }}</span>
+              <span>{{ q.remainingAmount | price }}</span>
+            </div>
+          }
+        } @else {
+          <div class="checkout__summary-row">
+            <span>{{ 'cart.shipping' | translate }}</span>
+            <span>{{ 'cart.calculatedAtCheckout' | translate }}</span>
+          </div>
+          <div class="checkout__summary-divider"></div>
+          <div class="checkout__summary-total">
+            <span>{{ 'cart.total' | translate }}</span>
+            <span>{{ subtotal() | price }}</span>
+          </div>
+        }
+
+        @if (couponNoticeReason(); as reason) {
+          <div class="checkout__summary-warning" role="alert">
+            {{ 'coupon.removed' | translate }}
+            {{ 'coupon.errors.' + reason | translate: { amount: (couponNoticeAmount() | price) } }}
+          </div>
+        }
+
+        @if (hasUnavailable()) {
+          <div class="checkout__summary-warning" role="alert">
+            {{ 'cart.unavailableWarning' | translate }}
+          </div>
+        }
+      </aside>
+    </div>
+  }
+</section>

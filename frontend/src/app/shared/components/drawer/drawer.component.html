@@ -1,0 +1,22 @@
+@if (isOpen()) {
+  <div class="app-drawer__backdrop" (click)="onBackdropClick()" role="presentation"></div>
+
+  <aside
+    [class]="classes()"
+    role="dialog"
+    aria-modal="true"
+    [attr.aria-label]="ariaLabel()"
+  >
+    <div class="app-drawer__header">
+      <ng-content select="[drawer-header]" />
+    </div>
+
+    <div class="app-drawer__body">
+      <ng-content />
+    </div>
+
+    <div class="app-drawer__footer">
+      <ng-content select="[drawer-footer]" />
+    </div>
+  </aside>
+}

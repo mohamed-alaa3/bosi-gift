@@ -1,0 +1,195 @@
+:host {
+    display: block;
+}
+
+.account-layout {
+    max-width: 1440px;
+    margin-inline: auto;
+    padding: 1.5rem 1rem 3rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+
+    @media (min-width: 1024px) {
+        grid-template-columns: 280px 1fr;
+        gap: 2rem;
+        padding: 2rem 2rem 4rem;
+    }
+
+    // ---------- Sidebar ----------
+    &__sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        height: fit-content;
+
+        @media (min-width: 1024px) {
+            position: sticky;
+            top: calc(var(--header-height) + 1rem);
+        }
+    }
+
+    // ---------- User card ----------
+    &__user {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    &__avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        border-radius: var(--radius-full);
+        background-color: var(--brand-primary);
+        color: #ffffff;
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 1.125rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    &__user-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__user-name {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__user-email {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin: 0.125rem 0 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    // ---------- Nav ----------
+    &__nav-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    &__nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        border-radius: var(--radius-md);
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text);
+        text-decoration: none;
+        transition:
+            background-color var(--transition-fast),
+            color var(--transition-fast);
+
+        &:hover:not(.is-disabled) {
+            background-color: var(--surface-hover);
+            color: var(--brand-primary);
+        }
+
+        &.is-active {
+            background-color: var(--brand-primary-soft);
+            color: var(--brand-primary);
+            font-weight: 600;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+
+        &.is-disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+    }
+
+    &__nav-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 18px;
+        height: 18px;
+    }
+
+    &__nav-label {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__nav-badge {
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        background-color: var(--bg-muted);
+        padding: 0.125rem 0.375rem;
+        border-radius: var(--radius-sm);
+    }
+
+    // ---------- Sign out ----------
+    &__signout {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: transparent;
+        border: none;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--danger);
+        cursor: pointer;
+        text-align: start;
+        width: 100%;
+        transition: background-color var(--transition-fast);
+
+        &:hover {
+            background-color: var(--danger-soft);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--danger);
+            outline-offset: 2px;
+        }
+    }
+
+    // ---------- Content ----------
+    &__content {
+        min-width: 0;
+    }
+}
+
+// RTL — mirror the icon layout automatically via gap
+// Nothing special needed — the direction property handles it

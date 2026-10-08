@@ -1,0 +1,116 @@
+<section
+  #sliderEl
+  class="hero"
+  role="region"
+  aria-roledescription="carousel"
+  aria-label="Featured gift collections"
+  tabindex="0"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  (focusin)="onFocusIn()"
+  (focusout)="onFocusOut()"
+>
+  <!-- Slides -->
+  <div
+    class="hero__track"
+    [class.is-transitioning]="isTransitioning() && !prefersReducedMotion()"
+  >
+    @for (slide of slides; track slide.id; let i = $index) {
+      <div
+        class="hero__slide"
+        [class.is-active]="i === currentIndex()"
+        [attr.aria-hidden]="i !== currentIndex()"
+        [attr.aria-roledescription]="'slide'"
+        [attr.aria-label]="(i + 1) + ' of ' + totalSlides"
+        role="group"
+      >
+        <!-- Background image -->
+        <div
+          class="hero__bg"
+          [style.background-image]="'url(' + slide.image + ')'"
+          [style.background-position]="slide.focalPoint || 'center'"
+          aria-hidden="true"
+        ></div>
+
+        <!-- Overlay -->
+        <div class="hero__overlay" aria-hidden="true"></div>
+
+        <!-- Content -->
+        <div class="hero__content">
+          <p class="hero__eyebrow">{{ slide.eyebrowKey | translate }}</p>
+          <h1 class="hero__title">{{ slide.titleKey | translate }}</h1>
+          <p class="hero__subtitle">{{ slide.subtitleKey | translate }}</p>
+
+          <div class="hero__actions">
+            <a
+              [routerLink]="slide.primaryCta.link"
+              class="hero__cta hero__cta--primary"
+            >
+              <span>{{ slide.primaryCta.labelKey | translate }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+
+            @if (slide.secondaryCta; as secondary) {
+              <a
+                [routerLink]="secondary.link"
+                class="hero__cta hero__cta--outline"
+              >
+                {{ secondary.labelKey | translate }}
+              </a>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Gift-shop decoration (purely visual) -->
+  <div class="gift-hero-decor" aria-hidden="true">
+    <app-gift-icon name="gift" class="gd gd--1 gd--lg gift-float" />
+    <app-gift-icon name="balloon" class="gd gd--2 gd--lg gift-float" />
+    <app-gift-icon name="heart" class="gd gd--3 gd--lg gift-float" />
+    <app-gift-icon name="sparkle" class="gd gd--4 gift-twinkle" />
+    <app-gift-icon name="sparkle" class="gd gd--5 gift-twinkle" />
+    <app-gift-icon name="heart" class="gd gd--6 gift-float" />
+    <app-gift-icon name="sparkle" class="gd gd--7 gd--lg gift-twinkle" />
+  </div>
+  <div class="gift-wave gift-wave--hero" aria-hidden="true"></div>
+
+  <!-- Arrows -->
+  @if (hasMultipleSlides()) {
+    <button
+      type="button"
+      class="hero__arrow hero__arrow--prev"
+      (click)="prev()"
+      [attr.aria-label]="'Previous slide'"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+
+    <button
+      type="button"
+      class="hero__arrow hero__arrow--next"
+      (click)="next()"
+      [attr.aria-label]="'Next slide'"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+  }
+
+  <!-- Dots -->
+  @if (hasMultipleSlides()) {
+    <div class="hero__dots" role="tablist" aria-label="Slide indicators">
+      @for (slide of slides; track slide.id; let i = $index) {
+        <button
+          type="button"
+          class="hero__dot"
+          [class.is-active]="i === currentIndex()"
+          (click)="goTo(i)"
+          role="tab"
+          [attr.aria-selected]="i === currentIndex()"
+          [attr.aria-label]="'Go to slide ' + (i + 1)"
+        ></button>
+      }
+    </div>
+  }
+</section>

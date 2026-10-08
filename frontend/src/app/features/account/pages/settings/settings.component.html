@@ -1,0 +1,169 @@
+<div class="account-settings">
+  <header class="account-settings__header" appRevealOnScroll>
+    <h1 class="account-settings__title">{{ 'account.settings' | translate }}</h1>
+    <p class="account-settings__subtitle">{{ 'account.settingsDesc' | translate }}</p>
+  </header>
+
+  <!-- Profile -->
+  <section class="account-settings__card" appRevealOnScroll>
+    <div class="account-settings__card-head">
+      <h2 class="account-settings__card-title">
+        {{ 'account.profileInfo' | translate }}
+      </h2>
+      <p class="account-settings__card-desc">
+        {{ 'account.profileInfoDesc' | translate }}
+      </p>
+    </div>
+
+    <form class="account-settings__form" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+      <div class="account-settings__row">
+        <div class="account-settings__field">
+          <label class="account-settings__label">{{ 'auth.fullName' | translate }}</label>
+          <input
+            type="text"
+            class="account-settings__input"
+            formControlName="name"
+            [class.is-invalid]="profileForm.controls.name.touched && profileForm.controls.name.invalid"
+          />
+        </div>
+
+        <div class="account-settings__field">
+          <label class="account-settings__label">{{ 'checkout.phone' | translate }}</label>
+          <input type="tel" class="account-settings__input" formControlName="phone" />
+        </div>
+      </div>
+
+      <div class="account-settings__field">
+        <label class="account-settings__label">{{ 'auth.email' | translate }}</label>
+        <input
+          type="email"
+          class="account-settings__input account-settings__input--readonly"
+          [value]="user()?.email ?? ''"
+          readonly
+          aria-readonly="true"
+        />
+        <p class="account-settings__hint">
+          {{ 'account.emailCannotChange' | translate }}
+        </p>
+      </div>
+
+      <div class="account-settings__actions">
+        <button
+          type="submit"
+          class="account-settings__btn account-settings__btn--primary"
+          [disabled]="savingProfile() || profileForm.invalid"
+        >
+          @if (savingProfile()) {
+            <span class="account-settings__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'common.save' | translate }}
+          }
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Password -->
+  <section class="account-settings__card" appRevealOnScroll [delay]="60">
+    <div class="account-settings__card-head">
+      <h2 class="account-settings__card-title">
+        {{ 'account.changePassword' | translate }}
+      </h2>
+      <p class="account-settings__card-desc">
+        {{ 'account.changePasswordDesc' | translate }}
+      </p>
+    </div>
+
+    <form class="account-settings__form" [formGroup]="passwordForm" (ngSubmit)="savePassword()">
+      <div class="account-settings__field">
+        <label class="account-settings__label">{{ 'account.currentPassword' | translate }}</label>
+        <div class="account-settings__input-wrap">
+          <input
+            [type]="passwordVisible() ? 'text' : 'password'"
+            class="account-settings__input"
+            formControlName="currentPassword"
+            autocomplete="current-password"
+            [class.is-invalid]="passwordForm.controls.currentPassword.touched && passwordForm.controls.currentPassword.invalid"
+          />
+          <button
+            type="button"
+            class="account-settings__toggle"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"
+          >
+            @if (passwordVisible()) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+            } @else {
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            }
+          </button>
+        </div>
+      </div>
+
+      <div class="account-settings__row">
+        <div class="account-settings__field">
+          <label class="account-settings__label">{{ 'account.newPassword' | translate }}</label>
+          <input
+            type="password"
+            class="account-settings__input"
+            formControlName="newPassword"
+            autocomplete="new-password"
+            [class.is-invalid]="passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid"
+          />
+          @if (passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid) {
+            <p class="account-settings__error">{{ 'auth.passwordMin' | translate }}</p>
+          }
+        </div>
+
+        <div class="account-settings__field">
+          <label class="account-settings__label">{{ 'auth.confirmPassword' | translate }}</label>
+          <input
+            type="password"
+            class="account-settings__input"
+            formControlName="confirmPassword"
+            autocomplete="new-password"
+            [class.is-invalid]="passwordsMismatch"
+          />
+          @if (passwordsMismatch) {
+            <p class="account-settings__error">{{ 'errors.passwordMismatch' | translate }}</p>
+          }
+        </div>
+      </div>
+
+      <div class="account-settings__actions">
+        <button
+          type="submit"
+          class="account-settings__btn account-settings__btn--primary"
+          [disabled]="savingPassword() || passwordForm.invalid || passwordsMismatch"
+        >
+          @if (savingPassword()) {
+            <span class="account-settings__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'account.updatePassword' | translate }}
+          }
+        </button>
+      </div>
+    </form>
+  </section>
+
+<!-- Danger zone -->
+<section class="account-settings__card account-settings__card--danger">
+  <div class="account-settings__card-head">
+    <h2 class="account-settings__card-title">
+      {{ 'account.signOutEverywhere' | translate }}
+    </h2>
+    <p class="account-settings__card-desc">
+      {{ 'account.signOutEverywhereDesc' | translate }}
+    </p>
+  </div>
+  <div class="account-settings__actions">
+    <button
+      type="button"
+      class="account-settings__btn account-settings__btn--danger"
+      (click)="signOut()"
+    >
+      {{ 'nav.signOut' | translate }}
+    </button>
+  </div>
+</section>
+</div>

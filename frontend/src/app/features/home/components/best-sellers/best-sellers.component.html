@@ -1,0 +1,86 @@
+<section class="best-sellers" aria-labelledby="best-sellers-title">
+  <header class="best-sellers__header">
+    <div class="best-sellers__heading">
+      <p class="best-sellers__eyebrow">
+        {{ 'home.bestSellers.eyebrow' | translate }}
+      </p>
+      <h2 id="best-sellers-title" class="best-sellers__title">
+        {{ 'home.bestSellers.title' | translate }}
+      </h2>
+    </div>
+
+    @if (state() === 'success') {
+      <a routerLink="/shop" class="best-sellers__view-all">
+        {{ 'home.bestSellers.viewAll' | translate }}
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    }
+  </header>
+
+  <!-- LOADING -->
+  @if (state() === 'loading') {
+    <div class="best-sellers__grid" aria-busy="true" aria-live="polite">
+      @for (i of skeletons; track i) {
+        <app-skeleton-card variant="card" />
+      }
+    </div>
+  }
+
+  <!-- SUCCESS -->
+  @if (state() === 'success') {
+    <div class="best-sellers__grid">
+      @for (product of products(); track product._id) {
+<app-product-card
+  [product]="product"
+  [showWishlistButton]="true"
+  (addToCart)="onAddToCart($event)"
+  (toggleWishlist)="onToggleWishlist($event)"
+/>
+      }
+    </div>
+  }
+
+  <!-- EMPTY -->
+  @if (state() === 'empty') {
+    <div class="best-sellers__state best-sellers__state--empty">
+      <div class="best-sellers__state-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+      </div>
+      <h3 class="best-sellers__state-title">
+        {{ 'home.bestSellers.empty' | translate }}
+      </h3>
+      <p class="best-sellers__state-text">
+        {{ 'home.bestSellers.emptyText' | translate }}
+      </p>
+      <button
+        type="button"
+        class="best-sellers__retry"
+        (click)="load()"
+      >
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- ERROR -->
+  @if (state() === 'error') {
+    <div class="best-sellers__state best-sellers__state--error">
+      <div class="best-sellers__state-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      </div>
+      <h3 class="best-sellers__state-title">
+        {{ 'home.bestSellers.error' | translate }}
+      </h3>
+      <p class="best-sellers__state-text">
+        {{ 'home.bestSellers.errorText' | translate }}
+      </p>
+      <button
+        type="button"
+        class="best-sellers__retry"
+        (click)="load()"
+      >
+        {{ 'common.retry' | translate }}
+      </button>
+    </div>
+  }
+</section>

@@ -1,0 +1,133 @@
+<section class="contact">
+  <!-- Hero -->
+  <header class="contact__hero" appRevealOnScroll>
+    <p class="contact__eyebrow">{{ 'contact.eyebrow' | translate }}</p>
+    <h1 class="contact__title">{{ 'contact.title' | translate }}</h1>
+    <p class="contact__subtitle">{{ 'contact.subtitle' | translate }}</p>
+  </header>
+
+  <div class="contact__layout">
+    <!-- Form -->
+    <div class="contact__form-wrap" appRevealOnScroll>
+      @if (!submitted()) {
+        <form class="contact__form" [formGroup]="form" (ngSubmit)="submit()">
+          <div class="contact__row">
+            <div class="contact__field">
+              <label class="contact__label" for="contact-name">
+                {{ 'contact.name' | translate }} *
+              </label>
+              <input
+                id="contact-name"
+                type="text"
+                class="contact__input"
+                formControlName="name"
+                [class.is-invalid]="form.controls.name.touched && form.controls.name.invalid"
+                [placeholder]="'contact.namePlaceholder' | translate"
+                autocomplete="name"
+              />
+              @if (form.controls.name.touched && form.controls.name.invalid) {
+                <p class="contact__error">{{ 'errors.required' | translate }}</p>
+              }
+            </div>
+
+            <div class="contact__field">
+              <label class="contact__label" for="contact-email">
+                {{ 'contact.email' | translate }} *
+              </label>
+              <input
+                id="contact-email"
+                type="email"
+                class="contact__input"
+                formControlName="email"
+                [class.is-invalid]="form.controls.email.touched && form.controls.email.invalid"
+                [placeholder]="'contact.emailPlaceholder' | translate"
+                autocomplete="email"
+              />
+              @if (form.controls.email.touched && form.controls.email.invalid) {
+                <p class="contact__error">{{ 'errors.invalidEmail' | translate }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="contact__field">
+            <label class="contact__label" for="contact-subject">
+              {{ 'contact.subject' | translate }}
+            </label>
+            <input
+              id="contact-subject"
+              type="text"
+              class="contact__input"
+              formControlName="subject"
+              [placeholder]="'contact.subjectPlaceholder' | translate"
+            />
+          </div>
+
+          <div class="contact__field">
+            <label class="contact__label" for="contact-message">
+              {{ 'contact.message' | translate }} *
+            </label>
+            <textarea
+              id="contact-message"
+              rows="6"
+              class="contact__input contact__input--textarea"
+              formControlName="message"
+              [class.is-invalid]="form.controls.message.touched && form.controls.message.invalid"
+              [placeholder]="'contact.messagePlaceholder' | translate"
+            ></textarea>
+            @if (form.controls.message.touched && form.controls.message.invalid) {
+              <p class="contact__error">{{ 'contact.messageTooShort' | translate }}</p>
+            }
+          </div>
+
+          <button
+            type="submit"
+            class="contact__submit"
+            [disabled]="submitting() || form.invalid"
+          >
+            @if (submitting()) {
+              <span class="contact__spinner" aria-hidden="true"></span>
+              {{ 'contact.sending' | translate }}
+            } @else {
+              {{ 'contact.send' | translate }}
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            }
+          </button>
+        </form>
+      } @else {
+        <div class="contact__success">
+          <div class="contact__success-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <h2 class="contact__success-title">{{ 'contact.successTitle' | translate }}</h2>
+          <p class="contact__success-text">{{ 'contact.successText' | translate }}</p>
+          <button type="button" class="contact__submit" (click)="sendAnother()">
+            {{ 'contact.sendAnother' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Info -->
+    <aside class="contact__aside" appRevealOnScroll [stagger]="true">
+      @for (item of contactInfo; track item.id) {
+        <div class="contact-info">
+          <span class="contact-info__icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path [attr.d]="item.icon" />
+            </svg>
+          </span>
+          <div class="contact-info__body">
+            <p class="contact-info__label">{{ item.titleKey | translate }}</p>
+            @if (item.href) {
+              <a [href]="item.href" class="contact-info__value contact-info__value--link">
+                {{ item.valueKey | translate }}
+              </a>
+            } @else {
+              <p class="contact-info__value">{{ item.valueKey | translate }}</p>
+            }
+          </div>
+        </div>
+      }
+    </aside>
+  </div>
+</section>

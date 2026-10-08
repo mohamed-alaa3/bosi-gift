@@ -1,0 +1,253 @@
+<!-- Backdrop -->
+<div
+  class="cart-drawer__backdrop"
+  [class.is-open]="isOpen()"
+  (click)="onBackdropClick()"
+  role="presentation"
+></div>
+
+<!-- Drawer -->
+<aside
+  class="cart-drawer"
+  [class.is-open]="isOpen()"
+  [class.is-rtl]="isRtl()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cart-drawer-title"
+>
+  <!-- Header -->
+  <header class="cart-drawer__header">
+    <h2 id="cart-drawer-title" class="cart-drawer__title">
+      {{ 'cart.title' | translate }}
+      @if (itemCount() > 0) {
+        <span class="cart-drawer__count">({{ itemCount() }})</span>
+      }
+    </h2>
+
+    <button
+      type="button"
+      class="cart-drawer__close"
+      (click)="close()"
+      aria-label="Close cart"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </header>
+
+  <!-- Body -->
+  <div class="cart-drawer__body">
+    <!-- Not signed in -->
+    @if (!isAuthenticated()) {
+      <div class="cart-drawer__state">
+        <div class="cart-drawer__state-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+        </div>
+        <h3 class="cart-drawer__state-title">{{ 'cart.signInTitle' | translate }}</h3>
+        <p class="cart-drawer__state-text">{{ 'cart.signInText' | translate }}</p>
+        <button type="button" class="cart-drawer__cta" (click)="signIn()">
+          {{ 'nav.signIn' | translate }}
+        </button>
+      </div>
+    }
+
+    <!-- Loading -->
+    @if (isAuthenticated() && state() === 'loading') {
+      <div class="cart-drawer__loader">
+        <app-loader size="md" variant="spinner" [label]="'common.loading' | translate" />
+      </div>
+    }
+
+    <!-- Error -->
+    @if (isAuthenticated() && state() === 'error') {
+      <div class="cart-drawer__state">
+        <div class="cart-drawer__state-icon cart-drawer__state-icon--error" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        </div>
+        <h3 class="cart-drawer__state-title">{{ 'cart.errorTitle' | translate }}</h3>
+        <p class="cart-drawer__state-text">{{ 'cart.errorText' | translate }}</p>
+        <button type="button" class="cart-drawer__cta" (click)="loadCart()">
+          {{ 'common.retry' | translate }}
+        </button>
+      </div>
+    }
+
+    <!-- Empty -->
+    @if (isAuthenticated() && state() === 'empty') {
+      <div class="cart-drawer__state">
+        <div class="cart-drawer__state-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+        </div>
+        <h3 class="cart-drawer__state-title">{{ 'cart.emptyTitle' | translate }}</h3>
+        <p class="cart-drawer__state-text">{{ 'cart.emptyText' | translate }}</p>
+        <button type="button" class="cart-drawer__cta" (click)="goToShop()">
+          {{ 'cart.continueShopping' | translate }}
+        </button>
+      </div>
+    }
+
+    <!-- Success: items -->
+    @if (isAuthenticated() && state() === 'success') {
+      <!-- Unavailable warning -->
+      @if (hasUnavailable()) {
+        <div class="cart-drawer__warning" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          <span>{{ 'cart.unavailableWarning' | translate }}</span>
+        </div>
+      }
+
+      <ul class="cart-drawer__list">
+        @for (item of items(); track item._id) {
+          <!-- ============================================ -->
+          <!-- GIFT BOX ITEM -->
+          <!-- ============================================ -->
+          @if (item.type === 'gift-box' && item.giftBox) {
+            <li class="cart-drawer__item cart-drawer__item--gift" [class.is-unavailable]="!item.available">
+              <!-- Image -->
+              <div class="cart-drawer__item-media">
+                @if (item.giftBox.boxImageUrl) {
+                  <img
+                    [src]="item.giftBox.boxImageUrl | safeImage"
+                    [alt]="item.giftBox.boxName | localized"
+                    class="cart-drawer__item-image img-fallback"
+                    loading="lazy"
+                  />
+                } @else {
+                  <div class="cart-drawer__item-image img-fallback" aria-hidden="true"></div>
+                }
+              </div>
+
+              <!-- Info -->
+              <div class="cart-drawer__item-info">
+                <div class="cart-drawer__item-head">
+                  <p class="cart-drawer__item-name">
+                    {{ item.giftBox.boxName | localized }}
+                  </p>
+                  <span class="cart-drawer__gift-badge">
+                    {{ 'giftBuilder.giftBox' | translate }}
+                  </span>
+                </div>
+
+                <p class="cart-drawer__item-options">
+                  {{ item.giftBox.items.length }} {{ 'giftBuilder.items' | translate }}
+                  @if (item.giftBox.wrap) {
+                    <span> · {{ item.giftBox.wrap.name | localized }}</span>
+                  }
+                  @if (item.giftBox.ribbon) {
+                    <span> · {{ item.giftBox.ribbon.name | localized }}</span>
+                  }
+                </p>
+
+                <p class="cart-drawer__item-price">
+                  {{ item.lineTotal | price }}
+                </p>
+
+                @if (!item.available && item.reason) {
+                  <p class="cart-drawer__item-reason">{{ item.reason }}</p>
+                }
+
+                <!-- Actions (remove only — quantity fixed at 1) -->
+                <div class="cart-drawer__item-actions">
+                  <button
+                    type="button"
+                    class="cart-drawer__remove"
+                    (click)="removeItem(item)"
+                    [disabled]="updatingItemId() === item._id"
+                    [attr.aria-label]="'cart.removeItem' | translate"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+          } @else {
+            <!-- ============================================ -->
+            <!-- REGULAR PRODUCT ITEM -->
+            <!-- ============================================ -->
+            <li class="cart-drawer__item" [class.is-unavailable]="!item.available">
+              <!-- Image -->
+              <div class="cart-drawer__item-media">
+                @if (item.product?.imageUrl) {
+                  <img
+                    [src]="item.product!.imageUrl | safeImage"
+                    [alt]="item.product!.name | localized"
+                    class="cart-drawer__item-image img-fallback"
+                    loading="lazy"
+                  />
+                } @else {
+                  <div class="cart-drawer__item-image img-fallback" aria-hidden="true"></div>
+                }
+              </div>
+
+              <!-- Info -->
+              <div class="cart-drawer__item-info">
+                <p class="cart-drawer__item-name">
+                  {{ item.product ? (item.product.name | localized) : ('cart.unavailable' | translate) }}
+                </p>
+
+                @if (item.selectedOptions.length > 0) {
+                  <p class="cart-drawer__item-options">
+                    @for (opt of item.selectedOptions; track opt.name.en; let last = $last) {
+                      <span>{{ opt.name | localized }}: {{ opt.value | localized }}</span>@if (!last) {<span>, </span>}
+                    }
+                  </p>
+                }
+
+                <p class="cart-drawer__item-price">
+                  {{ (item.product?.effectivePrice ?? 0) | price }}
+                </p>
+
+                @if (!item.available && item.reason) {
+                  <p class="cart-drawer__item-reason">{{ item.reason }}</p>
+                }
+
+                <!-- Quantity + remove -->
+                <div class="cart-drawer__item-actions">
+                  <app-quantity-stepper
+                    size="sm"
+                    [min]="1"
+                    [max]="item.product?.stock ?? 1"
+                    (valueChange)="updateQuantity(item, $event)"
+                  />
+
+                  <button
+                    type="button"
+                    class="cart-drawer__remove"
+                    (click)="removeItem(item)"
+                    [disabled]="updatingItemId() === item._id"
+                    [attr.aria-label]="'cart.removeItem' | translate"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                  </button>
+                </div>
+              </div>
+            </li>
+          }
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Footer (only on success) -->
+  @if (isAuthenticated() && state() === 'success') {
+    <footer class="cart-drawer__footer">
+      <div class="cart-drawer__subtotal">
+        <span class="cart-drawer__subtotal-label">{{ 'cart.subtotal' | translate }}</span>
+        <span class="cart-drawer__subtotal-value">{{ subtotal() | price }}</span>
+      </div>
+      <p class="cart-drawer__shipping-note">{{ 'cart.shippingNote' | translate }}</p>
+
+      <button
+        type="button"
+        class="cart-drawer__checkout"
+        [disabled]="!canCheckout()"
+        (click)="goToCheckout()"
+      >
+        {{ 'cart.checkout' | translate }}
+      </button>
+
+      <button type="button" class="cart-drawer__view-cart" (click)="goToCart()">
+        {{ 'cart.viewCart' | translate }}
+      </button>
+    </footer>
+  }
+</aside>

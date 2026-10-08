@@ -1,0 +1,151 @@
+<div class="admin-contact">
+  <header class="admin-contact__header">
+    <div>
+      <h1 class="admin-contact__title">{{ 'admin.contact.title' | translate }}</h1>
+      <p class="admin-contact__subtitle">
+        {{ 'admin.contact.subtitle' | translate }}
+        @if (newCount() > 0) {
+          <span class="admin-contact__new-badge">{{ newCount() }} {{ 'admin.contact.newCount' | translate }}</span>
+        }
+      </p>
+    </div>
+  </header>
+
+  <!-- Filter pills -->
+  <div class="admin-contact__filters" role="tablist">
+    @for (opt of statusOptions; track opt.value) {
+      <button
+        type="button"
+        class="admin-contact__filter"
+        [class.is-active]="statusFilter() === opt.value"
+        (click)="setStatus(opt.value)"
+      >
+        {{ opt.labelKey | translate }}
+      </button>
+    }
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="admin-contact__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.contact.errorTitle' | translate"
+      [message]="'admin.contact.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.contact.emptyTitle' | translate"
+      [message]="'admin.contact.emptyText' | translate"
+    />
+  }
+
+  @if (state() === 'success') {
+    <ul class="admin-contact__list">
+      @for (msg of messages(); track msg._id) {
+        <li class="contact-row" [class.is-unread]="msg.status === 'new'">
+          <button type="button" class="contact-row__button" (click)="openDetail(msg)">
+            <div class="contact-row__main">
+              <div class="contact-row__head">
+                <p class="contact-row__name">{{ msg.name }}</p>
+                <span class="contact-row__status" [class]="statusClass(msg.status)">
+                  {{ 'admin.contact.status' + (msg.status.charAt(0).toUpperCase() + msg.status.slice(1)) | translate }}
+                </span>
+              </div>
+              <p class="contact-row__email">{{ msg.email }}</p>
+              @if (msg.subject) {
+                <p class="contact-row__subject">{{ msg.subject }}</p>
+              }
+              <p class="contact-row__message">{{ msg.message }}</p>
+            </div>
+
+            <div class="contact-row__meta">
+              <span class="contact-row__date">{{ msg.createdAt | date:'medium' }}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="contact-row__arrow" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+          </button>
+        </li>
+      }
+    </ul>
+
+    @if (totalPages() > 1) {
+      <div class="admin-contact__pagination">
+        <app-pagination
+          [page]="page()"
+          [totalPages]="totalPages()"
+          (pageChange)="onPageChange($event)"
+        />
+      </div>
+    }
+  }
+
+  <!-- Detail modal -->
+  @if (openMessage(); as msg) {
+    <div class="contact-modal__backdrop" (click)="closeDetail()" role="presentation"></div>
+
+    <div class="contact-modal" role="dialog" aria-modal="true">
+      <header class="contact-modal__header">
+        <div>
+          <h2 class="contact-modal__title">{{ msg.subject || ('admin.contact.noSubject' | translate) }}</h2>
+          <p class="contact-modal__from">
+            {{ 'admin.contact.from' | translate }}: <strong>{{ msg.name }}</strong> · {{ msg.email }}
+          </p>
+          <p class="contact-modal__date">{{ msg.createdAt | date:'medium' }}</p>
+        </div>
+        <button type="button" class="contact-modal__close" (click)="closeDetail()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </header>
+
+      <div class="contact-modal__body">
+        <p class="contact-modal__message">{{ msg.message }}</p>
+      </div>
+
+      <footer class="contact-modal__footer">
+        <div class="contact-modal__statuses">
+          <button
+            type="button"
+            class="contact-modal__status"
+            [class.is-active]="msg.status === 'read'"
+            (click)="updateStatus(msg, 'read')"
+            [disabled]="processingId() === msg._id"
+          >
+            {{ 'admin.contact.markAsRead' | translate }}
+          </button>
+          <button
+            type="button"
+            class="contact-modal__status"
+            [class.is-active]="msg.status === 'replied'"
+            (click)="updateStatus(msg, 'replied')"
+            [disabled]="processingId() === msg._id"
+          >
+            {{ 'admin.contact.markAsReplied' | translate }}
+          </button>
+        </div>
+
+        <div class="contact-modal__actions">
+          <button type="button" class="contact-modal__btn contact-modal__btn--ghost" (click)="replyViaEmail(msg)">
+            {{ 'admin.contact.replyViaEmail' | translate }}
+          </button>
+          <button
+            type="button"
+            class="contact-modal__btn contact-modal__btn--danger"
+            (click)="remove(msg)"
+            [disabled]="processingId() === msg._id"
+          >
+            {{ 'common.delete' | translate }}
+          </button>
+        </div>
+      </footer>
+    </div>
+  }
+</div>

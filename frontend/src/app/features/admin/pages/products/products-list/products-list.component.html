@@ -1,0 +1,174 @@
+<div class="admin-products">
+  <!-- Header -->
+  <header class="admin-products__header">
+    <div>
+      <h1 class="admin-products__title">{{ 'admin.products.title' | translate }}</h1>
+      <p class="admin-products__subtitle">{{ 'admin.products.subtitle' | translate }}</p>
+    </div>
+    <button type="button" class="admin-products__add" (click)="goToNew()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      {{ 'admin.products.addProduct' | translate }}
+    </button>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="admin-products__toolbar">
+    <div class="admin-products__search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input
+        type="search"
+        class="admin-products__search-input"
+        [placeholder]="'admin.products.searchPlaceholder' | translate"
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+      />
+    </div>
+
+    <select class="admin-products__select" [value]="categoryFilter()" (change)="onCategoryChange($event)">
+      <option value="">{{ 'admin.products.allCategories' | translate }}</option>
+      @for (cat of categories(); track cat._id) {
+        <option [value]="cat._id">{{ cat.name | localized }}</option>
+      }
+    </select>
+
+    <select class="admin-products__select" [value]="stockFilter()" (change)="onStockChange($event)">
+      <option value="all">{{ 'admin.products.allStock' | translate }}</option>
+      <option value="in">{{ 'admin.products.inStock' | translate }}</option>
+      <option value="out">{{ 'admin.products.outOfStock' | translate }}</option>
+    </select>
+
+    @if (hasFilters()) {
+      <button type="button" class="admin-products__clear" (click)="clearFilters()">
+        {{ 'admin.products.clear' | translate }}
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (state() === 'loading') {
+    <div class="admin-products__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  <!-- Error -->
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.products.errorTitle' | translate"
+      [message]="'admin.products.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="loadProducts()"
+    />
+  }
+
+  <!-- Empty -->
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="box"
+      [title]="'admin.products.emptyTitle' | translate"
+      [message]="'admin.products.emptyText' | translate"
+      [actionLabel]="'admin.products.addProduct' | translate"
+      (actionClick)="goToNew()"
+    />
+  }
+
+  <!-- Table -->
+  @if (state() === 'success') {
+    <div class="admin-products__table-wrap">
+      <table class="admin-products__table">
+        <thead>
+          <tr>
+            <th>{{ 'admin.products.colProduct' | translate }}</th>
+            <th>{{ 'admin.products.colCategory' | translate }}</th>
+            <th>{{ 'admin.products.colPrice' | translate }}</th>
+            <th>{{ 'admin.products.colStock' | translate }}</th>
+            <th>{{ 'admin.products.colStatus' | translate }}</th>
+            <th class="admin-products__col-actions">{{ 'admin.products.colActions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of products(); track p._id) {
+            <tr [class.is-inactive]="!p.isActive">
+              <td>
+                <div class="admin-products__product">
+                  <div class="admin-products__media">
+                    @if (p.imageUrls?.[0] || p.images?.[0]) {
+                      <img [src]="(p.imageUrls?.[0] || p.images?.[0]) | safeImage" [alt]="p.name | localized" class="admin-products__image img-fallback" />
+                    } @else {
+                      <div class="admin-products__image img-fallback" aria-hidden="true"></div>
+                    }
+                  </div>
+                  <div class="admin-products__info">
+                    <p class="admin-products__name">{{ p.name | localized }}</p>
+                    @if (p.sku) {
+                      <p class="admin-products__sku">SKU: {{ p.sku }}</p>
+                    }
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="admin-products__category">
+  <span class="admin-products__category">
+  {{ categoryName(p) }}
+</span>
+                </span>
+              </td>
+              <td>
+                <span class="admin-products__price">{{ p.price | price }}</span>
+              </td>
+              <td>
+                <span class="admin-products__stock" [class.is-low]="p.stock <= 5 && p.stock > 0" [class.is-zero]="p.stock <= 0">
+                  {{ p.stock }}
+                </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="admin-products__status"
+                  [class.is-active]="p.isActive"
+                  (click)="toggleActive(p)"
+                  [attr.aria-label]="p.isActive ? ('admin.products.deactivate' | translate) : ('admin.products.activate' | translate)"
+                >
+                  <span class="admin-products__status-dot"></span>
+                  {{ p.isActive ? ('admin.products.active' | translate) : ('admin.products.inactive' | translate) }}
+                </button>
+              </td>
+              <td class="admin-products__col-actions">
+                <div class="admin-products__actions">
+                  <button
+                    type="button"
+                    class="admin-products__action"
+                    (click)="goToEdit(p._id)"
+                    [attr.aria-label]="'common.edit' | translate"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-products__action admin-products__action--danger"
+                    (click)="remove(p)"
+                    [disabled]="deletingId() === p._id"
+                    [attr.aria-label]="'common.delete' | translate"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="admin-products__pagination">
+        <app-pagination
+          [page]="page()"
+          [totalPages]="totalPages()"
+          (pageChange)="onPageChange($event)"
+        />
+      </div>
+    }
+  }
+</div>

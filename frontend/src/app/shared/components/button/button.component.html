@@ -1,0 +1,37 @@
+@if (routerLink(); as link) {
+  <a
+    [routerLink]="link"
+    [class]="classes()"
+    [attr.aria-disabled]="disabled() || loading()"
+    (click)="onClick($event)"
+  >
+    <ng-container *ngTemplateOutlet="inner"></ng-container>
+  </a>
+} @else {
+  <button
+    [type]="type()"
+    [class]="classes()"
+    [disabled]="disabled() || loading()"
+    (click)="onClick($event)"
+  >
+    <ng-container *ngTemplateOutlet="inner"></ng-container>
+  </button>
+}
+
+<ng-template #inner>
+  @if (loading()) {
+    <span class="app-button__spinner" aria-hidden="true"></span>
+  } @else {
+    <span class="app-button__icon-start">
+      <ng-content select="[icon-start]" />
+    </span>
+  }
+
+  <span class="app-button__label">
+    <ng-content />
+  </span>
+
+  <span class="app-button__icon-end">
+    <ng-content select="[icon-end]" />
+  </span>
+</ng-template>

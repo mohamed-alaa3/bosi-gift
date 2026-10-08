@@ -1,0 +1,17 @@
+<div class="auth-panel" [style.background-image]="'url(' + image() + ')'">
+  <div class="auth-panel__overlay"></div>
+  <div class="auth-panel__content">
+    <p class="auth-panel__eyebrow">{{ 'auth.habibaMoments' | translate }}</p>
+    <h2 class="auth-panel__title">{{ 'auth.craftingJoy' | translate }}</h2>
+    <p class="auth-panel__text">{{ 'auth.authHeroText' | translate }}</p>
+
+    <div class="auth-panel__footer">
+      <div class="auth-panel__avatars" aria-hidden="true">
+        <span class="auth-panel__avatar"></span>
+        <span class="auth-panel__avatar"></span>
+        <span class="auth-panel__avatar"></span>
+      </div>
+      <span class="auth-panel__joined">{{ 'auth.joinedBy' | translate }}</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,31 @@
+<div class="app-checkbox" [class.has-error]="showError()" [class.is-disabled]="isEffectivelyDisabled()">
+  <label class="app-checkbox__wrap" [for]="checkboxId()">
+    <input
+      type="checkbox"
+      [id]="checkboxId()"
+      class="app-checkbox__input"
+      [checked]="checked()"
+      [disabled]="isEffectivelyDisabled()"
+      [required]="required()"
+      [attr.aria-invalid]="showError()"
+      (change)="onToggle()"
+      (keydown)="onKeydown($event)"
+    />
+
+    <span class="app-checkbox__box" aria-hidden="true">
+      @if (checked()) {
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+      }
+    </span>
+
+    @if (label()) {
+      <span class="app-checkbox__label">{{ label() }}</span>
+    }
+  </label>
+
+  @if (showError()) {
+    <p class="app-checkbox__error">{{ error() }}</p>
+  } @else if (hint()) {
+    <p class="app-checkbox__hint">{{ hint() }}</p>
+  }
+</div>

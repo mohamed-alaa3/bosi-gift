@@ -1,0 +1,97 @@
+<div class="revenue-chart">
+  <header class="revenue-chart__header">
+    <div>
+      <h2 class="revenue-chart__title">{{ 'admin.dashboard.revenueTrends' | translate }}</h2>
+      <p class="revenue-chart__subtitle">{{ 'admin.dashboard.revenueTrendsDesc' | translate }}</p>
+    </div>
+
+    @if (currentPoint(); as cp) {
+      <div class="revenue-chart__kpi">
+        <p class="revenue-chart__kpi-label">{{ 'admin.dashboard.lastDay' | translate }}</p>
+        <p class="revenue-chart__kpi-value">{{ formatCurrency(cp.revenue) }}</p>
+        <p class="revenue-chart__kpi-orders">{{ cp.orders }} {{ 'admin.dashboard.orders' | translate }}</p>
+      </div>
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="revenue-chart__loading"></div>
+  } @else if (points().length === 0) {
+    <div class="revenue-chart__empty">
+      {{ 'admin.dashboard.noRevenueData' | translate }}
+    </div>
+  } @else {
+    <div class="revenue-chart__canvas">
+      <svg
+        [attr.viewBox]="'0 0 ' + width + ' ' + height"
+        preserveAspectRatio="xMidYMid meet"
+        class="revenue-chart__svg"
+        role="img"
+        aria-label="Revenue over time"
+      >
+        <defs>
+          <linearGradient id="revenueArea" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#CA4562" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#CA4562" stop-opacity="0" />
+          </linearGradient>
+        </defs>
+
+        <!-- Y grid lines + labels -->
+        @for (tick of yTicks(); track tick.y) {
+          <line
+            [attr.x1]="padding.left"
+            [attr.x2]="width - padding.right"
+            [attr.y1]="tick.y"
+            [attr.y2]="tick.y"
+            stroke="currentColor"
+            stroke-opacity="0.08"
+            stroke-dasharray="4 4"
+          />
+          <text
+            [attr.x]="padding.left - 8"
+            [attr.y]="tick.y + 4"
+            text-anchor="end"
+            class="revenue-chart__axis-label"
+          >
+            {{ tick.label }}
+          </text>
+        }
+
+        <!-- X axis line -->
+        <line
+          [attr.x1]="padding.left"
+          [attr.x2]="width - padding.right"
+          [attr.y1]="height - padding.bottom"
+          [attr.y2]="height - padding.bottom"
+          stroke="currentColor"
+          stroke-opacity="0.15"
+        />
+
+        <!-- Area -->
+        <path [attr.d]="areaD()" fill="url(#revenueArea)" />
+
+        <!-- Line -->
+        <path
+          [attr.d]="pathD()"
+          fill="none"
+          stroke="#CA4562"
+          stroke-width="2.5"
+          stroke-linejoin="round"
+          stroke-linecap="round"
+        />
+
+        <!-- X labels -->
+        @for (lbl of xLabels(); track lbl.index) {
+          <text
+            [attr.x]="lbl.x"
+            [attr.y]="height - padding.bottom + 20"
+            text-anchor="middle"
+            class="revenue-chart__axis-label"
+          >
+            {{ lbl.label }}
+          </text>
+        }
+      </svg>
+    </div>
+  }
+</div>

@@ -1,0 +1,23 @@
+// ==========================================
+// Main entry — imported by src/styles.scss
+// ==========================================
+// Order matters:
+// 1. Variables (tokens)
+// 2. Reset (base normalization)
+// 3. Themes (light/dark palettes)
+// 4. Typography (fonts + scales)
+// 5. Mixins (reusable helpers — no output by itself)
+// 6. Animations (keyframes + utilities)
+// 7. RTL helpers
+
+@use './variables';
+@use './reset';
+@use './themes';
+@use './typography';
+@use './mixins';
+@use './animations';
+@use './rtl';
+@use './gift-decor';
+@use './gift-pages';
+@use './gift-flow';
+@use './gift-discovery';

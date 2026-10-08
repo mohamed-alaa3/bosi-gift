@@ -1,0 +1,175 @@
+<div class="admin-coupons">
+  <header class="admin-coupons__header">
+    <div>
+      <h1 class="admin-coupons__title">{{ 'admin.coupons.title' | translate }}</h1>
+      <p class="admin-coupons__subtitle">{{ 'admin.coupons.subtitle' | translate }}</p>
+    </div>
+    <a routerLink="/admin/coupons/new" class="admin-coupons__add">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      {{ 'admin.coupons.addCoupon' | translate }}
+    </a>
+  </header>
+
+  @if (state() === 'success') {
+    <div class="admin-coupons__toolbar">
+      <div class="admin-coupons__search">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input
+          type="search"
+          class="admin-coupons__search-input"
+          [placeholder]="'admin.coupons.searchPlaceholder' | translate"
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </div>
+    </div>
+
+    <div class="admin-coupons__filters" role="tablist">
+      @for (opt of statusOptions; track opt.value) {
+        <button
+          type="button"
+          class="admin-coupons__filter"
+          [class.is-active]="statusFilter() === opt.value"
+          (click)="setStatus(opt.value)"
+          role="tab"
+          [attr.aria-selected]="statusFilter() === opt.value"
+        >
+          {{ opt.labelKey | translate }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (state() === 'loading') {
+    <div class="admin-coupons__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.coupons.errorTitle' | translate"
+      [message]="'admin.coupons.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="box"
+      [title]="'admin.coupons.emptyTitle' | translate"
+      [message]="'admin.coupons.emptyText' | translate"
+    />
+  }
+
+  @if (state() === 'success') {
+    @if (filteredCoupons().length === 0) {
+      <p class="admin-coupons__no-match">{{ 'common.noResults' | translate }}</p>
+    } @else {
+      <div class="admin-coupons__table-wrap">
+        <table class="admin-coupons__table">
+          <thead>
+            <tr>
+              <th>{{ 'admin.coupons.colCode' | translate }}</th>
+              <th>{{ 'admin.coupons.colDiscount' | translate }}</th>
+              <th>{{ 'admin.coupons.colUsage' | translate }}</th>
+              <th>{{ 'admin.coupons.colValidity' | translate }}</th>
+              <th>{{ 'admin.coupons.colStatus' | translate }}</th>
+              <th class="admin-coupons__col-actions">{{ 'admin.coupons.colActions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of filteredCoupons(); track c._id) {
+              <tr [class.is-inactive]="!c.isActive">
+                <td>
+                  <span class="admin-coupons__code">{{ c.code }}</span>
+                  @if (c.applicableCategories.length || c.applicableProducts.length) {
+                    <span class="admin-coupons__tag">{{ 'admin.coupons.restricted' | translate }}</span>
+                  }
+                </td>
+                <td>
+                  <div class="admin-coupons__discount">
+                    <span class="admin-coupons__discount-value">
+                      @if (c.type === 'percentage') {
+                        {{ c.value }}%
+                      } @else {
+                        {{ c.value | price }}
+                      }
+                    </span>
+                    @if (c.minOrderAmount != null) {
+                      <span class="admin-coupons__meta">
+                        {{ 'admin.coupons.minOrderShort' | translate: { amount: (c.minOrderAmount | price) } }}
+                      </span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="admin-coupons__usage">
+                    {{ c.usedCount }} / {{ c.usageLimit ?? '∞' }}
+                  </span>
+                </td>
+                <td>
+                  <div class="admin-coupons__validity">
+                    @if (c.validFrom || c.validUntil) {
+                      <span>{{ c.validFrom ? (c.validFrom | date: 'mediumDate') : '—' }}</span>
+                      <span class="admin-coupons__meta">
+                        {{ 'admin.coupons.until' | translate }}
+                        {{ c.validUntil ? (c.validUntil | date: 'mediumDate') : '—' }}
+                      </span>
+                    } @else {
+                      <span class="admin-coupons__meta">{{ 'admin.coupons.noExpiry' | translate }}</span>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span class="admin-coupons__status" [class]="'is-' + statusOf(c)">
+                    {{ 'admin.coupons.status.' + statusOf(c) | translate }}
+                  </span>
+                </td>
+                <td class="admin-coupons__col-actions">
+                  <div class="admin-coupons__actions">
+                    <button
+                      type="button"
+                      class="admin-coupons__switch"
+                      role="switch"
+                      [class.is-on]="c.isActive"
+                      [attr.aria-checked]="c.isActive"
+                      [attr.aria-label]="'admin.coupons.toggleActive' | translate"
+                      [title]="'admin.coupons.toggleActive' | translate"
+                      [disabled]="togglingId() === c._id"
+                      (click)="toggleActive(c)"
+                    >
+                      <span class="admin-coupons__switch-thumb"></span>
+                    </button>
+
+                    <a
+                      class="admin-coupons__icon-btn"
+                      [routerLink]="['/admin/coupons', c._id, 'edit']"
+                      [attr.aria-label]="'common.edit' | translate"
+                      [title]="'common.edit' | translate"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                    </a>
+
+                    <button
+                      type="button"
+                      class="admin-coupons__icon-btn admin-coupons__icon-btn--danger"
+                      [attr.aria-label]="'common.delete' | translate"
+                      [title]="'common.delete' | translate"
+                      [disabled]="deletingId() === c._id"
+                      (click)="remove(c)"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

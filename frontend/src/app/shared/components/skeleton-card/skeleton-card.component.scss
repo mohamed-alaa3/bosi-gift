@@ -1,0 +1,100 @@
+// Shared shimmer effect
+@mixin shimmer-bg {
+    background: linear-gradient(90deg,
+            var(--bg-muted) 0%,
+            var(--surface-hover) 50%,
+            var(--bg-muted) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s linear infinite;
+}
+
+.app-skeleton {
+
+    &__line,
+    &__image {
+        @include shimmer-bg;
+        border-radius: var(--radius-sm);
+    }
+
+    &__line {
+        height: 0.875rem;
+        width: 100%;
+        border-radius: 6px;
+
+        &--title {
+            height: 1.125rem;
+            width: 70%;
+            margin-bottom: 0.25rem;
+        }
+
+        &--short {
+            width: 55%;
+        }
+
+        &--price {
+            height: 1rem;
+            width: 30%;
+            margin-top: 0.5rem;
+            border-radius: 6px;
+        }
+    }
+
+    // ---------- Variants ----------
+
+    &--card {
+        display: flex;
+        flex-direction: column;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+
+        .app-skeleton__image {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 0;
+        }
+
+        .app-skeleton__body {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+
+    &--text-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0.625rem;
+        width: 100%;
+    }
+
+    &--line {
+        width: 100%;
+        height: 1rem;
+        @include shimmer-bg;
+        border-radius: 6px;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+// Reduced motion
+@media (prefers-reduced-motion: reduce) {
+
+    .app-skeleton__line,
+    .app-skeleton__image,
+    .app-skeleton--line {
+        animation: none;
+        background: var(--bg-muted);
+    }
+}

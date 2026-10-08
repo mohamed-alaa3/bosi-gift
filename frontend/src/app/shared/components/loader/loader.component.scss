@@ -1,0 +1,120 @@
+.app-loader {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-primary);
+
+    &__spinner {
+        display: inline-block;
+        border-radius: 50%;
+        border-style: solid;
+        border-color: currentColor;
+        border-top-color: transparent;
+        animation: spin 0.75s linear infinite;
+    }
+
+    &__dot {
+        display: inline-block;
+        width: 0.5em;
+        height: 0.5em;
+        border-radius: 50%;
+        background-color: currentColor;
+        animation: bounce-dot 1.2s ease-in-out infinite;
+
+        &:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+    }
+
+    // Sizes
+    &--sm {
+        .app-loader__spinner {
+            width: 1rem;
+            height: 1rem;
+            border-width: 2px;
+        }
+
+        .app-loader__dot {
+            width: 0.375em;
+            height: 0.375em;
+        }
+    }
+
+    &--md {
+        .app-loader__spinner {
+            width: 1.75rem;
+            height: 1.75rem;
+            border-width: 2.5px;
+        }
+    }
+
+    &--lg {
+        .app-loader__spinner {
+            width: 3rem;
+            height: 3rem;
+            border-width: 3px;
+        }
+    }
+
+    // Dots variant
+    &--dots {
+        gap: 0.5rem;
+    }
+
+    // Fullscreen variant
+    &--fullscreen {
+        .app-loader__overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            background-color: color-mix(in srgb, var(--bg) 85%, transparent);
+            backdrop-filter: blur(4px);
+            z-index: var(--z-modal, 1070);
+        }
+
+        .app-loader__spinner-wrap {
+            color: var(--brand-primary);
+
+            .app-loader__spinner {
+                width: 3rem;
+                height: 3rem;
+                border-width: 3px;
+            }
+        }
+
+        .app-loader__label {
+            font-size: 0.9375rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes bounce-dot {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0.6);
+        opacity: 0.6;
+    }
+
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

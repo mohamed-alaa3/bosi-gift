@@ -1,0 +1,42 @@
+<section class="shop-by-category" aria-labelledby="shop-by-category-title">
+  <header class="shop-by-category__header" appRevealOnScroll>
+    <h2 id="shop-by-category-title" class="shop-by-category__title">
+      {{ titleKey() | translate }}
+    </h2>
+    <div class="gift-ornament" aria-hidden="true"><app-gift-icon name="sparkle" /></div>
+    <p class="shop-by-category__subtitle">
+      {{ subtitleKey() | translate }}
+    </p>
+  </header>
+
+  <div
+    class="shop-by-category__grid"
+    appRevealOnScroll
+    [stagger]="true"
+    [delay]="80"
+  >
+    @for (category of categories; track category.id; let i = $index) {
+      <a
+        class="shop-by-category__card"
+        [routerLink]="category.link"
+        [attr.aria-label]="category.labelKey | translate"
+        [attr.data-tone]="i % 4"
+      >
+        <div class="shop-by-category__media">
+          <app-gift-icon class="shop-by-category__icon" [name]="category.icon" />
+          <img
+            [src]="category.image"
+            [alt]="category.labelKey | translate"
+            loading="lazy"
+            decoding="async"
+            class="shop-by-category__image"
+            (error)="onImageError($event)"
+          />
+        </div>
+        <span class="shop-by-category__label">
+          {{ category.labelKey | translate }}
+        </span>
+      </a>
+    }
+  </div>
+</section>

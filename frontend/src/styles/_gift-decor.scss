@@ -1,0 +1,134 @@
+// ==========================================
+// Gift-shop decoration (global, lightweight)
+// ==========================================
+// Pure CSS/SVG. Nothing here changes layout of existing components;
+// it only provides dividers, floating ornaments and shared keyframes.
+
+app-gift-icon {
+    display: inline-block;
+    line-height: 0;
+}
+
+// ---------- Wave divider ----------
+// Coloured with --wave-color (defaults to page background).
+.gift-wave {
+    display: block;
+    width: 100%;
+    height: clamp(18px, 3vw, 34px);
+    background-color: var(--wave-color, var(--bg));
+    pointer-events: none;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40' preserveAspectRatio='none'%3E%3Cpath d='M0 40V22C150 2 300 2 450 20S750 40 900 22S1100 6 1200 20V40Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40' preserveAspectRatio='none'%3E%3Cpath d='M0 40V22C150 2 300 2 450 20S750 40 900 22S1100 6 1200 20V40Z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+
+    &--flip {
+        transform: scaleY(-1);
+    }
+
+    &--hero {
+        position: absolute;
+        inset-inline: 0;
+        bottom: -1px;
+        z-index: 2;
+    }
+}
+
+// ---------- Heart ornament (section header accent) ----------
+.gift-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    color: var(--brand-primary);
+
+    &::before,
+    &::after {
+        content: '';
+        width: clamp(32px, 8vw, 72px);
+        height: 2px;
+        border-radius: 2px;
+        background: linear-gradient(to right, transparent, var(--brand-pink));
+    }
+
+    &::after {
+        transform: scaleX(-1);
+    }
+
+    app-gift-icon {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+// ---------- Floating ornaments ----------
+@keyframes gift-float {
+    0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+    50% { transform: translateY(-10px) rotate(calc(var(--r, 0deg) + 4deg)); }
+}
+
+@keyframes gift-twinkle {
+    0%, 100% { opacity: 0.35; transform: scale(0.8) rotate(var(--r, 0deg)); }
+    50% { opacity: 1; transform: scale(1.1) rotate(var(--r, 0deg)); }
+}
+
+.gift-float {
+    animation: gift-float 7s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+}
+
+.gift-twinkle {
+    animation: gift-twinkle 3.2s ease-in-out infinite;
+    animation-delay: var(--d, 0s);
+}
+
+// ---------- Hero decoration layer ----------
+.gift-hero-decor {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+
+    .gd {
+        position: absolute;
+        display: block;
+        width: var(--s, 32px);
+        height: var(--s, 32px);
+        opacity: 0.85;
+        transform: rotate(var(--r, 0deg));
+        filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.22));
+    }
+
+    // Desktop-only larger pieces (keeps mobile uncluttered)
+    .gd--lg {
+        display: none;
+    }
+
+    @media (min-width: 1024px) {
+        .gd--lg {
+            display: block;
+            opacity: 0.95;
+        }
+    }
+
+    .gd--1 { --s: 128px; --r: 6deg; --d: -1s; inset-inline-end: 6%; bottom: 17%; }
+    .gd--2 { --s: 84px; --r: 8deg; --d: -3s; inset-inline-end: 22%; top: 13%; }
+    .gd--3 { --s: 56px; --r: -12deg; --d: -2s; inset-inline-end: 4%; top: 24%; }
+    .gd--4 { --s: 26px; --d: -1s; inset-inline-start: 7%; top: 13%; }
+    .gd--5 { --s: 20px; --d: -2s; inset-inline-end: 9%; top: 17%; }
+    .gd--6 { --s: 24px; --r: 14deg; --d: -4s; inset-inline-end: 7%; bottom: 14%; }
+    .gd--7 { --s: 34px; --d: -3s; inset-inline-end: 31%; bottom: 28%; }
+
+    @media (min-width: 1024px) {
+        .gd--5 { inset-inline-end: 44%; top: 20%; }
+        .gd--6 { inset-inline-end: 30%; bottom: 14%; }
+    }
+}
+
+// ---------- Reduced motion ----------
+@media (prefers-reduced-motion: reduce) {
+    .gift-float,
+    .gift-twinkle,
+    .gift-hero-decor .gd {
+        animation: none !important;
+    }
+}

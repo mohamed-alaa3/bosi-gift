@@ -1,0 +1,142 @@
+// ==========================================
+// Reusable Mixins
+// ==========================================
+
+// --- Focus ring (accessibility) ---
+@mixin focus-ring($color: var(--brand-primary), $width: 2px, $offset: 2px) {
+    &:focus-visible {
+        outline: $width solid $color;
+        outline-offset: $offset;
+        border-radius: var(--radius-sm);
+    }
+}
+
+// --- Card ---
+@mixin card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-base);
+}
+
+@mixin card-hover {
+    &:hover {
+        background: var(--surface-hover);
+        border-color: var(--border-strong);
+        box-shadow: var(--shadow-md);
+    }
+}
+
+// --- Container (matches Tailwind `container`) ---
+@mixin container {
+    width: 100%;
+    margin-inline: auto;
+    padding-inline: 1rem;
+
+    @media (min-width: 640px) {
+        max-width: 640px;
+        padding-inline: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+        max-width: 768px;
+    }
+
+    @media (min-width: 1024px) {
+        max-width: 1024px;
+        padding-inline: 2rem;
+    }
+
+    @media (min-width: 1280px) {
+        max-width: 1280px;
+        padding-inline: 2.5rem;
+    }
+
+    @media (min-width: 1440px) {
+        max-width: 1440px;
+    }
+}
+
+// --- Flexbox shortcuts ---
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+// --- Absolute fill (for overlays) ---
+@mixin absolute-fill {
+    position: absolute;
+    inset: 0;
+}
+
+// --- Aspect ratio (older browsers) ---
+@mixin aspect-ratio($w, $h) {
+    aspect-ratio: #{$w} / #{$h};
+}
+
+// --- Line clamp ---
+@mixin line-clamp($lines: 2) {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+// --- Gradient text ---
+@mixin gradient-text($from, $to) {
+    background: linear-gradient(135deg, $from, $to);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+// --- Reduced motion guard ---
+@mixin reduced-motion-safe {
+    @media (prefers-reduced-motion: reduce) {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+// --- Stagger children (complements the class in _animations.scss) ---
+@mixin stagger($count: 12, $delay-step: 60ms, $initial: 0ms) {
+    @for $i from 1 through $count {
+        &:nth-child(#{$i}) {
+            animation-delay: #{$initial + ($i - 1) * $delay-step};
+        }
+    }
+}
+
+// --- Hover lift (subtle card lift on hover) ---
+@mixin hover-lift {
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+}
+
+// --- Skeleton shimmer ---
+@mixin shimmer {
+    background: linear-gradient(90deg,
+            var(--bg-muted) 0%,
+            var(--surface-hover) 50%,
+            var(--bg-muted) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.8s linear infinite;
+}

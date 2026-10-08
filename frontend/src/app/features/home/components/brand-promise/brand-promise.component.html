@@ -1,0 +1,39 @@
+<section class="brand-promise" aria-labelledby="brand-promise-title">
+  <div class="brand-promise__inner">
+    <!-- Content -->
+    <div class="brand-promise__content">
+      <p class="brand-promise__eyebrow">
+        {{ 'home.promise.eyebrow' | translate }}
+      </p>
+      <h2 id="brand-promise-title" class="brand-promise__title">
+        {{ 'home.promise.title' | translate }}
+      </h2>
+      <p class="brand-promise__text">
+        {{ 'home.promise.text' | translate }}
+      </p>
+      <a routerLink="/about" class="brand-promise__cta">
+        <span>{{ 'home.promise.cta' | translate }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <!-- Image -->
+    <div class="brand-promise__media">
+<img
+  [src]="image"
+  alt="Bosi Gift — Crafting memories, one gift at a time"
+  loading="lazy"
+  decoding="async"
+  class="brand-promise__image img-fallback"
+/>
+
+      <!-- Happy customers badge -->
+      <div class="brand-promise__badge" aria-label="10k+ happy customers">
+        <p class="brand-promise__badge-value">10k+</p>
+        <p class="brand-promise__badge-label">
+          {{ 'home.promise.happyCustomers' | translate }}
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

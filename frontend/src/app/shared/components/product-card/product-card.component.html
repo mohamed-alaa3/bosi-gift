@@ -1,0 +1,115 @@
+<a [routerLink]="productLink()" class="app-product-card">
+  <!-- Image area -->
+  <div class="app-product-card__media">
+    @if (primaryImage()) {
+<img
+  [src]="primaryImage() | safeImage"
+  [alt]="product().name | localized"
+  loading="lazy"
+  decoding="async"
+  class="app-product-card__image img-fallback"
+/>
+    } @else {
+      <div class="app-product-card__placeholder" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+      </div>
+    }
+
+    <!-- Badges -->
+    <div class="app-product-card__badges">
+      @if (hasDiscount()) {
+        <span class="app-product-card__badge app-product-card__badge--sale">
+          <span dir="ltr" class="app-product-card__pct">-{{ discountPercent() }}%</span>
+        </span>
+      }
+      @if (isNew()) {
+        <span class="app-product-card__badge app-product-card__badge--new">{{ 'product.badgeNew' | translate }}</span>
+      }
+      @if (isFeatured() && !hasDiscount() && !isNew()) {
+        <span class="app-product-card__badge app-product-card__badge--featured">{{ 'product.badgeFeatured' | translate }}</span>
+      }
+    </div>
+
+    <!-- Out of stock overlay -->
+    @if (isOutOfStock()) {
+      <div class="app-product-card__out-of-stock">
+        <span>{{ 'common.outOfStock' | translate }}</span>
+      </div>
+    }
+
+    <!-- Wishlist button -->
+    @if (showWishlistButton()) {
+<button
+  type="button"
+  class="app-product-card__wishlist"
+  [class.is-active]="isInWishlist()"
+  [attr.aria-pressed]="isInWishlist()"
+  [class.is-pulsing]="isPulsing()"
+  (click)="onToggleWishlist($event)"
+  [attr.aria-label]="isInWishlist() ? 'Remove from wishlist' : 'Add to wishlist'"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+    [attr.fill]="isInWishlist() ? 'currentColor' : 'none'"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+  </svg>
+</button>
+    }
+  </div>
+
+  <!-- Body -->
+  <div class="app-product-card__body">
+@if (productCategory(); as catName) {
+  <p class="app-product-card__category">{{ catName | localized }}</p>
+}
+
+    <h3 class="app-product-card__title">{{ product().name | localized }}</h3>
+
+    @if (product().ratingCount > 0) {
+      <div class="app-product-card__rating">
+        <app-rating-stars
+          size="sm"
+          [value]="product().ratingAvg"
+          [showValue]="true"
+          [showCount]="true"
+          [count]="product().ratingCount"
+        />
+      </div>
+    }
+
+    <div class="app-product-card__footer">
+      <div class="app-product-card__prices">
+        @if (hasDiscount()) {
+          <span class="app-product-card__price app-product-card__price--current">
+            {{ product().discountPrice | price }}
+          </span>
+          <span class="app-product-card__price app-product-card__price--old">
+            {{ product().price | price }}
+          </span>
+        } @else {
+          <span class="app-product-card__price app-product-card__price--current">
+            {{ product().price | price }}
+          </span>
+        }
+      </div>
+
+<button
+  type="button"
+  class="app-product-card__add"
+  [class.is-loading]="addingToCart()"
+  [class.is-success]="addedToCart()"
+  [disabled]="isOutOfStock() || addingToCart() || addedToCart()"
+  (click)="onAddToCart($event)"
+  [attr.aria-label]="'product.addToCart' | translate"
+>
+  @if (addingToCart()) {
+    <span class="app-product-card__spinner" aria-hidden="true"></span>
+  } @else if (addedToCart()) {
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+  } @else {
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+  }
+</button>
+    </div>
+  </div>
+</a>

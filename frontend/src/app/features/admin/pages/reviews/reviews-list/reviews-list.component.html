@@ -1,0 +1,179 @@
+<section class="ar">
+  <header class="ar__head">
+    <div>
+      <h1 class="ar__title">{{ 'admin.reviews.title' | translate }}</h1>
+      <p class="ar__sub">{{ 'admin.reviews.subtitle' | translate }}</p>
+    </div>
+    <button type="button" class="ar__btn ar__btn--primary" (click)="openForm()">＋ {{ 'admin.reviews.add' | translate }}</button>
+  </header>
+
+  <!-- Filters -->
+  <div class="ar__filters">
+    <input
+      type="search"
+      class="ar__input ar__search"
+      [ngModel]="q"
+      (ngModelChange)="onSearch($event)"
+      [placeholder]="'admin.reviews.searchPlaceholder' | translate"
+      [attr.aria-label]="'common.search' | translate"
+    />
+    <select class="ar__input" [(ngModel)]="type" (ngModelChange)="applyFilters()" [attr.aria-label]="'admin.reviews.type' | translate">
+      <option value="">{{ 'admin.reviews.allTypes' | translate }}</option>
+      <option value="product">{{ 'admin.reviews.typeProduct' | translate }}</option>
+      <option value="service">{{ 'admin.reviews.typeService' | translate }}</option>
+    </select>
+    <select class="ar__input" [(ngModel)]="status" (ngModelChange)="applyFilters()" [attr.aria-label]="'admin.reviews.status' | translate">
+      <option value="">{{ 'admin.reviews.allStatuses' | translate }}</option>
+      <option value="pending">{{ 'reviews.status.pending' | translate }}</option>
+      <option value="approved">{{ 'reviews.status.approved' | translate }}</option>
+      <option value="rejected">{{ 'reviews.status.rejected' | translate }}</option>
+    </select>
+  </div>
+
+  <!-- Manual testimonial -->
+  @if (formOpen()) {
+    <form class="ar__form" (ngSubmit)="save()" novalidate>
+      <h2 class="ar__form-title">{{ 'admin.reviews.add' | translate }}</h2>
+      <p class="ar__form-note">{{ 'admin.reviews.manualNote' | translate }}</p>
+
+      <div class="ar__grid">
+        <label class="ar__field">
+          <span>{{ 'admin.reviews.type' | translate }}</span>
+          <select class="ar__input" name="type" [(ngModel)]="form.type">
+            <option value="product">{{ 'admin.reviews.typeProduct' | translate }}</option>
+            <option value="service">{{ 'admin.reviews.typeService' | translate }}</option>
+          </select>
+        </label>
+
+        <label class="ar__field">
+          <span>{{ 'admin.reviews.displayName' | translate }}</span>
+          <input class="ar__input" name="displayName" maxlength="80" [(ngModel)]="form.displayName" />
+        </label>
+
+        @if (form.type === 'product') {
+          <label class="ar__field ar__field--wide">
+            <span>{{ 'admin.reviews.product' | translate }}</span>
+            <select class="ar__input" name="product" [(ngModel)]="form.product">
+              <option value="">—</option>
+              @for (p of products(); track p._id) {
+                <option [value]="p._id">{{ p.name | localized }}</option>
+              }
+            </select>
+          </label>
+        }
+
+        <div class="ar__field">
+          <span>{{ 'reviews.overall' | translate }}</span>
+          <app-star-input [(value)]="rating" [label]="'reviews.overall' | translate" />
+        </div>
+
+        <label class="ar__field">
+          <span>{{ 'admin.reviews.date' | translate }}</span>
+          <input class="ar__input" type="date" name="date" [(ngModel)]="form.date" />
+        </label>
+
+        <label class="ar__field">
+          <span>{{ 'admin.reviews.status' | translate }}</span>
+          <select class="ar__input" name="status" [(ngModel)]="form.status">
+            <option value="approved">{{ 'reviews.status.approved' | translate }}</option>
+            <option value="pending">{{ 'reviews.status.pending' | translate }}</option>
+            <option value="rejected">{{ 'reviews.status.rejected' | translate }}</option>
+          </select>
+        </label>
+      </div>
+
+      @if (form.type === 'service') {
+        <div class="ar__extras">
+          <div class="ar__field"><span>{{ 'reviews.customerService' | translate }}</span><app-star-input [(value)]="customerService" [label]="'reviews.customerService' | translate" /></div>
+          <div class="ar__field"><span>{{ 'reviews.delivery' | translate }}</span><app-star-input [(value)]="delivery" [label]="'reviews.delivery' | translate" /></div>
+          <div class="ar__field"><span>{{ 'reviews.packaging' | translate }}</span><app-star-input [(value)]="packaging" [label]="'reviews.packaging' | translate" /></div>
+        </div>
+      }
+
+      <label class="ar__field ar__field--wide">
+        <span>{{ 'admin.reviews.text' | translate }}</span>
+        <textarea class="ar__input" name="comment" rows="4" maxlength="1000" [(ngModel)]="form.comment"></textarea>
+      </label>
+
+      @if (formError()) { <p class="ar__error" role="alert">{{ formError() }}</p> }
+
+      <div class="ar__actions">
+        <button type="submit" class="ar__btn ar__btn--primary" [disabled]="saving()">{{ (saving() ? 'reviews.saving' : 'admin.reviews.create') | translate }}</button>
+        <button type="button" class="ar__btn" (click)="closeForm()" [disabled]="saving()">{{ 'reviews.cancel' | translate }}</button>
+      </div>
+    </form>
+  }
+
+  <!-- List -->
+  @if (loading()) {
+    <p class="ar__muted">{{ 'reviews.loading' | translate }}</p>
+  } @else if (error()) {
+    <p class="ar__error" role="alert">{{ 'reviews.loadError' | translate }}</p>
+  } @else if (reviews().length === 0) {
+    <p class="ar__empty">{{ 'admin.reviews.empty' | translate }}</p>
+  } @else {
+    <p class="ar__count">{{ 'admin.reviews.total' | translate: { count: total() } }}</p>
+    <ul class="ar__list">
+      @for (r of reviews(); track r._id) {
+        <li class="ar__card" [attr.data-status]="r.status">
+          <div class="ar__card-top">
+            <div class="ar__badges">
+              <span class="ar__pill" [class.ar__pill--service]="r.type === 'service'">
+                {{ (r.type === 'service' ? 'admin.reviews.typeService' : 'admin.reviews.typeProduct') | translate }}
+              </span>
+              <span class="ar__pill ar__pill--status" [attr.data-status]="r.status">{{ 'reviews.status.' + r.status | translate }}</span>
+              @if (r.source === 'admin') {
+                <span class="ar__pill ar__pill--manual">✍️ {{ 'admin.reviews.manual' | translate }}</span>
+              } @else if (r.isVerifiedPurchase) {
+                <span class="verified-badge">✓ {{ 'reviews.verified' | translate }}</span>
+              }
+            </div>
+            <app-rating-stars size="sm" [value]="r.rating" />
+          </div>
+
+          <p class="ar__text">{{ clean(r.comment) || '—' }}</p>
+
+          @if (r.type === 'service' && (r.customerServiceRating || r.deliveryRating || r.packagingRating)) {
+            <p class="ar__sub-ratings">
+              @if (r.customerServiceRating) { <span>{{ 'reviews.customerService' | translate }}: {{ r.customerServiceRating }}★</span> }
+              @if (r.deliveryRating) { <span>{{ 'reviews.delivery' | translate }}: {{ r.deliveryRating }}★</span> }
+              @if (r.packagingRating) { <span>{{ 'reviews.packaging' | translate }}: {{ r.packagingRating }}★</span> }
+            </p>
+          }
+
+          <dl class="ar__meta">
+            <div>
+              <dt>{{ 'admin.reviews.customer' | translate }}</dt>
+              <dd>{{ authorOf(r) }}@if (r.user?.email) { <span class="ar__email"> · {{ r.user?.email }}</span> }</dd>
+            </div>
+            @if (r.product) {
+              <div><dt>{{ 'admin.reviews.product' | translate }}</dt><dd>{{ r.product.name | localized }}</dd></div>
+            }
+            <div><dt>{{ 'admin.reviews.date' | translate }}</dt><dd>{{ r.createdAt | date: 'mediumDate' }}</dd></div>
+          </dl>
+
+          <div class="ar__actions">
+            @if (r.status !== 'approved') {
+              <button type="button" class="ar__btn ar__btn--ok" [disabled]="busyId() === r._id" (click)="setStatus(r, 'approved')">✓ {{ 'admin.reviews.approve' | translate }}</button>
+            }
+            @if (r.status !== 'rejected') {
+              <button type="button" class="ar__btn" [disabled]="busyId() === r._id" (click)="setStatus(r, 'rejected')">✕ {{ 'admin.reviews.reject' | translate }}</button>
+            }
+            @if (r.status === 'approved') {
+              <button type="button" class="ar__btn" [disabled]="busyId() === r._id" (click)="setStatus(r, 'pending')">{{ 'admin.reviews.unpublish' | translate }}</button>
+            }
+            <button type="button" class="ar__btn ar__btn--danger" [disabled]="busyId() === r._id" (click)="remove(r)">{{ 'common.delete' | translate }}</button>
+          </div>
+        </li>
+      }
+    </ul>
+
+    @if (totalPages() > 1) {
+      <nav class="ar__pager" [attr.aria-label]="'admin.reviews.title' | translate">
+        <button type="button" class="ar__btn" [disabled]="page() <= 1" (click)="goTo(page() - 1)">‹</button>
+        <span>{{ page() }} / {{ totalPages() }}</span>
+        <button type="button" class="ar__btn" [disabled]="page() >= totalPages()" (click)="goTo(page() + 1)">›</button>
+      </nav>
+    }
+  }
+</section>

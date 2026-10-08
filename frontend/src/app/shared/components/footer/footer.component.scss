@@ -1,0 +1,348 @@
+.app-footer {
+    background-color: var(--bg-muted);
+    border-top: 1px solid var(--border);
+    color: var(--text);
+
+    [data-theme='dark'] & {
+        background-color: var(--bg-elevated);
+    }
+
+    // ---------- Main content ----------
+    &__inner {
+        max-width: 1440px;
+        margin-inline: auto;
+        padding: 3rem 1rem 2.5rem;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+
+        @media (min-width: 640px) {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            grid-template-columns: 1.5fr 1fr 1.5fr 1.25fr;
+            padding: 4rem 2rem 3rem;
+            gap: 3rem;
+        }
+    }
+
+    &__col {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    // ---------- Brand column ----------
+    &__col--brand {
+        gap: 1rem;
+    }
+
+    &__logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--brand-ink);
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-weight: 700;
+        font-size: 1.125rem;
+        text-decoration: none;
+        align-self: flex-start;
+
+        [data-theme='dark'] & {
+            color: #ffffff;
+        }
+    }
+
+    &__logo-icon {
+        width: 88px;
+        height: 88px;
+        object-fit: contain;
+        display: block;
+    }
+
+    &__logo-accent {
+        color: var(--brand-primary);
+        font-weight: 500;
+    }
+
+    &__about {
+        font-size: 0.875rem;
+        line-height: 1.6;
+        color: var(--text-muted);
+        margin: 0;
+        max-width: 36ch;
+    }
+
+    // ---------- Socials ----------
+    &__socials {
+        display: flex;
+        gap: 0.5rem;
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+    }
+
+    &__social {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: var(--radius-full);
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        text-decoration: none;
+        transition:
+            background-color var(--transition-fast),
+            border-color var(--transition-fast),
+            color var(--transition-fast),
+            transform var(--transition-fast);
+
+        &:hover {
+            background-color: var(--brand-primary);
+            border-color: var(--brand-primary);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+    }
+
+    // ---------- Headings + Links ----------
+    &__heading {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0 0 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    &__links {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    &__link {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color var(--transition-fast);
+
+        &:hover {
+            color: var(--brand-primary);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+            border-radius: 4px;
+        }
+    }
+
+    // ---------- Newsletter ----------
+    &__text {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    &__newsletter {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.25rem;
+        max-width: 380px;
+    }
+
+    &__input {
+        flex: 1;
+        min-width: 0;
+        height: 44px;
+        padding-inline: 1rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.875rem;
+        color: var(--text);
+        background-color: var(--surface);
+        border: 1.5px solid var(--border-strong);
+        border-radius: var(--radius-md);
+        outline: none;
+        transition:
+            border-color var(--transition-fast),
+            box-shadow var(--transition-fast);
+
+        &::placeholder {
+            color: var(--text-subtle);
+        }
+
+        &:focus {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), 0.15);
+        }
+
+        &.is-invalid {
+            border-color: var(--danger);
+        }
+    }
+
+    &__subscribe {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        padding-inline: 1.25rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #ffffff;
+        background-color: var(--brand-primary);
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        flex-shrink: 0;
+        min-width: 84px;
+        transition:
+            background-color var(--transition-fast),
+            transform var(--transition-fast);
+
+        &:hover:not(:disabled) {
+            background-color: var(--brand-primary-hover);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        &:disabled {
+            opacity: 0.7;
+            cursor: progress;
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+    }
+
+    &__spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    &__error {
+        font-size: 0.75rem;
+        color: var(--danger);
+        margin: 0.25rem 0 0;
+    }
+
+    &__success {
+        font-size: 0.75rem;
+        color: var(--success);
+        margin: 0.25rem 0 0;
+    }
+
+    // ---------- Contact ----------
+    &__contact {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    &__contact li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+    }
+
+    &__contact-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--brand-primary);
+        margin-top: 2px;
+    }
+
+    &__contact-link {
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color var(--transition-fast);
+
+        &:hover {
+            color: var(--brand-primary);
+        }
+    }
+
+    // ---------- Bottom bar ----------
+    &__bottom {
+        border-top: 1px solid var(--border);
+        max-width: 1440px;
+        margin-inline: auto;
+        padding: 1.25rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        text-align: center;
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 1.25rem 2rem;
+            text-align: start;
+        }
+    }
+
+    &__copy {
+        font-size: 0.8125rem;
+        color: var(--text-subtle);
+        margin: 0;
+    }
+
+    &__legal {
+        display: flex;
+        gap: 1.25rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    &__legal-link {
+        font-size: 0.8125rem;
+        color: var(--text-subtle);
+        text-decoration: none;
+        transition: color var(--transition-fast);
+
+        &:hover {
+            color: var(--brand-primary);
+        }
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

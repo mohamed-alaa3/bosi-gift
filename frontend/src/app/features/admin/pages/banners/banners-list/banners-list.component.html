@@ -1,0 +1,95 @@
+<div class="admin-banners">
+  <header class="admin-banners__header">
+    <div>
+      <h1 class="admin-banners__title">{{ 'admin.banners.title' | translate }}</h1>
+      <p class="admin-banners__subtitle">{{ 'admin.banners.subtitle' | translate }}</p>
+    </div>
+    <button type="button" class="admin-banners__add" (click)="goToNew()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      {{ 'admin.banners.addBanner' | translate }}
+    </button>
+  </header>
+
+  <div class="admin-banners__filters" role="tablist">
+    @for (opt of positionOptions; track opt.value) {
+      <button
+        type="button"
+        class="admin-banners__filter"
+        [class.is-active]="positionFilter() === opt.value"
+        (click)="setPosition(opt.value)"
+      >
+        {{ opt.labelKey | translate }}
+      </button>
+    }
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="admin-banners__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.banners.errorTitle' | translate"
+      [message]="'admin.banners.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="box"
+      [title]="'admin.banners.emptyTitle' | translate"
+      [message]="'admin.banners.emptyText' | translate"
+      [actionLabel]="'admin.banners.addBanner' | translate"
+      (actionClick)="goToNew()"
+    />
+  }
+
+  @if (state() === 'success') {
+    <ul class="admin-banners__grid">
+      @for (b of banners(); track b._id) {
+        <li class="banner-card" [class.is-inactive]="!b.isActive">
+          <div class="banner-card__media">
+            @if (b.imageUrl || b.image) {
+              <img [src]="(b.imageUrl || b.image) | safeImage" [alt]="b.title | localized" class="banner-card__image img-fallback" loading="lazy" />
+            } @else {
+              <div class="banner-card__image img-fallback" aria-hidden="true"></div>
+            }
+            <span class="banner-card__position">{{ positionLabel(b.position) | translate }}</span>
+          </div>
+
+          <div class="banner-card__body">
+            <h3 class="banner-card__title">{{ b.title | localized }}</h3>
+            @if (b.subtitle.en || b.subtitle.ar) {
+              <p class="banner-card__subtitle">{{ b.subtitle | localized }}</p>
+            }
+
+            <div class="banner-card__meta">
+              <span class="banner-card__status" [class.is-active]="b.isActive">
+                {{ b.isActive ? ('admin.banners.active' | translate) : ('admin.banners.inactive' | translate) }}
+              </span>
+            </div>
+
+            <div class="banner-card__actions">
+              <button type="button" class="banner-card__action" (click)="goToEdit(b._id)">
+                {{ 'common.edit' | translate }}
+              </button>
+              <button
+                type="button"
+                class="banner-card__action banner-card__action--danger"
+                (click)="remove(b)"
+                [disabled]="deletingId() === b._id"
+              >
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

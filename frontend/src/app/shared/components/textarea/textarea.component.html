@@ -1,0 +1,42 @@
+<div class="app-textarea" [class.has-error]="showError()" [class.is-disabled]="isEffectivelyDisabled()">
+  @if (label()) {
+    <label [for]="textareaId()" class="app-textarea__label">
+      {{ label() }}
+      @if (required()) {
+        <span class="app-textarea__required" aria-hidden="true">*</span>
+      }
+    </label>
+  }
+
+  <textarea
+    [id]="textareaId()"
+    [value]="value()"
+    [placeholder]="placeholder()"
+    [rows]="rows()"
+    [attr.maxlength]="maxLength() || null"
+    [disabled]="isEffectivelyDisabled()"
+    [required]="required()"
+    [attr.aria-invalid]="showError()"
+    [attr.aria-describedby]="hint() || error() || showCounter() ? describedById() : null"
+    class="app-textarea__control"
+    (input)="onInput($event)"
+    (blur)="onBlur()"
+    (focus)="onFocus()"
+  ></textarea>
+
+  <div class="app-textarea__footer">
+    @if (showError()) {
+      <p [id]="describedById()" class="app-textarea__error">{{ error() }}</p>
+    } @else if (hint()) {
+      <p [id]="describedById()" class="app-textarea__hint">{{ hint() }}</p>
+    } @else {
+      <span></span>
+    }
+
+    @if (showCounter()) {
+      <span class="app-textarea__counter" [class.is-limit]="charCount() >= (maxLength() ?? 0)">
+        {{ charCount() }} / {{ maxLength() }}
+      </span>
+    }
+  </div>
+</div>

@@ -1,0 +1,185 @@
+.best-sellers {
+    max-width: 1440px;
+    margin-inline: auto;
+    padding: 2rem 1rem 4rem;
+
+    @media (min-width: 1024px) {
+        padding: 3rem 2rem 6rem;
+    }
+
+    // ---------- Header ----------
+    &__header {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 2.5rem;
+
+        @media (min-width: 768px) {
+            flex-direction: row;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+    }
+
+    &__heading {
+        display: flex;
+        flex-direction: column;
+        gap: 0.375rem;
+    }
+
+    &__eyebrow {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--brand-primary);
+        margin: 0;
+    }
+
+    &__title {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: var(--text);
+        margin: 0;
+    }
+
+    &__view-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--brand-primary);
+        text-decoration: none;
+        align-self: flex-start;
+        transition: gap var(--transition-base), color var(--transition-base);
+
+        svg {
+            transition: transform var(--transition-base);
+        }
+
+        &:hover {
+            color: var(--brand-primary-hover);
+
+            svg {
+                transform: translateX(4px);
+            }
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 4px;
+            border-radius: 4px;
+        }
+
+        @media (min-width: 768px) {
+            align-self: flex-end;
+        }
+    }
+
+    // ---------- Grid ----------
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+
+        @media (min-width: 768px) {
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 1024px) {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.75rem;
+        }
+    }
+
+    // ---------- State cards (empty / error) ----------
+    &__state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.75rem;
+        padding: 3rem 1.5rem;
+        background-color: var(--surface);
+        border: 1px dashed var(--border-strong);
+        border-radius: var(--radius-xl);
+        max-width: 640px;
+        margin-inline: auto;
+    }
+
+    &__state--error {
+        border-color: color-mix(in srgb, var(--danger) 40%, var(--border-strong));
+    }
+
+    &__state-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 72px;
+        height: 72px;
+        border-radius: var(--radius-full);
+        background-color: var(--brand-primary-soft);
+        color: var(--brand-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    &__state--error &__state-icon {
+        background-color: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    &__state-title {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0;
+    }
+
+    &__state-text {
+        font-size: 0.9375rem;
+        color: var(--text-muted);
+        margin: 0;
+        max-width: 40ch;
+        line-height: 1.5;
+    }
+
+    &__retry {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.75rem;
+        padding: 0.75rem 1.75rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: #ffffff;
+        background-color: var(--brand-primary);
+        border: none;
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        transition:
+            background-color var(--transition-base),
+            transform var(--transition-base);
+
+        &:hover {
+            background-color: var(--brand-primary-hover);
+        }
+
+        &:active {
+            transform: translateY(1px);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+    }
+}

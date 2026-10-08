@@ -1,0 +1,125 @@
+.kpi-card {
+    position: relative;
+    padding: 1.25rem;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: box-shadow var(--transition-base), border-color var(--transition-base);
+
+    &:hover {
+        box-shadow: var(--shadow-md);
+        border-color: var(--border-strong);
+    }
+
+    &__head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+
+        &--primary {
+            background-color: var(--brand-primary-soft);
+            color: var(--brand-primary);
+        }
+
+        &--success {
+            background-color: var(--success-soft);
+            color: var(--success);
+        }
+
+        &--info {
+            background-color: var(--info-soft);
+            color: var(--info);
+        }
+
+        &--warning {
+            background-color: var(--warning-soft);
+            color: var(--warning);
+        }
+
+        &--danger {
+            background-color: var(--danger-soft);
+            color: var(--danger);
+        }
+    }
+
+    &__growth {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.1875rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.1875rem 0.5rem;
+        border-radius: var(--radius-full);
+
+        &.is-positive {
+            color: var(--success);
+            background-color: var(--success-soft);
+        }
+
+        &.is-negative {
+            color: var(--danger);
+            background-color: var(--danger-soft);
+        }
+    }
+
+    &__label {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+        margin: 0;
+    }
+
+    &__value {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+
+        @media (min-width: 1024px) {
+            font-size: 1.75rem;
+        }
+    }
+
+    &__skeleton {
+        height: 1.75rem;
+        width: 60%;
+        border-radius: var(--radius-sm);
+        background: linear-gradient(90deg,
+                var(--bg-muted) 0%,
+                var(--surface-hover) 50%,
+                var(--bg-muted) 100%);
+        background-size: 200% 100%;
+        animation: shimmer 1.6s linear infinite;
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}

@@ -1,0 +1,104 @@
+// ==========================================
+// Floating WhatsApp button
+// ==========================================
+// - Anchored with logical properties: bottom-right in LTR, bottom-left in RTL.
+// - Hidden (and removed from tab order via `visibility`) until scrolled > 200px.
+
+.whatsapp-btn {
+    position: fixed;
+    inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px));
+    inset-inline-end: var(--space-4);
+    z-index: var(--z-fixed);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 52px;
+    block-size: 52px;
+    border-radius: var(--radius-full);
+
+    background-color: var(--brand-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-lg);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+
+    // Hidden state
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(12px);
+
+    transition:
+        opacity var(--transition-base),
+        transform var(--transition-base),
+        visibility var(--transition-base),
+        background-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+
+    @media (min-width: 768px) {
+        inset-block-end: calc(var(--space-6) + env(safe-area-inset-bottom, 0px));
+        inset-inline-end: var(--space-6);
+        inline-size: 56px;
+        block-size: 56px;
+    }
+
+    // Visible state
+    &.is-visible {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    &:hover {
+        background-color: var(--brand-primary-hover);
+        box-shadow: var(--shadow-xl);
+    }
+
+    &.is-visible:hover {
+        transform: translateY(-3px);
+    }
+
+    &.is-visible:active {
+        transform: translateY(0) scale(0.94);
+        box-shadow: var(--shadow-md);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--brand-primary);
+        outline-offset: 3px;
+    }
+
+    &__icon {
+        display: block;
+        inline-size: 28px;
+        block-size: 28px;
+        pointer-events: none;
+    }
+}
+
+// Dark mode: keep brand orange, add a subtle ring so the circle
+// stays defined against near-black backgrounds.
+[data-theme='dark'] .whatsapp-btn {
+    box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 12px 32px rgba(0, 0, 0, 0.55);
+
+    &:hover {
+        box-shadow:
+            0 0 0 1px rgba(255, 255, 255, 0.12),
+            0 16px 40px rgba(0, 0, 0, 0.65);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .whatsapp-btn,
+    .whatsapp-btn.is-visible,
+    .whatsapp-btn.is-visible:hover,
+    .whatsapp-btn.is-visible:active {
+        transition: none;
+        transform: none;
+    }
+}

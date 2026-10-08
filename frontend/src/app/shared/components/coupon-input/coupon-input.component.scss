@@ -1,0 +1,218 @@
+// ==========================================
+// Coupon input (cart / checkout)
+// Tokens only → works in light, dark, LTR and RTL.
+// ==========================================
+
+.coupon-input {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &__label {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+    }
+
+    &__row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    &__field {
+        flex: 1;
+        min-width: 0;
+        min-height: 44px;
+        padding-inline: 0.875rem;
+        padding-block: 0.5rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        color: var(--text);
+        background-color: var(--surface);
+        border: 1.5px solid var(--border-strong);
+        border-radius: var(--radius-md);
+        outline: none;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+
+        &::placeholder {
+            color: var(--text-subtle);
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        &:focus {
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 3px rgba(var(--brand-primary-rgb), 0.15);
+        }
+
+        &.has-error {
+            border-color: var(--danger);
+
+            &:focus {
+                box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%, transparent);
+            }
+        }
+    }
+
+    &__apply {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 84px;
+        min-height: 44px;
+        padding-inline: 1rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: #ffffff;
+        background-color: var(--brand-primary);
+        border: none;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: background-color var(--transition-fast);
+
+        &:hover:not(:disabled) {
+            background-color: var(--brand-primary-hover);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+
+        &:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+    }
+
+    &__spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid currentColor;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: coupon-input-spin 0.7s linear infinite;
+    }
+
+    &__sr {
+        position: absolute;
+        inline-size: 1px;
+        block-size: 1px;
+        margin: -1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+    }
+
+    // ---------- Applied state ----------
+    &__applied {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.625rem 0.75rem;
+        background-color: var(--success-soft);
+        border: 1px solid color-mix(in srgb, var(--success) 35%, transparent);
+        border-radius: var(--radius-md);
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: var(--success);
+    }
+
+    &__applied-info {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+    }
+
+    &__applied-code {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 0.875rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--text);
+        overflow-wrap: anywhere;
+    }
+
+    &__applied-desc {
+        font-size: 0.75rem;
+        color: var(--success);
+        font-weight: 600;
+    }
+
+    &__remove {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        inline-size: 32px;
+        block-size: 32px;
+        color: var(--text-muted);
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        transition: background-color var(--transition-fast), color var(--transition-fast);
+
+        &:hover {
+            color: var(--danger);
+            background-color: var(--danger-soft);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+    }
+
+    // ---------- Messages ----------
+    &__error {
+        margin: 0;
+        font-size: 0.8125rem;
+        color: var(--danger);
+    }
+
+    &__notice {
+        margin: 0;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+        line-height: 1.4;
+        color: var(--warning);
+        background-color: var(--warning-soft);
+        border-radius: var(--radius-sm);
+    }
+}
+
+@keyframes coupon-input-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .coupon-input__field,
+    .coupon-input__apply,
+    .coupon-input__remove {
+        transition: none;
+    }
+
+    .coupon-input__spinner {
+        animation-duration: 2s;
+    }
+}

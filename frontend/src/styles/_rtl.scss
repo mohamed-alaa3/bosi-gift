@@ -1,0 +1,96 @@
+// ==========================================
+// RTL Support — Logical Properties helpers
+// ==========================================
+// Rule: prefer logical properties (inline/block) directly in components.
+// These utilities are for edge cases.
+
+// --- Flip icons that represent direction ---
+[dir='rtl'] .icon-directional {
+    transform: scaleX(-1);
+}
+
+// --- Truncate helpers (RTL-safe) ---
+.truncate-1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+// --- Logical spacing shortcuts (small subset) ---
+.ms-auto {
+    margin-inline-start: auto;
+}
+
+.me-auto {
+    margin-inline-end: auto;
+}
+
+.ms-0 {
+    margin-inline-start: 0;
+}
+
+.me-0 {
+    margin-inline-end: 0;
+}
+
+.ps-0 {
+    padding-inline-start: 0;
+}
+
+.pe-0 {
+    padding-inline-end: 0;
+}
+
+// --- Border helpers ---
+.border-s {
+    border-inline-start: 1px solid var(--border);
+}
+
+.border-e {
+    border-inline-end: 1px solid var(--border);
+}
+
+// --- Text alignment (logical) ---
+.text-start {
+    text-align: start;
+}
+
+.text-end {
+    text-align: end;
+}
+
+// --- RTL-only / LTR-only visibility ---
+.rtl-only {
+    display: none;
+}
+
+[dir='rtl'] .rtl-only {
+    display: block;
+}
+
+[dir='rtl'] .ltr-only {
+    display: none;
+}
+
+.ltr-only {
+    display: block;
+}
+
+// --- Slight letter-spacing fix for Arabic (Arabic doesn't need negative tracking) ---
+[dir='rtl'] {
+    letter-spacing: 0 !important;
+}

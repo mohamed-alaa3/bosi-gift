@@ -1,0 +1,31 @@
+<section class="builder" aria-labelledby="builder-title">
+  <div class="builder__card">
+    <app-gift-icon name="sparkle" class="builder__deco builder__deco--1 gift-twinkle" />
+    <app-gift-icon name="heart" class="builder__deco builder__deco--2 gift-float" />
+    <app-gift-icon name="sparkle" class="builder__deco builder__deco--3 gift-twinkle" />
+
+    <div class="builder__content">
+      <p class="builder__eyebrow">{{ 'home.giftBuilder.eyebrow' | translate }}</p>
+      <h2 id="builder-title" class="builder__title">{{ 'home.giftBuilder.title' | translate }}</h2>
+      <p class="builder__text">{{ 'home.giftBuilder.text' | translate }}</p>
+
+      <ol class="builder__steps">
+        <li><span>1</span>{{ 'home.giftBuilder.step1' | translate }}</li>
+        <li><span>2</span>{{ 'home.giftBuilder.step2' | translate }}</li>
+        <li><span>3</span>{{ 'home.giftBuilder.step3' | translate }}</li>
+        <li><span>4</span>{{ 'home.giftBuilder.step4' | translate }}</li>
+      </ol>
+
+      <a routerLink="/gifts" class="builder__cta">
+        <span>{{ 'home.giftBuilder.cta' | translate }}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+
+    <div class="builder__visual" aria-hidden="true">
+      <app-gift-icon name="gift" class="builder__gift gift-float" />
+      <app-gift-icon name="flower" class="builder__mini builder__mini--a" />
+      <app-gift-icon name="teddy" class="builder__mini builder__mini--b" />
+    </div>
+  </div>
+</section>

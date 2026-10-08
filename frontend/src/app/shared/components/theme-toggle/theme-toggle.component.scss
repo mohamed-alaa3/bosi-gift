@@ -1,0 +1,59 @@
+.app-theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 2px solid var(--brand-primary);
+        outline-offset: 3px;
+        border-radius: var(--radius-full);
+    }
+
+    &__track {
+        position: relative;
+        display: inline-block;
+        width: 48px;
+        height: 26px;
+        border-radius: var(--radius-full);
+        background-color: var(--bg-muted);
+        border: 1.5px solid var(--border);
+        transition: background-color var(--transition-base), border-color var(--transition-base);
+    }
+
+    &__thumb {
+        position: absolute;
+        top: 50%;
+        inset-inline-start: 2px;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: var(--radius-full);
+        background-color: var(--surface);
+        color: var(--brand-primary);
+        box-shadow: var(--shadow-xs);
+        transition:
+            inset-inline-start var(--transition-base),
+            background-color var(--transition-base),
+            color var(--transition-base);
+    }
+
+    // Dark mode state
+    &.is-dark {
+        .app-theme-toggle__track {
+            background-color: var(--brand-ink);
+            border-color: var(--brand-ink);
+        }
+
+        .app-theme-toggle__thumb {
+            inset-inline-start: calc(100% - 22px);
+            background-color: var(--brand-primary);
+            color: #ffffff;
+        }
+    }
+}

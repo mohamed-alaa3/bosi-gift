@@ -1,0 +1,94 @@
+<div class="admin-gift-boxes">
+  <header class="admin-gift-boxes__header">
+    <div>
+      <h1 class="admin-gift-boxes__title">{{ 'admin.giftBoxes.title' | translate }}</h1>
+      <p class="admin-gift-boxes__subtitle">{{ 'admin.giftBoxes.subtitle' | translate }}</p>
+    </div>
+    <a routerLink="/admin/gift-boxes/new" class="admin-gift-boxes__add">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      {{ 'admin.giftBoxes.addBox' | translate }}
+    </a>
+  </header>
+
+  @if (state() === 'loading') {
+    <div class="admin-gift-boxes__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.giftBoxes.errorTitle' | translate"
+      [message]="'admin.giftBoxes.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="box"
+      [title]="'admin.giftBoxes.emptyTitle' | translate"
+      [message]="'admin.giftBoxes.emptyText' | translate"
+      [actionLabel]="'admin.giftBoxes.addBox' | translate"
+      [actionLink]="'/admin/gift-boxes/new'"
+    />
+  }
+
+  @if (state() === 'success') {
+    <ul class="admin-gift-boxes__grid">
+      @for (box of boxes(); track box._id) {
+        <li class="gift-box-card" [class.is-inactive]="!box.isActive">
+          <div class="gift-box-card__media">
+            @if (box.imageUrl || box.image) {
+              <img
+                [src]="(box.imageUrl || box.image) | safeImage"
+                [alt]="box.name | localized"
+                class="gift-box-card__image img-fallback"
+                loading="lazy"
+              />
+            } @else {
+              <div class="gift-box-card__image img-fallback" aria-hidden="true"></div>
+            }
+            <span class="gift-box-card__capacity">
+              {{ box.capacity }} {{ 'giftBuilder.items' | translate }}
+            </span>
+          </div>
+
+          <div class="gift-box-card__body">
+            <h3 class="gift-box-card__name">{{ box.name | localized }}</h3>
+
+            @if (box.description.en || box.description.ar) {
+              <p class="gift-box-card__desc">{{ box.description | localized }}</p>
+            }
+
+            <div class="gift-box-card__meta">
+              <span class="gift-box-card__price">{{ box.basePrice | price }}</span>
+              <span class="gift-box-card__status" [class.is-active]="box.isActive">
+                {{ box.isActive ? ('admin.giftBoxes.active' | translate) : ('admin.giftBoxes.inactive' | translate) }}
+              </span>
+            </div>
+
+            <div class="gift-box-card__actions">
+              <a
+                [routerLink]="['/admin/gift-boxes', box._id, 'edit']"
+                class="gift-box-card__action"
+              >
+                {{ 'common.edit' | translate }}
+              </a>
+              <button
+                type="button"
+                class="gift-box-card__action gift-box-card__action--danger"
+                (click)="remove(box)"
+                [disabled]="deletingId() === box._id"
+              >
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

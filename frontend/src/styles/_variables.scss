@@ -1,0 +1,93 @@
+// ==========================================
+// Design Tokens — Bosi Gift
+// ==========================================
+// Only structural tokens live here.
+// Theme colors (light/dark) live in _themes.scss.
+
+:root {
+    // --- Brand palette (source: logo) ---
+    --brand-primary: #CA4562;
+    --brand-primary-hover: #B33A55;
+    --brand-primary-soft: #FFF0F3;
+    --brand-ink: #1F3F40;
+    --brand-ink-soft: #3E5E5F;
+    --brand-primary-rgb: 202, 69, 98;
+    --brand-pink: #F7A1B0; // logo dress pink (decorative)
+    --brand-coral: #F0786C; // logo ribbon coral (decorative)
+    --brand-secondary: #1F6A6A; // logo teal
+    --brand-secondary-hover: #175454;
+    --brand-secondary-soft: #E6F3F2;
+    --brand-outline: #A33A4D; // logo wordmark outline
+
+    // --- Spacing scale (used via CSS var or SCSS) ---
+    --space-0: 0;
+    --space-1: 0.25rem; // 4px
+    --space-2: 0.5rem; // 8px
+    --space-3: 0.75rem; // 12px
+    --space-4: 1rem; // 16px
+    --space-5: 1.25rem; // 20px
+    --space-6: 1.5rem; // 24px
+    --space-8: 2rem; // 32px
+    --space-10: 2.5rem; // 40px
+    --space-12: 3rem; // 48px
+    --space-16: 4rem; // 64px
+    --space-20: 5rem; // 80px
+    --space-24: 6rem; // 96px
+
+    // --- Radii ---
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --radius-2xl: 28px;
+    --radius-full: 9999px;
+
+    // --- Shadows ---
+    --shadow-xs: 0 1px 2px rgba(31, 63, 64, 0.05);
+    --shadow-sm: 0 2px 6px rgba(31, 63, 64, 0.07);
+    --shadow-md: 0 6px 16px rgba(31, 63, 64, 0.09);
+    --shadow-lg: 0 12px 32px rgba(31, 63, 64, 0.11);
+    --shadow-xl: 0 24px 48px rgba(31, 63, 64, 0.13);
+
+    // --- Motion ---
+    --motion-duration-fast: 150ms;
+    --motion-duration-base: 250ms;
+    --motion-duration-slow: 400ms;
+    --motion-duration-slower: 600ms;
+
+    --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --motion-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    // Direction-aware slide offsets (RTL-safe, updated by JS when dir changes)
+    --motion-dir-start: -100%;
+    --motion-dir-end: 100%;
+
+    // --- Z-index layers ---
+    --z-dropdown: 1000;
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-drawer-backdrop: 1040;
+    --z-drawer: 1050;
+    --z-modal-backdrop: 1060;
+    --z-modal: 1070;
+    --z-popover: 1080;
+    --z-toast: 1090;
+
+    // --- Layout ---
+    --header-height: 72px;
+    --header-height-mobile: 64px;
+    --footer-min-height: 320px;
+
+    // --- Transitions (semantic) ---
+    --transition-fast: var(--motion-duration-fast) var(--motion-ease-out);
+    --transition-base: var(--motion-duration-base) var(--motion-ease-out);
+    --transition-slow: var(--motion-duration-slow) var(--motion-ease-out);
+}
+
+// --- RTL direction awareness ---
+// When dir="rtl", start = right, end = left.
+[dir='rtl'] {
+    --motion-dir-start: 100%;
+    --motion-dir-end: -100%;
+}

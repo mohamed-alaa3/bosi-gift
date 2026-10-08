@@ -1,0 +1,23 @@
+<section class="static-page">
+  @if (config(); as cfg) {
+    <!-- Hero -->
+    <header class="static-page__hero" appRevealOnScroll>
+      <h1 class="static-page__title">{{ cfg.titleKey | translate }}</h1>
+      <p class="static-page__intro">{{ cfg.introKey | translate }}</p>
+    </header>
+
+    <!-- Content -->
+    <article class="static-page__content" appRevealOnScroll>
+      @for (section of sections(); track $index) {
+        <div class="static-page__section">
+          <h2 class="static-page__section-heading">{{ section.heading }}</h2>
+          <p class="static-page__section-body">{{ section.body }}</p>
+        </div>
+      }
+    </article>
+  } @else {
+    <div class="static-page__empty">
+      <h1>{{ 'staticPages.notFound' | translate }}</h1>
+    </div>
+  }
+</section>

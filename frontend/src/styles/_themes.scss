@@ -1,0 +1,101 @@
+// ==========================================
+// Themes — Light & Dark
+// ==========================================
+// These are applied to :root (light default)
+// and to [data-theme="dark"] (when toggled).
+
+:root {
+    // Backgrounds
+    --bg: #FFFFFF;
+    --bg-elevated: #FFF9FA;
+    --bg-muted: #FDF1F3;
+
+    // Surfaces (cards, panels)
+    --surface: #FFFFFF;
+    --surface-hover: #FFF6F8;
+
+    // Text
+    --text: #1F3F40;
+    --text-muted: #4D6869;
+    --text-subtle: #7A8F90;
+
+    // Borders
+    --border: #F3DDE2;
+    --border-strong: #E5BFC8;
+
+    // Status
+    --success: #16A34A;
+    --success-soft: #DCFCE7;
+    --warning: #D97706;
+    --warning-soft: #FEF3C7;
+    --danger: #DC2626;
+    --danger-soft: #FEE2E2;
+    --info: #2563EB;
+    --info-soft: #DBEAFE;
+
+    // Scrollbar
+    --scrollbar-thumb: #EBB9C3;
+    --scrollbar-track: #FDF1F3;
+
+    // Overlay (drawer/modal backdrop)
+    --overlay: rgba(31, 63, 64, 0.45);
+
+    color-scheme: light;
+}
+
+[data-theme='dark'] {
+    // Brand (lighter rose for dark backgrounds)
+    --brand-primary: #E8647E;
+    --brand-primary-hover: #F07C93;
+    --brand-primary-soft: #3A222A;
+    --brand-primary-rgb: 232, 100, 126;
+    --brand-secondary: #2F8F8B;
+    --brand-secondary-hover: #3FA6A1;
+    --brand-secondary-soft: #1D3535;
+
+    // Backgrounds
+    --bg: #121A1A;
+    --bg-elevated: #172121;
+    --bg-muted: #1D2A2A;
+
+    // Surfaces
+    --surface: #1B2626;
+    --surface-hover: #223030;
+
+    // Text
+    --text: #F7ECEE;
+    --text-muted: #BFCFCF;
+    --text-subtle: #84999A;
+
+    // Borders
+    --border: #2C3E3E;
+    --border-strong: #3B5252;
+
+    // Status (slightly brighter for dark bg contrast)
+    --success: #22C55E;
+    --success-soft: #052E16;
+    --warning: #F59E0B;
+    --warning-soft: #3B2600;
+    --danger: #EF4444;
+    --danger-soft: #3B0B0B;
+    --info: #3B82F6;
+    --info-soft: #0C1F44;
+
+    // Scrollbar
+    --scrollbar-thumb: #3F5656;
+    --scrollbar-track: #172121;
+
+    // Overlay
+    --overlay: rgba(0, 0, 0, 0.65);
+
+    color-scheme: dark;
+}
+
+// Smooth theme transitions (opt-in via .theme-transition on <html>)
+html.theme-transition,
+html.theme-transition * {
+    transition:
+        background-color var(--motion-duration-base) var(--motion-ease-out),
+        border-color var(--motion-duration-base) var(--motion-ease-out),
+        color var(--motion-duration-base) var(--motion-ease-out);
+}

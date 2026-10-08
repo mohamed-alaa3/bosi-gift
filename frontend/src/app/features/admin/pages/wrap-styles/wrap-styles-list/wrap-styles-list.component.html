@@ -1,0 +1,88 @@
+<div class="admin-wrap-styles">
+  <header class="admin-wrap-styles__header">
+    <div>
+      <h1 class="admin-wrap-styles__title">{{ 'admin.wrapStyles.title' | translate }}</h1>
+      <p class="admin-wrap-styles__subtitle">{{ 'admin.wrapStyles.subtitle' | translate }}</p>
+    </div>
+    <a routerLink="/admin/wrap-styles/new" class="admin-wrap-styles__add">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      {{ 'admin.wrapStyles.addStyle' | translate }}
+    </a>
+  </header>
+
+  @if (state() === 'loading') {
+    <div class="admin-wrap-styles__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.wrapStyles.errorTitle' | translate"
+      [message]="'admin.wrapStyles.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="box"
+      [title]="'admin.wrapStyles.emptyTitle' | translate"
+      [message]="'admin.wrapStyles.emptyText' | translate"
+      [actionLabel]="'admin.wrapStyles.addStyle' | translate"
+      [actionLink]="'/admin/wrap-styles/new'"
+    />
+  }
+
+  @if (state() === 'success') {
+    <ul class="admin-wrap-styles__grid">
+      @for (style of styles(); track style._id) {
+        <li class="wrap-card" [class.is-inactive]="!style.isActive">
+          <div class="wrap-card__media">
+            @if (style.imageUrl || style.image) {
+              <img
+                [src]="(style.imageUrl || style.image) | safeImage"
+                [alt]="style.name | localized"
+                class="wrap-card__image img-fallback"
+                loading="lazy"
+              />
+            } @else {
+              <div class="wrap-card__image img-fallback" aria-hidden="true"></div>
+            }
+          </div>
+
+          <div class="wrap-card__body">
+            <h3 class="wrap-card__name">{{ style.name | localized }}</h3>
+
+            @if (style.description.en || style.description.ar) {
+              <p class="wrap-card__desc">{{ style.description | localized }}</p>
+            }
+
+            <div class="wrap-card__meta">
+              <span class="wrap-card__price">+{{ style.price | price }}</span>
+              <span class="wrap-card__status" [class.is-active]="style.isActive">
+                {{ style.isActive ? ('admin.wrapStyles.active' | translate) : ('admin.wrapStyles.inactive' | translate) }}
+              </span>
+            </div>
+
+            <div class="wrap-card__actions">
+              <a [routerLink]="['/admin/wrap-styles', style._id, 'edit']" class="wrap-card__action">
+                {{ 'common.edit' | translate }}
+              </a>
+              <button
+                type="button"
+                class="wrap-card__action wrap-card__action--danger"
+                (click)="remove(style)"
+                [disabled]="deletingId() === style._id"
+              >
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

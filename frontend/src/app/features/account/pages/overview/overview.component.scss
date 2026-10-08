@@ -1,0 +1,63 @@
+.overview {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    &__header {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    &__title {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+    }
+
+    &__subtitle {
+        font-size: 0.9375rem;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    &__stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+
+        @media (min-width: 640px) {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    &__stat {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+    }
+
+    &__stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+        margin: 0;
+    }
+
+    &__stat-value {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        line-height: 1.1;
+    }
+}

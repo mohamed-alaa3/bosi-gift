@@ -1,0 +1,24 @@
+@switch (variant()) {
+  @case ('fullscreen') {
+    <div class="app-loader__overlay" role="status" [attr.aria-label]="label()">
+      <div class="app-loader__spinner-wrap">
+        <span class="app-loader__spinner"></span>
+      </div>
+      <p class="app-loader__label">{{ label() }}</p>
+    </div>
+  }
+
+  @case ('dots') {
+    <div [class]="classes()" role="status" [attr.aria-label]="label()">
+      <span class="app-loader__dot"></span>
+      <span class="app-loader__dot"></span>
+      <span class="app-loader__dot"></span>
+    </div>
+  }
+
+  @default {
+    <div [class]="classes()" role="status" [attr.aria-label]="label()">
+      <span class="app-loader__spinner"></span>
+    </div>
+  }
+}

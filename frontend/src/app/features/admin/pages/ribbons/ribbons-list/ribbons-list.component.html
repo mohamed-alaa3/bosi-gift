@@ -1,0 +1,83 @@
+<div class="admin-ribbons">
+  <header class="admin-ribbons__header">
+    <div>
+      <h1 class="admin-ribbons__title">{{ 'admin.ribbons.title' | translate }}</h1>
+      <p class="admin-ribbons__subtitle">{{ 'admin.ribbons.subtitle' | translate }}</p>
+    </div>
+    <a routerLink="/admin/ribbons/new" class="admin-ribbons__add">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      {{ 'admin.ribbons.addRibbon' | translate }}
+    </a>
+  </header>
+
+  @if (state() === 'loading') {
+    <div class="admin-ribbons__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.ribbons.errorTitle' | translate"
+      [message]="'admin.ribbons.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="box"
+      [title]="'admin.ribbons.emptyTitle' | translate"
+      [message]="'admin.ribbons.emptyText' | translate"
+      [actionLabel]="'admin.ribbons.addRibbon' | translate"
+      [actionLink]="'/admin/ribbons/new'"
+    />
+  }
+
+  @if (state() === 'success') {
+    <ul class="admin-ribbons__grid">
+      @for (ribbon of ribbons(); track ribbon._id) {
+        <li class="ribbon-card" [class.is-inactive]="!ribbon.isActive">
+          <div class="ribbon-card__media" [style.background-color]="ribbon.color">
+            @if (ribbon.imageUrl || ribbon.image) {
+              <img
+                [src]="(ribbon.imageUrl || ribbon.image) | safeImage"
+                [alt]="ribbon.name | localized"
+                class="ribbon-card__image img-fallback"
+                loading="lazy"
+              />
+            }
+            <span class="ribbon-card__swatch" [style.background-color]="ribbon.color"></span>
+          </div>
+
+          <div class="ribbon-card__body">
+            <h3 class="ribbon-card__name">{{ ribbon.name | localized }}</h3>
+
+            <div class="ribbon-card__meta">
+              <span class="ribbon-card__price">+{{ ribbon.price | price }}</span>
+              <span class="ribbon-card__status" [class.is-active]="ribbon.isActive">
+                {{ ribbon.isActive ? ('admin.ribbons.active' | translate) : ('admin.ribbons.inactive' | translate) }}
+              </span>
+            </div>
+
+            <div class="ribbon-card__actions">
+              <a [routerLink]="['/admin/ribbons', ribbon._id, 'edit']" class="ribbon-card__action">
+                {{ 'common.edit' | translate }}
+              </a>
+              <button
+                type="button"
+                class="ribbon-card__action ribbon-card__action--danger"
+                (click)="remove(ribbon)"
+                [disabled]="deletingId() === ribbon._id"
+              >
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

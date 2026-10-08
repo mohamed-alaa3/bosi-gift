@@ -1,0 +1,23 @@
+@if (isOpen()) {
+  <div class="app-modal__backdrop" (click)="onBackdropClick($event)" role="presentation">
+    <div #dialogEl [class]="classes()" role="dialog" aria-modal="true" [attr.aria-label]="ariaLabel()">
+      @if (showCloseButton()) {
+        <button type="button" class="app-modal__close" (click)="close()" aria-label="Close dialog">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      }
+
+      <header class="app-modal__header">
+        <ng-content select="[modal-header]" />
+      </header>
+
+      <div class="app-modal__body">
+        <ng-content />
+      </div>
+
+      <footer class="app-modal__footer">
+        <ng-content select="[modal-footer]" />
+      </footer>
+    </div>
+  </div>
+}

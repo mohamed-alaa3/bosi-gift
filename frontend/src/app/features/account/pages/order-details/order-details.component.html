@@ -1,0 +1,323 @@
+@if (state() === 'loading') {
+  <div class="order-details__loader">
+    <app-loader size="lg" variant="spinner" />
+  </div>
+}
+
+@if (state() === 'error') {
+  <app-empty-state
+    icon="box"
+    [title]="'account.orderNotFound' | translate"
+    [message]="'account.orderNotFoundText' | translate"
+    [actionLabel]="'account.orderHistory' | translate"
+    [actionLink]="'/account/orders'"
+  />
+}
+
+@if (state() === 'success' && order(); as o) {
+  <div class="order-details">
+    <app-breadcrumbs [items]="breadcrumbs" />
+
+    <!-- Header -->
+    <header class="order-details__header">
+      <div>
+        <p class="order-details__eyebrow">{{ 'account.orderNumber' | translate }}</p>
+        <h1 class="order-details__title">{{ o.orderNumber }}</h1>
+        <p class="order-details__date">
+          {{ o.createdAt | date:'medium' }}
+        </p>
+      </div>
+
+      <span class="order-details__status" [class]="statusClass(o.status)">
+        {{ 'orderStatus.' + o.status | translate }}
+      </span>
+    </header>
+
+    <!-- Tracking timeline -->
+    @if (o.status !== 'cancelled') {
+      <section class="order-details__timeline" aria-label="Order progress">
+        <ol class="order-details__steps">
+          @for (step of statusFlow; track step) {
+            <li
+              class="order-details__step"
+              [class.is-complete]="isStepComplete(o, step)"
+              [class.is-current]="isStepCurrent(o, step)"
+            >
+              <span class="order-details__step-dot" aria-hidden="true">
+                @if (isStepComplete(o, step) && !isStepCurrent(o, step)) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                }
+              </span>
+              <span class="order-details__step-label">
+                {{ 'orderStatus.' + step | translate }}
+              </span>
+            </li>
+          }
+        </ol>
+      </section>
+} @else {
+      <div class="order-details__cancelled" role="alert">
+        <span>{{ 'account.orderCancelled' | translate }}</span>
+        @if (o.rejectionReason) {
+          <span class="order-details__cancelled-reason">
+            — {{ o.rejectionReason }}
+          </span>
+        }
+      </div>
+    }
+
+    <!-- Content grid -->
+    <!-- Feedback: review products / overall experience (after delivery) -->
+    @if (o.status !== 'cancelled') {
+      <div class="order-details__reviews">
+        <app-order-reviews [orderId]="o._id" [orderStatus]="o.status" />
+      </div>
+    }
+
+    <div class="order-details__grid">
+      <!-- Left: items -->
+      <section class="order-details__section">
+        <h2 class="order-details__section-title">
+          {{ 'account.orderItems' | translate }} ({{ o.items.length }})
+        </h2>
+
+<ul class="order-details__items">
+  @for (item of o.items; track $index) {
+    <!-- ============================================ -->
+    <!-- GIFT BOX ITEM -->
+    <!-- ============================================ -->
+    @if (item.type === 'gift-box' && item.giftBox) {
+      <li class="order-details__item order-details__item--gift">
+        <div class="order-details__gift-header">
+          <div class="order-details__gift-icon" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/>
+              <path d="M3.3 7l8.7 5 8.7-5"/>
+              <path d="M12 22V12"/>
+            </svg>
+          </div>
+          <h3 class="order-details__gift-title">{{ 'checkout.customGiftBox' | translate }}</h3>
+          <span class="order-details__item-subtotal">{{ item.subtotal | price }}</span>
+        </div>
+
+        <!-- Box -->
+        @if (item.giftBox.box; as box) {
+          <div class="order-details__gift-block">
+            <p class="order-details__gift-label">{{ 'giftBuilder.box' | translate }}</p>
+            <div class="order-details__gift-row">
+              <div class="order-details__gift-thumb">
+                @if (box.imageUrl || box.image) {
+                  <img
+                    [src]="(box.imageUrl || box.image) | safeImage"
+                    [alt]="box.name | localized"
+                    class="img-fallback"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                }
+              </div>
+              <p class="order-details__gift-name">{{ box.name | localized }}</p>
+              <span class="order-details__gift-price">{{ box.price | price }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Items -->
+        @if (item.giftBox.items && item.giftBox.items.length > 0) {
+          <div class="order-details__gift-block">
+            <p class="order-details__gift-label">
+              {{ 'giftBuilder.items' | translate }} ({{ item.giftBox.items.length }})
+            </p>
+            @for (gi of item.giftBox.items; track gi.id; let last = $last) {
+              <div class="order-details__gift-row">
+                <div class="order-details__gift-thumb">
+                  @if (gi.imageUrl || gi.image) {
+                    <img
+                      [src]="(gi.imageUrl || gi.image) | safeImage"
+                      [alt]="gi.name | localized"
+                      class="img-fallback"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  }
+                </div>
+                <div class="order-details__gift-name-wrap">
+                  <p class="order-details__gift-name">{{ gi.name | localized }}</p>
+                  @if (gi.quantity > 1) {
+                    <p class="order-details__gift-qty">× {{ gi.quantity }}</p>
+                  }
+                </div>
+                <span class="order-details__gift-price">{{ (gi.price * gi.quantity) | price }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Wrap -->
+        @if (item.giftBox.wrap; as wrap) {
+          <div class="order-details__gift-block">
+            <p class="order-details__gift-label">{{ 'giftBuilder.wrap' | translate }}</p>
+            <div class="order-details__gift-row">
+              <div class="order-details__gift-thumb">
+                @if (wrap.imageUrl || wrap.image) {
+                  <img
+                    [src]="(wrap.imageUrl || wrap.image) | safeImage"
+                    [alt]="wrap.name | localized"
+                    class="img-fallback"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                }
+              </div>
+              <p class="order-details__gift-name">{{ wrap.name | localized }}</p>
+              <span class="order-details__gift-price">{{ wrap.price | price }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Ribbon -->
+        @if (item.giftBox.ribbon; as ribbon) {
+          <div class="order-details__gift-block">
+            <p class="order-details__gift-label">{{ 'giftBuilder.ribbon' | translate }}</p>
+            <div class="order-details__gift-row">
+              <span class="order-details__gift-color" [style.background-color]="ribbon.color"></span>
+              <p class="order-details__gift-name">{{ ribbon.name | localized }}</p>
+              <span class="order-details__gift-price">{{ ribbon.price | price }}</span>
+            </div>
+          </div>
+        }
+
+        <!-- Note -->
+        @if (item.giftBox.note) {
+          <div class="order-details__gift-block">
+            <p class="order-details__gift-label">{{ 'giftBuilder.note' | translate }}</p>
+            <p class="order-details__gift-note">{{ item.giftBox.note }}</p>
+          </div>
+        }
+      </li>
+    } @else {
+      <!-- ============================================ -->
+      <!-- REGULAR PRODUCT ITEM (existing) -->
+      <!-- ============================================ -->
+      <li class="order-details__item">
+        <div class="order-details__item-media">
+          @if (item.imageUrl || item.imageSnapshot) {
+            <img
+              [src]="(item.imageUrl || item.imageSnapshot) | safeImage"
+              [alt]="item.nameSnapshot | localized"
+              class="order-details__item-image img-fallback"
+              loading="lazy"
+              decoding="async"
+            />
+          } @else {
+            <div class="order-details__item-image img-fallback" aria-hidden="true"></div>
+          }
+        </div>
+
+        <div class="order-details__item-info">
+          <p class="order-details__item-name">{{ item.nameSnapshot | localized }}</p>
+          @if (item.selectedOptions.length > 0) {
+            <p class="order-details__item-options">
+              @for (opt of item.selectedOptions; track opt.name.en; let last = $last) {
+                <span>{{ opt.name | localized }}: {{ opt.value | localized }}</span>@if (!last) {<span>, </span>}
+              }
+            </p>
+          }
+          <p class="order-details__item-qty">
+            {{ 'checkout.qty' | translate }}: {{ item.quantity }} × {{ item.priceAtPurchase | price }}
+          </p>
+        </div>
+
+        <span class="order-details__item-subtotal">{{ item.subtotal | price }}</span>
+      </li>
+    }
+  }
+</ul>
+      </section>
+
+      <!-- Right: summary -->
+      <aside class="order-details__summary">
+        <!-- Totals -->
+        <div class="order-details__summary-card">
+          <h2 class="order-details__section-title">{{ 'cart.summary' | translate }}</h2>
+
+          <div class="order-details__summary-row">
+            <span>{{ 'cart.subtotal' | translate }}</span>
+            <span>{{ o.subtotal | price }}</span>
+          </div>
+          <div class="order-details__summary-row">
+            <span>{{ 'cart.shipping' | translate }}</span>
+            <span>{{ o.shippingFee | price }}</span>
+          </div>
+          @if (o.tax > 0) {
+            <div class="order-details__summary-row">
+              <span>{{ 'checkout.tax' | translate }}</span>
+              <span>{{ o.tax | price }}</span>
+            </div>
+          }
+          @if (o.discount > 0) {
+            <div class="order-details__summary-row is-discount">
+              <span>
+                {{ 'cart.discount' | translate }}
+                @if (o.couponCode) {
+                  ({{ o.couponCode }})
+                }
+              </span>
+              <span>-{{ o.discount | price }}</span>
+            </div>
+          }
+
+          <div class="order-details__summary-divider"></div>
+
+          <div class="order-details__summary-total">
+            <span>{{ 'cart.total' | translate }}</span>
+            <span>{{ o.total | price }}</span>
+          </div>
+        </div>
+
+        <!-- Shipping -->
+        <div class="order-details__summary-card">
+          <h2 class="order-details__section-title">{{ 'account.shippingAddress' | translate }}</h2>
+          <p class="order-details__address-name">{{ o.shippingAddress.fullName }}</p>
+          <p class="order-details__address-line">
+            {{ o.shippingAddress.street }}{{ o.shippingAddress.building ? ', ' + o.shippingAddress.building : '' }}{{ o.shippingAddress.apartment ? ', ' + o.shippingAddress.apartment : '' }}
+          </p>
+          <p class="order-details__address-line">
+            {{ o.shippingAddress.area ? o.shippingAddress.area + ', ' : '' }}{{ o.shippingAddress.city }}, {{ o.shippingAddress.country }}
+          </p>
+          @if (o.shippingAddress.postalCode) {
+            <p class="order-details__address-line">{{ 'checkout.postalCode' | translate }}: {{ o.shippingAddress.postalCode }}</p>
+          }
+          <p class="order-details__address-line">{{ o.shippingAddress.phone }}</p>
+        </div>
+
+        <!-- Payment -->
+        <div class="order-details__summary-card">
+          <h2 class="order-details__section-title">{{ 'checkout.paymentMethod' | translate }}</h2>
+          <p class="order-details__address-line">
+            {{ paymentMethodKey(o.paymentMethod) | translate }}
+          </p>
+          <p class="order-details__address-line">
+            {{ 'checkout.status' | translate }}:
+            <strong>{{ paymentStatusKey(o.paymentStatus) | translate }}</strong>
+          </p>
+        </div>
+
+        @if (o.notes) {
+          <div class="order-details__summary-card">
+            <h2 class="order-details__section-title">{{ 'checkout.reviewNotes' | translate }}</h2>
+            <p class="order-details__notes">{{ o.notes }}</p>
+          </div>
+        }
+      </aside>
+    </div>
+
+    <!-- Back -->
+    <div class="order-details__footer">
+      <a routerLink="/account/orders" class="order-details__back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        {{ 'account.backToOrders' | translate }}
+      </a>
+    </div>
+  </div>
+}

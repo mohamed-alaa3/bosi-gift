@@ -1,0 +1,348 @@
+<div class="admin-settings">
+  <header class="admin-settings__header">
+    <h1 class="admin-settings__title">{{ 'admin.settings.title' | translate }}</h1>
+    <p class="admin-settings__subtitle">{{ 'admin.settings.subtitle' | translate }}</p>
+  </header>
+
+  @if (state() === 'loading') {
+    <div class="admin-settings__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.settings.loadErrorTitle' | translate"
+      [message]="'admin.settings.loadErrorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'success') {
+    <!-- Tabs -->
+    <div
+      class="settings-tabs"
+      role="tablist"
+      [attr.aria-label]="'admin.settings.tabsLabel' | translate"
+    >
+      @for (tab of tabs; track tab.id) {
+        <button
+          type="button"
+          role="tab"
+          class="settings-tabs__tab"
+          [id]="'settings-tab-' + tab.id"
+          [class.is-active]="activeTab() === tab.id"
+          [attr.aria-selected]="activeTab() === tab.id"
+          [attr.aria-controls]="'settings-panel-' + tab.id"
+          [attr.tabindex]="activeTab() === tab.id ? 0 : -1"
+          (click)="selectTab(tab.id)"
+          (keydown)="onTabKeydown($event, tab.id)"
+        >
+          {{ tab.labelKey | translate }}
+          @if (dirtyTabs()[tab.id]) {
+            <span class="settings-tabs__dot" [attr.title]="'admin.settings.unsaved' | translate"></span>
+            <span class="settings-sr">{{ 'admin.settings.unsaved' | translate }}</span>
+          }
+        </button>
+      }
+    </div>
+
+    <!-- ============================ Shipping ============================ -->
+    @if (activeTab() === 'shipping') {
+      <section
+        id="settings-panel-shipping"
+        class="settings-panel"
+        role="tabpanel"
+        aria-labelledby="settings-tab-shipping"
+        tabindex="0"
+      >
+        <div class="settings-panel__head">
+          <h2 class="settings-panel__title">{{ 'admin.settings.shipping.title' | translate }}</h2>
+          <p class="settings-panel__text">{{ 'admin.settings.shipping.description' | translate }}</p>
+        </div>
+        <p class="settings-note">{{ 'admin.settings.shipping.note' | translate }}</p>
+
+        @for (group of regionGroups(); track group.region) {
+          <fieldset class="shipping-region">
+            <legend class="shipping-region__title">
+              {{ 'admin.settings.regions.' + group.region | translate }}
+            </legend>
+
+            <div class="shipping-region__bulk">
+              <label class="shipping-region__bulk-label" [attr.for]="'bulk-' + group.region">
+                {{ 'admin.settings.shipping.bulkLabel' | translate }}
+              </label>
+              <div class="shipping-region__bulk-controls">
+                <input
+                  type="number"
+                  inputmode="decimal"
+                  min="0"
+                  step="1"
+                  class="settings-input settings-input--short"
+                  [id]="'bulk-' + group.region"
+                  [value]="bulkValues()[group.region] ?? ''"
+                  (input)="onBulkInput(group.region, $event)"
+                  (keydown.enter)="applyBulk(group.region)"
+                />
+                <span class="settings-unit">{{ 'admin.settings.egp' | translate }}</span>
+                <button
+                  type="button"
+                  class="settings-btn settings-btn--ghost settings-btn--small"
+                  [disabled]="bulkAmount(group.region) === null"
+                  (click)="applyBulk(group.region)"
+                >
+                  {{ 'admin.settings.shipping.bulkApply' | translate }}
+                </button>
+              </div>
+            </div>
+
+            <ul class="shipping-list">
+              @for (row of group.rows; track row.key) {
+                <li
+                  class="shipping-row"
+                  [class.is-disabled]="!row.enabled"
+                  [class.is-changed]="rowChanged(row)"
+                >
+                  <span class="shipping-row__name">
+                    {{ row.name | localized }}
+                    @if (!row.enabled) {
+                      <span class="settings-badge settings-badge--off">{{ 'admin.settings.shipping.notShipping' | translate }}</span>
+                    } @else if (row.fee === 0) {
+                      <span class="settings-badge settings-badge--free">{{ 'admin.settings.shipping.free' | translate }}</span>
+                    }
+                  </span>
+
+                  <div class="shipping-row__fee">
+                    <input
+                      type="number"
+                      inputmode="decimal"
+                      min="0"
+                      step="1"
+                      class="settings-input settings-input--short"
+                      [class.is-invalid]="!isFeeValid(row.fee)"
+                      [attr.aria-invalid]="!isFeeValid(row.fee) ? 'true' : null"
+                      [attr.aria-label]="'admin.settings.shipping.feeFor' | translate: { name: (row.name | localized) }"
+                      [value]="row.fee ?? ''"
+                      (input)="onFeeInput(row.key, $event)"
+                    />
+                    <span class="settings-unit">{{ 'admin.settings.egp' | translate }}</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    role="switch"
+                    class="settings-switch"
+                    [class.is-on]="row.enabled"
+                    [attr.aria-checked]="row.enabled"
+                    [attr.aria-label]="'admin.settings.shipping.shipTo' | translate: { name: (row.name | localized) }"
+                    [title]="'admin.settings.shipping.shipTo' | translate: { name: (row.name | localized) }"
+                    (click)="toggleEnabled(row.key)"
+                  >
+                    <span class="settings-switch__thumb"></span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </fieldset>
+        }
+
+        <div class="settings-savebar">
+          @if (shippingInvalid()) {
+            <span class="settings-savebar__error" role="alert">{{ 'admin.settings.shipping.feeInvalid' | translate }}</span>
+          } @else if (shippingDirty()) {
+            <span class="settings-savebar__hint" role="status">{{ 'admin.settings.unsaved' | translate }}</span>
+          }
+          <button
+            type="button"
+            class="settings-btn settings-btn--ghost"
+            [disabled]="!shippingDirty() || savingTab() !== null"
+            (click)="resetShipping()"
+          >
+            {{ 'admin.settings.reset' | translate }}
+          </button>
+          <button
+            type="button"
+            class="settings-btn settings-btn--primary"
+            [disabled]="!shippingDirty() || shippingInvalid() || savingTab() !== null"
+            (click)="saveShipping()"
+          >
+            @if (savingTab() === 'shipping') {
+              <span class="settings-spinner" aria-hidden="true"></span>
+              {{ 'admin.settings.saving' | translate }}
+            } @else {
+              {{ 'admin.settings.save' | translate }}
+            }
+          </button>
+        </div>
+      </section>
+    }
+
+    <!-- ============================ Payment ============================ -->
+    @if (activeTab() === 'payment') {
+      <section
+        id="settings-panel-payment"
+        class="settings-panel"
+        role="tabpanel"
+        aria-labelledby="settings-tab-payment"
+        tabindex="0"
+      >
+        <div class="settings-panel__head">
+          <h2 class="settings-panel__title">{{ 'admin.settings.payment.title' | translate }}</h2>
+          <p class="settings-panel__text">{{ 'admin.settings.payment.description' | translate }}</p>
+        </div>
+
+        @if (noPaymentNumber()) {
+          <p class="settings-note settings-note--warning" role="status">
+            {{ 'admin.settings.payment.noMethods' | translate }}
+          </p>
+        }
+
+        <form class="settings-form" [formGroup]="paymentForm" (submit)="$event.preventDefault(); savePayment()" novalidate>
+          <div class="settings-grid">
+            <div class="settings-field">
+              <label class="settings-label" for="pay-deposit">{{ 'admin.settings.payment.depositAmount' | translate }} *</label>
+              <div class="settings-input-group">
+                <input id="pay-deposit" type="number" inputmode="decimal" min="1" step="1" class="settings-input" formControlName="depositAmount"
+                  [class.is-invalid]="errorKey(paymentForm.controls.depositAmount, 'deposit')" />
+                <span class="settings-unit">{{ 'admin.settings.egp' | translate }}</span>
+              </div>
+              @if (errorKey(paymentForm.controls.depositAmount, 'deposit'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              } @else {
+                <p class="settings-hint">{{ 'admin.settings.payment.depositHint' | translate }}</p>
+              }
+            </div>
+
+            <div class="settings-field">
+              <label class="settings-label" for="pay-discount">{{ 'admin.settings.payment.discountPercent' | translate }} *</label>
+              <div class="settings-input-group">
+                <input id="pay-discount" type="number" inputmode="decimal" min="0" max="100" step="0.5" class="settings-input" formControlName="fullPaymentDiscountPercent"
+                  [class.is-invalid]="errorKey(paymentForm.controls.fullPaymentDiscountPercent, 'percent')" />
+                <span class="settings-unit">%</span>
+              </div>
+              @if (errorKey(paymentForm.controls.fullPaymentDiscountPercent, 'percent'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              } @else {
+                <p class="settings-hint">{{ 'admin.settings.payment.discountHint' | translate }}</p>
+              }
+            </div>
+
+            <div class="settings-field">
+              <label class="settings-label" for="pay-vodafone">{{ 'admin.settings.payment.vodafone' | translate }}</label>
+              <input id="pay-vodafone" type="text" inputmode="tel" dir="ltr" autocomplete="off" class="settings-input settings-input--ltr" formControlName="vodafoneCashNumber"
+                placeholder="01XXXXXXXXX" [class.is-invalid]="errorKey(paymentForm.controls.vodafoneCashNumber, 'phone')" />
+              @if (errorKey(paymentForm.controls.vodafoneCashNumber, 'phone'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              } @else {
+                <p class="settings-hint">{{ 'admin.settings.payment.vodafoneHint' | translate }}</p>
+              }
+            </div>
+
+            <div class="settings-field">
+              <label class="settings-label" for="pay-instapay">{{ 'admin.settings.payment.instapay' | translate }}</label>
+              <input id="pay-instapay" type="text" dir="ltr" autocomplete="off" autocapitalize="none" spellcheck="false" class="settings-input settings-input--ltr" formControlName="instapayNumber"
+                placeholder="01XXXXXXXXX / name@instapay" [class.is-invalid]="errorKey(paymentForm.controls.instapayNumber, 'instapay')" />
+              @if (errorKey(paymentForm.controls.instapayNumber, 'instapay'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              } @else {
+                <p class="settings-hint">{{ 'admin.settings.payment.instapayHint' | translate }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="settings-savebar">
+            @if (paymentDirty()) {
+              <span class="settings-savebar__hint" role="status">{{ 'admin.settings.unsaved' | translate }}</span>
+            }
+            <button type="button" class="settings-btn settings-btn--ghost" [disabled]="!paymentDirty() || savingTab() !== null" (click)="resetPayment()">
+              {{ 'admin.settings.reset' | translate }}
+            </button>
+            <button type="submit" class="settings-btn settings-btn--primary" [disabled]="!paymentDirty() || paymentInvalid() || savingTab() !== null">
+              @if (savingTab() === 'payment') {
+                <span class="settings-spinner" aria-hidden="true"></span>
+                {{ 'admin.settings.saving' | translate }}
+              } @else {
+                {{ 'admin.settings.save' | translate }}
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+
+    <!-- ============================ Store info ============================ -->
+    @if (activeTab() === 'store') {
+      <section
+        id="settings-panel-store"
+        class="settings-panel"
+        role="tabpanel"
+        aria-labelledby="settings-tab-store"
+        tabindex="0"
+      >
+        <div class="settings-panel__head">
+          <h2 class="settings-panel__title">{{ 'admin.settings.store.title' | translate }}</h2>
+          <p class="settings-panel__text">{{ 'admin.settings.store.description' | translate }}</p>
+        </div>
+
+        <form class="settings-form" [formGroup]="storeForm" (submit)="$event.preventDefault(); saveStore()" novalidate>
+          <div class="settings-grid">
+            <div class="settings-field">
+              <label class="settings-label" for="store-name">{{ 'admin.settings.store.name' | translate }}</label>
+              <input id="store-name" type="text" class="settings-input" formControlName="name" maxlength="80"
+                [class.is-invalid]="errorKey(storeForm.controls.name, 'text')" />
+              @if (errorKey(storeForm.controls.name, 'text'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              }
+            </div>
+
+            <div class="settings-field">
+              <label class="settings-label" for="store-phone">{{ 'admin.settings.store.phone' | translate }}</label>
+              <input id="store-phone" type="tel" dir="ltr" class="settings-input settings-input--ltr" formControlName="phone" maxlength="30"
+                [class.is-invalid]="errorKey(storeForm.controls.phone, 'phone')" />
+              @if (errorKey(storeForm.controls.phone, 'phone'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              }
+            </div>
+
+            <div class="settings-field">
+              <label class="settings-label" for="store-email">{{ 'admin.settings.store.email' | translate }}</label>
+              <input id="store-email" type="email" dir="ltr" class="settings-input settings-input--ltr" formControlName="email" maxlength="120"
+                [class.is-invalid]="errorKey(storeForm.controls.email, 'text')" />
+              @if (errorKey(storeForm.controls.email, 'text'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              }
+            </div>
+
+            <div class="settings-field">
+              <label class="settings-label" for="store-address">{{ 'admin.settings.store.address' | translate }}</label>
+              <input id="store-address" type="text" class="settings-input" formControlName="address" maxlength="200"
+                [class.is-invalid]="errorKey(storeForm.controls.address, 'text')" />
+              @if (errorKey(storeForm.controls.address, 'text'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="settings-savebar">
+            @if (storeDirty()) {
+              <span class="settings-savebar__hint" role="status">{{ 'admin.settings.unsaved' | translate }}</span>
+            }
+            <button type="button" class="settings-btn settings-btn--ghost" [disabled]="!storeDirty() || savingTab() !== null" (click)="resetStore()">
+              {{ 'admin.settings.reset' | translate }}
+            </button>
+            <button type="submit" class="settings-btn settings-btn--primary" [disabled]="!storeDirty() || storeInvalid() || savingTab() !== null">
+              @if (savingTab() === 'store') {
+                <span class="settings-spinner" aria-hidden="true"></span>
+                {{ 'admin.settings.saving' | translate }}
+              } @else {
+                {{ 'admin.settings.save' | translate }}
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    }
+  }
+</div>

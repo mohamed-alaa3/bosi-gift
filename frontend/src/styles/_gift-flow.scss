@@ -1,0 +1,425 @@
+// ==========================================
+// Gift-shop polish: announcement offset + gift builder / cart / checkout
+// ==========================================
+// Global overrides with higher specificity than component styles, so the
+// existing component SCSS (and its size budgets) stay untouched.
+
+// ---------- Fixed header offset for the announcement strip ----------
+// Only the main layout defines --announce-h (36px); elsewhere it falls back to 0.
+// Once the page is scrolled (header gets .is-scrolled) the header sits at top:0.
+app-main-layout .app-header.app-header {
+    top: var(--announce-h, 0px);
+    transition:
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        box-shadow var(--transition-base),
+        transform 400ms var(--motion-ease-out),
+        top 250ms var(--motion-ease-out);
+}
+
+app-main-layout .app-header.app-header.is-scrolled,
+app-main-layout .app-header.app-header.is-hidden {
+    top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    app-main-layout .app-header.app-header {
+        transition: none;
+    }
+}
+
+// ==========================================
+// Shared tokens for this file
+// ==========================================
+:root {
+    --gift-sparkle-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1c1 6 3 8 9 9-6 1-8 3-9 9-1-6-3-8-9-9 6-1 8-3 9-9Z'/%3E%3C/svg%3E");
+}
+
+// Small heart after a page title (decorative)
+@mixin gift-title-heart {
+    &::after {
+        content: '';
+        display: inline-block;
+        width: 0.55em;
+        height: 0.55em;
+        margin-inline-start: 0.5rem;
+        background-color: var(--brand-pink);
+        -webkit-mask: var(--gift-heart-mask) center / contain no-repeat;
+        mask: var(--gift-heart-mask) center / contain no-repeat;
+    }
+}
+
+// Accent line on top of summary cards. Uses inset box-shadow so it never
+// changes layout or the cards' existing position: sticky.
+@mixin gift-summary-card {
+    border-radius: 28px;
+    box-shadow:
+        inset 0 4px 0 var(--brand-pink),
+        0 10px 28px rgba(var(--brand-primary-rgb), 0.1);
+}
+
+// Pill button feedback (hover lift / press)
+@mixin gift-press-button {
+    transition:
+        background-color var(--transition-base),
+        transform var(--transition-base),
+        box-shadow var(--transition-base);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(var(--brand-primary-rgb), 0.38);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(1px) scale(0.98);
+    }
+}
+
+// ==========================================
+// GIFT BUILDER (presentation only)
+// ==========================================
+section.gift-builder {
+    // Hero: floating heart + sparkle accents (desktop/tablet only)
+    .gift-builder__hero {
+        position: relative;
+
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            display: none;
+            pointer-events: none;
+            animation: gift-float 7s ease-in-out infinite;
+        }
+
+        &::before {
+            width: 44px;
+            height: 44px;
+            top: 4px;
+            inset-inline-start: 4%;
+            background-color: var(--brand-pink);
+            -webkit-mask: var(--gift-heart-mask) center / contain no-repeat;
+            mask: var(--gift-heart-mask) center / contain no-repeat;
+            --r: -10deg;
+        }
+
+        &::after {
+            width: 36px;
+            height: 36px;
+            top: 30px;
+            inset-inline-end: 6%;
+            background-color: var(--brand-coral);
+            -webkit-mask: var(--gift-sparkle-mask) center / contain no-repeat;
+            mask: var(--gift-sparkle-mask) center / contain no-repeat;
+            animation-delay: -3s;
+        }
+
+        @media (min-width: 768px) {
+            &::before,
+            &::after {
+                display: block;
+            }
+        }
+    }
+
+    .gift-builder__title {
+        @include gift-title-heart;
+    }
+
+    // Step dots
+    .gift-steps__dot {
+        box-shadow: 0 3px 8px rgba(var(--brand-primary-rgb), 0.12);
+    }
+
+    // Aside: live preview of the gift box
+    .gift-builder__aside .box-preview {
+        border-radius: 32px;
+        border: 2px dashed var(--brand-pink);
+        background: linear-gradient(160deg, var(--brand-primary-soft), var(--bg-elevated));
+        box-shadow: 0 12px 32px rgba(var(--brand-primary-rgb), 0.12);
+    }
+
+    .box-preview__progress-fill.box-preview__progress-fill {
+        background: linear-gradient(90deg, var(--brand-pink), var(--brand-primary));
+        border-radius: 999px;
+    }
+
+    .box-preview__checkout.box-preview__checkout {
+        border-radius: 999px;
+        box-shadow: 0 8px 20px rgba(var(--brand-primary-rgb), 0.3);
+        @include gift-press-button;
+    }
+
+    // Pickers: rounded gift cards that lift on hover
+    .box-picker__card.box-picker__card,
+    .item-picker__card.item-picker__card,
+    .wrap-picker__card.wrap-picker__card {
+        border-radius: 24px;
+        box-shadow: 0 4px 14px rgba(var(--brand-primary-rgb), 0.07);
+        overflow: hidden;
+        transition:
+            transform var(--transition-base),
+            box-shadow var(--transition-base),
+            border-color var(--transition-base);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 28px rgba(var(--brand-primary-rgb), 0.16);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(-1px) scale(0.99);
+        }
+
+        &.is-selected {
+            box-shadow: 0 0 0 3px var(--brand-primary-soft), 0 14px 28px rgba(var(--brand-primary-rgb), 0.18);
+        }
+    }
+
+    .box-picker__image,
+    .item-picker__image,
+    .wrap-picker__image {
+        transition: transform var(--motion-duration-slow) var(--motion-ease-out);
+    }
+
+    .box-picker__card:hover .box-picker__image,
+    .item-picker__card:hover .item-picker__image,
+    .wrap-picker__card:hover .wrap-picker__image {
+        transform: scale(1.06);
+    }
+
+    .item-picker__add.item-picker__add {
+        border-radius: 999px;
+        transition: transform var(--transition-fast), background-color var(--transition-fast);
+
+        &:active:not(:disabled) { transform: scale(0.94); }
+        &.is-added { animation: gift-heart-beat 450ms var(--motion-ease-spring); }
+    }
+
+    .review-panel__section.review-panel__section {
+        border-radius: 20px;
+    }
+}
+
+// ==========================================
+// CART
+// ==========================================
+.cart-page {
+    .cart-page__title {
+        @include gift-title-heart;
+    }
+
+    .cart-page__item.cart-page__item {
+        border-radius: 24px;
+        box-shadow: 0 4px 14px rgba(var(--brand-primary-rgb), 0.06);
+        transition: box-shadow var(--transition-base), transform var(--transition-base);
+
+        &:hover {
+            box-shadow: 0 12px 26px rgba(var(--brand-primary-rgb), 0.12);
+        }
+    }
+
+    .cart-page__item-media.cart-page__item-media {
+        border-radius: 18px;
+        overflow: hidden;
+        background: linear-gradient(160deg, var(--brand-primary-soft), var(--bg-muted));
+    }
+
+    .cart-page__summary.cart-page__summary {
+        @include gift-summary-card;
+        background: linear-gradient(180deg, var(--brand-primary-soft) 0%, var(--bg-muted) 40%);
+    }
+
+    .cart-page__checkout.cart-page__checkout {
+        box-shadow: 0 8px 20px rgba(var(--brand-primary-rgb), 0.32);
+        @include gift-press-button;
+    }
+
+    .cart-page__continue.cart-page__continue {
+        transition: transform var(--transition-base), color var(--transition-base);
+    }
+}
+
+// ==========================================
+// CHECKOUT
+// ==========================================
+.checkout {
+    .checkout__title {
+        @include gift-title-heart;
+    }
+
+    .checkout__section.checkout__section {
+        border-radius: 24px;
+        box-shadow: 0 4px 14px rgba(var(--brand-primary-rgb), 0.06);
+    }
+
+    .checkout__section-num.checkout__section-num {
+        background: linear-gradient(135deg, var(--brand-pink), var(--brand-primary));
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(var(--brand-primary-rgb), 0.28);
+    }
+
+    .checkout__address-card.checkout__address-card,
+    .checkout__shipping-card.checkout__shipping-card {
+        border-radius: 18px;
+        transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(var(--brand-primary-rgb), 0.12);
+        }
+    }
+
+    .checkout__summary.checkout__summary {
+        @include gift-summary-card;
+        background: linear-gradient(180deg, var(--brand-primary-soft) 0%, var(--bg-muted) 40%);
+    }
+
+    .checkout__summary-media.checkout__summary-media {
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .checkout__btn:not(.checkout__btn--whatsapp):not(:disabled) {
+        transition:
+            background-color var(--transition-base),
+            transform var(--transition-base),
+            box-shadow var(--transition-base);
+
+        &:hover { transform: translateY(-2px); }
+        &:active { transform: translateY(1px) scale(0.98); }
+    }
+}
+
+// ---------- Order confirmation: little celebration ----------
+.confirmation {
+    .confirmation__icon.confirmation__icon {
+        position: relative;
+        animation: gift-celebrate 700ms var(--motion-ease-spring) both;
+
+        // confetti burst around the check icon
+        &::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            margin: -4px 0 0 -4px;
+            border-radius: 50%;
+            background-color: var(--brand-pink);
+            box-shadow:
+                0 -52px 0 var(--brand-coral),
+                46px -26px 0 var(--brand-pink),
+                46px 26px 0 var(--brand-primary),
+                0 52px 0 var(--brand-coral),
+                -46px 26px 0 var(--brand-pink),
+                -46px -26px 0 var(--brand-primary);
+            animation: gift-confetti 1100ms var(--motion-ease-out) 200ms both;
+            pointer-events: none;
+        }
+    }
+
+    .confirmation__card.confirmation__card {
+        border-radius: 28px;
+        box-shadow:
+            inset 0 4px 0 var(--brand-pink),
+            0 12px 32px rgba(var(--brand-primary-rgb), 0.12);
+    }
+
+    .confirmation__btn--primary.confirmation__btn--primary {
+        transition: transform var(--transition-base), box-shadow var(--transition-base);
+
+        &:hover { transform: translateY(-2px); }
+        &:active { transform: translateY(1px) scale(0.98); }
+    }
+}
+
+@keyframes gift-celebrate {
+    0% { transform: scale(0.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes gift-confetti {
+    0% { transform: scale(0.2) rotate(0deg); opacity: 1; }
+    100% { transform: scale(1.3) rotate(60deg); opacity: 0; }
+}
+
+// ---------- Reduced motion ----------
+@media (prefers-reduced-motion: reduce) {
+    section.gift-builder .gift-builder__hero::before,
+    section.gift-builder .gift-builder__hero::after,
+    .confirmation .confirmation__icon,
+    .confirmation .confirmation__icon::after,
+    section.gift-builder .item-picker__add.is-added {
+        animation: none !important;
+    }
+
+    .confirmation .confirmation__icon::after {
+        display: none;
+    }
+
+    section.gift-builder .box-picker__card,
+    section.gift-builder .item-picker__card,
+    section.gift-builder .wrap-picker__card,
+    section.gift-builder .box-preview__checkout,
+    .cart-page .cart-page__item,
+    .cart-page .cart-page__checkout,
+    .checkout .checkout__address-card,
+    .checkout .checkout__shipping-card,
+    .checkout .checkout__btn,
+    .confirmation .confirmation__btn--primary {
+        transition: none !important;
+    }
+
+    section.gift-builder .box-picker__card:hover,
+    section.gift-builder .item-picker__card:hover,
+    section.gift-builder .wrap-picker__card:hover,
+    section.gift-builder .box-preview__checkout:hover,
+    .cart-page .cart-page__checkout:hover,
+    .checkout .checkout__address-card:hover,
+    .checkout .checkout__shipping-card:hover,
+    .checkout .checkout__btn:hover,
+    .confirmation .confirmation__btn--primary:hover {
+        transform: none !important;
+    }
+}
+
+// ---------- Hero eyebrow: legible on the dark photo ----------
+.hero__eyebrow.hero__eyebrow.hero__eyebrow {
+    color: var(--brand-pink);
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+// ---------- Hero: keep text clear of the slider arrows (desktop) ----------
+@media (min-width: 1024px) {
+    .hero__content.hero__content.hero__content {
+        padding-inline-start: max(5vw, 6rem);
+        padding-inline-end: max(5vw, 6rem);
+    }
+}
+
+// ---------- Checkout step indicator: fit all steps on mobile ----------
+// Show only the current step's label so the six dots never get cut off.
+@media (max-width: 640px) {
+    app-checkout-step-indicator .step-indicator {
+        gap: 0.25rem;
+    }
+
+    app-checkout-step-indicator .step-indicator__item:not(.is-active) .step-indicator__label {
+        display: none;
+    }
+
+    app-checkout-step-indicator .step-indicator__item {
+        gap: 0.35rem;
+    }
+
+    app-checkout-step-indicator .step-indicator__line {
+        width: 10px;
+        margin-inline: 0;
+    }
+}
+
+app-checkout-step-indicator .step-indicator__item.is-active .step-indicator__dot {
+    box-shadow: 0 0 0 4px var(--brand-primary-soft);
+}

@@ -1,0 +1,103 @@
+<section class="about">
+  <!-- Hero -->
+  <header class="about__hero" appRevealOnScroll>
+    <p class="about__eyebrow">{{ 'about.eyebrow' | translate }}</p>
+    <h1 class="about__title">{{ 'about.title' | translate }}</h1>
+    <p class="about__subtitle">{{ 'about.subtitle' | translate }}</p>
+  </header>
+
+  <!-- Story -->
+  <section class="about__story" appRevealOnScroll>
+    <div class="about__story-text">
+      <p class="about__eyebrow">{{ 'about.storyEyebrow' | translate }}</p>
+      <h2 class="about__heading">{{ 'about.storyTitle' | translate }}</h2>
+      <p class="about__paragraph">{{ 'about.storyP1' | translate }}</p>
+      <p class="about__paragraph">{{ 'about.storyP2' | translate }}</p>
+      <p class="about__paragraph">{{ 'about.storyP3' | translate }}</p>
+    </div>
+
+    <div class="about__story-image">
+      <img
+        src="assets/images/about/story.jpg"
+        alt="Bosi Gift"
+        loading="lazy"
+        decoding="async"
+        class="about__image img-fallback"
+      />
+    </div>
+  </section>
+
+  <!-- Values -->
+  <section class="about__values">
+    <header class="about__values-header" appRevealOnScroll>
+      <h2 class="about__heading about__heading--center">
+        {{ 'about.valuesTitle' | translate }}
+      </h2>
+      <p class="about__subtitle about__subtitle--center">
+        {{ 'about.valuesSubtitle' | translate }}
+      </p>
+    </header>
+
+    <div class="about__values-grid" appRevealOnScroll [stagger]="true" [delay]="60">
+      @for (value of values; track value.id) {
+        <article class="about-value">
+          <div class="about-value__icon" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="26"
+              height="26"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path [attr.d]="value.icon" />
+            </svg>
+          </div>
+          <h3 class="about-value__title">{{ value.titleKey | translate }}</h3>
+          <p class="about-value__text">{{ value.textKey | translate }}</p>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- Stats -->
+  <section class="about__stats" appRevealOnScroll [stagger]="true">
+    @for (stat of stats; track stat.id) {
+      <div class="about-stat">
+        <p class="about-stat__value">{{ stat.value }}</p>
+        <p class="about-stat__label">{{ stat.labelKey | translate }}</p>
+      </div>
+    }
+  </section>
+
+  <!-- CTA -->
+  <section class="about__cta" appRevealOnScroll variant="scale">
+    <h2 class="about__cta-title">{{ 'about.ctaTitle' | translate }}</h2>
+    <p class="about__cta-text">{{ 'about.ctaText' | translate }}</p>
+    <div class="about__cta-actions">
+      <a routerLink="/shop" class="about__btn about__btn--primary">
+        {{ 'about.ctaShop' | translate }}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </a>
+      <a routerLink="/contact" class="about__btn about__btn--ghost">
+        {{ 'about.ctaContact' | translate }}
+      </a>
+    </div>
+  </section>
+</section>

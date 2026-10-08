@@ -1,0 +1,443 @@
+<div class="product-form">
+  <!-- Header -->
+  <header class="product-form__header">
+    <a routerLink="/admin/products" class="product-form__back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      {{ 'admin.products.backToList' | translate }}
+    </a>
+    <h1 class="product-form__title">{{ getFormLabel() | translate }}</h1>
+  </header>
+
+  <!-- Loading (edit) -->
+  @if (loading()) {
+    <div class="product-form__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  <!-- Form -->
+  @if (!loading()) {
+    <!-- Step indicator -->
+    <ol class="product-form__steps">
+      @for (s of steps; track s.num; let last = $last) {
+        <li
+          class="product-form__step"
+          [class.is-active]="step() === s.num"
+          [class.is-complete]="s.num < step()"
+        >
+          <button
+            type="button"
+            class="product-form__step-btn"
+            (click)="goToStep($any(s.num))"
+            [attr.aria-current]="step() === s.num ? 'step' : null"
+          >
+            <span class="product-form__step-dot">
+              @if (s.num < step()) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              } @else {
+                {{ s.num }}
+              }
+            </span>
+            <span class="product-form__step-label">{{ s.labelKey | translate }}</span>
+          </button>
+
+          @if (!last) {
+            <span class="product-form__step-line" aria-hidden="true"></span>
+          }
+        </li>
+      }
+    </ol>
+
+    <!-- Step content -->
+    <div class="product-form__body">
+      <!-- ============================================================ -->
+      <!-- STEP 1: BASIC INFO -->
+      <!-- ============================================================ -->
+      @if (step() === 1) {
+  <form [formGroup]="basicForm" class="product-form__panel">
+  <h2 class="product-form__panel-title">{{ 'admin.products.basicInfo' | translate }}</h2>
+
+  <div class="product-form__grid">
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.nameEn' | translate }} *</label>
+      <input
+        type="text"
+        class="product-form__input"
+        formControlName="nameEn"
+        [class.is-invalid]="isFieldInvalid('basic', 'nameEn')"
+      />
+      @if (isFieldInvalid('basic', 'nameEn')) {
+        <p class="product-form__error">{{ 'admin.products.required' | translate }}</p>
+      }
+    </div>
+
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.nameAr' | translate }} *</label>
+      <input
+        type="text"
+        dir="rtl"
+        class="product-form__input"
+        formControlName="nameAr"
+        [class.is-invalid]="isFieldInvalid('basic', 'nameAr')"
+      />
+      @if (isFieldInvalid('basic', 'nameAr')) {
+        <p class="product-form__error">{{ 'admin.products.required' | translate }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="product-form__grid">
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.descEn' | translate }} *</label>
+      <textarea
+        rows="4"
+        class="product-form__input product-form__input--textarea"
+        formControlName="descriptionEn"
+        [class.is-invalid]="isFieldInvalid('basic', 'descriptionEn')"
+      ></textarea>
+      @if (isFieldInvalid('basic', 'descriptionEn')) {
+        <p class="product-form__error">{{ 'admin.products.required' | translate }}</p>
+      }
+    </div>
+
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.descAr' | translate }} *</label>
+      <textarea
+        rows="4"
+        dir="rtl"
+        class="product-form__input product-form__input--textarea"
+        formControlName="descriptionAr"
+        [class.is-invalid]="isFieldInvalid('basic', 'descriptionAr')"
+      ></textarea>
+      @if (isFieldInvalid('basic', 'descriptionAr')) {
+        <p class="product-form__error">{{ 'admin.products.required' | translate }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="product-form__grid">
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.shortDescEn' | translate }}</label>
+      <input type="text" class="product-form__input" formControlName="shortDescriptionEn" />
+    </div>
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.shortDescAr' | translate }}</label>
+      <input type="text" dir="rtl" class="product-form__input" formControlName="shortDescriptionAr" />
+    </div>
+  </div>
+</form>
+      }
+
+      <!-- ============================================================ -->
+      <!-- STEP 2: PRICING & STOCK -->
+      <!-- ============================================================ -->
+      @if (step() === 2) {
+<form [formGroup]="pricingForm" class="product-form__panel">
+  <h2 class="product-form__panel-title">{{ 'admin.products.pricingStock' | translate }}</h2>
+
+  <div class="product-form__grid">
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.price' | translate }} *</label>
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        class="product-form__input"
+        formControlName="price"
+        [class.is-invalid]="isFieldInvalid('pricing', 'price')"
+      />
+    </div>
+
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.discountPrice' | translate }}</label>
+      <input
+        type="number"
+        min="0"
+        step="0.01"
+        class="product-form__input"
+        formControlName="discountPrice"
+        [class.is-invalid]="hasDiscountError()"
+      />
+      @if (hasDiscountError()) {
+        <p class="product-form__error">{{ 'admin.products.discountError' | translate }}</p>
+      }
+    </div>
+  </div>
+
+  <div class="product-form__grid">
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.category' | translate }} *</label>
+      <select
+        class="product-form__input product-form__select"
+        formControlName="category"
+        [class.is-invalid]="isFieldInvalid('pricing', 'category')"
+      >
+        <option value="">{{ 'admin.products.selectCategory' | translate }}</option>
+        @for (cat of categories(); track cat._id) {
+          <option [value]="cat._id">{{ cat.name | localized }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.stock' | translate }} *</label>
+      <input
+        type="number"
+        min="0"
+        step="1"
+        class="product-form__input"
+        formControlName="stock"
+        [class.is-invalid]="isFieldInvalid('pricing', 'stock')"
+      />
+    </div>
+  </div>
+
+  <div class="product-form__field">
+    <label class="product-form__label">{{ 'admin.products.sku' | translate }}</label>
+    <input type="text" class="product-form__input" formControlName="sku" />
+  </div>
+
+  <div class="product-form__checks">
+    <label class="product-form__check">
+      <input type="checkbox" formControlName="isFeatured" />
+      <span>{{ 'admin.products.featured' | translate }}</span>
+    </label>
+
+    <label class="product-form__check">
+      <input type="checkbox" formControlName="isActive" />
+      <span>{{ 'admin.products.active' | translate }}</span>
+    </label>
+
+    <label class="product-form__check">
+      <input type="checkbox" formControlName="isReadyGiftBox" />
+      <span>{{ 'admin.products.readyBox' | translate }}</span>
+    </label>
+
+    <label class="product-form__check">
+      <input type="checkbox" formControlName="isDailyOffer" />
+      <span>{{ 'admin.products.dailyOffer' | translate }}</span>
+    </label>
+  </div>
+
+  @if (pricingForm.controls.isDailyOffer.value) {
+    <p class="product-form__hint">{{ 'admin.products.dailyOfferHint' | translate }}</p>
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.offerStart' | translate }}</label>
+      <input type="datetime-local" class="product-form__input" formControlName="dailyOfferStart" />
+    </div>
+    <div class="product-form__field">
+      <label class="product-form__label">{{ 'admin.products.offerEnd' | translate }}</label>
+      <input type="datetime-local" class="product-form__input" formControlName="dailyOfferEnd" />
+    </div>
+  }
+
+  <div class="product-form__field">
+    <span class="product-form__label">{{ 'admin.products.recipients' | translate }}</span>
+    <div class="product-form__checks">
+      @for (r of recipientOptions; track r.slug) {
+        <label class="product-form__check">
+          <input type="checkbox" [checked]="recipients().includes(r.slug)" (change)="toggleRecipient(r.slug)" />
+          <span>{{ r.emoji }} {{ r.labelKey | translate }}</span>
+        </label>
+      }
+    </div>
+  </div>
+
+  <div class="product-form__field">
+    <span class="product-form__label">{{ 'admin.products.occasions' | translate }}</span>
+    <div class="product-form__checks">
+      @for (o of occasionOptions; track o.slug) {
+        <label class="product-form__check">
+          <input type="checkbox" [checked]="occasions().includes(o.slug)" (change)="toggleOccasion(o.slug)" />
+          <span>{{ o.emoji }} {{ o.labelKey | translate }}</span>
+        </label>
+      }
+    </div>
+  </div>
+</form>
+      }
+
+      <!-- ============================================================ -->
+      <!-- STEP 3: IMAGES -->
+      <!-- ============================================================ -->
+      @if (step() === 3) {
+        <div class="product-form__panel">
+          <h2 class="product-form__panel-title">{{ 'admin.products.images' | translate }}</h2>
+          <p class="product-form__hint">{{ 'admin.products.imagesHint' | translate }}</p>
+
+          <!-- Upload -->
+          <label class="product-form__upload">
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              hidden
+              (change)="onFilesSelected($event)"
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+            {{ 'admin.products.uploadImages' | translate }}
+          </label>
+
+          <!-- Image list -->
+          @if (images().length > 0) {
+            <ul class="product-form__images">
+              @for (img of images(); track $index; let i = $index) {
+                <li class="product-form__image-item" [class.is-primary]="i === 0">
+                  <div class="product-form__image-media">
+                    <img [src]="img.isExisting ? (img.url | safeImage) : img.url" alt="" class="product-form__image" />
+                    @if (i === 0) {
+                      <span class="product-form__image-badge">{{ 'admin.products.primary' | translate }}</span>
+                    }
+                  </div>
+
+                  <div class="product-form__image-actions">
+                    @if (i > 0) {
+                      <button type="button" (click)="makePrimary(i)" [attr.aria-label]="'admin.products.makePrimary' | translate">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19V5M5 12l7-7 7 7"/></svg>
+                      </button>
+                    }
+                    <button type="button" class="is-danger" (click)="removeImage(i)" [attr.aria-label]="'common.delete' | translate">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+                </li>
+              }
+            </ul>
+          }
+
+          @if (images().length === 0) {
+            <p class="product-form__empty-images">{{ 'admin.products.noImages' | translate }}</p>
+          }
+        </div>
+      }
+
+      <!-- ============================================================ -->
+      <!-- STEP 4: OPTIONS -->
+      <!-- ============================================================ -->
+      @if (step() === 4) {
+        <div class="product-form__panel">
+          <h2 class="product-form__panel-title">{{ 'admin.products.options' | translate }}</h2>
+          <p class="product-form__hint">{{ 'admin.products.optionsHint' | translate }}</p>
+
+          @if (options().length === 0) {
+            <p class="product-form__empty-images">{{ 'admin.products.noOptions' | translate }}</p>
+          }
+
+          <ul class="product-form__options">
+            @for (opt of options(); track $index; let oi = $index) {
+              <li class="product-form__option">
+                <div class="product-form__option-head">
+                  <p class="product-form__option-num">
+                    {{ 'admin.products.option' | translate }} {{ oi + 1 }}
+                  </p>
+                  <button type="button" class="product-form__option-remove" (click)="removeOption(oi)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    {{ 'common.delete' | translate }}
+                  </button>
+                </div>
+
+                <div class="product-form__grid">
+                  <div class="product-form__field">
+                    <label class="product-form__label">{{ 'admin.products.optionNameEn' | translate }}</label>
+                    <input
+                      type="text"
+                      class="product-form__input"
+                      [value]="opt.name.en"
+                      (input)="updateOptionName(oi, 'en', $any($event.target).value)"
+                      placeholder="e.g. Scent"
+                    />
+                  </div>
+                  <div class="product-form__field">
+                    <label class="product-form__label">{{ 'admin.products.optionNameAr' | translate }}</label>
+                    <input
+                      type="text"
+                      dir="rtl"
+                      class="product-form__input"
+                      [value]="opt.name.ar"
+                      (input)="updateOptionName(oi, 'ar', $any($event.target).value)"
+                      placeholder="مثال: الرائحة"
+                    />
+                  </div>
+                </div>
+
+                <p class="product-form__subheading">{{ 'admin.products.optionValues' | translate }}</p>
+
+                <ul class="product-form__option-values">
+                  @for (v of opt.values; track $index; let vi = $index) {
+                    <li class="product-form__option-value">
+                      <input
+                        type="text"
+                        class="product-form__input"
+                        [value]="v.name.en"
+                        (input)="updateOptionValue(oi, vi, 'en', $any($event.target).value)"
+                        placeholder="English value"
+                      />
+                      <input
+                        type="text"
+                        dir="rtl"
+                        class="product-form__input"
+                        [value]="v.name.ar"
+                        (input)="updateOptionValue(oi, vi, 'ar', $any($event.target).value)"
+                        placeholder="القيمة بالعربية"
+                      />
+                      <button type="button" class="product-form__value-remove" (click)="removeOptionValue(oi, vi)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                      </button>
+                    </li>
+                  }
+                </ul>
+
+                <button type="button" class="product-form__add-value" (click)="addOptionValue(oi)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                  {{ 'admin.products.addValue' | translate }}
+                </button>
+              </li>
+            }
+          </ul>
+
+          <button type="button" class="product-form__add-option" (click)="addOption()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            {{ 'admin.products.addOption' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Wizard footer -->
+    <div class="product-form__actions">
+      <button
+        type="button"
+        class="product-form__btn product-form__btn--ghost"
+        (click)="back()"
+        [disabled]="step() === 1"
+      >
+        {{ 'common.back' | translate }}
+      </button>
+
+      @if (step() < 4) {
+        <button
+          type="button"
+          class="product-form__btn product-form__btn--primary"
+          (click)="next()"
+          [disabled]="!canProceed()"
+        >
+          {{ 'common.next' | translate }}
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      } @else {
+        <button
+          type="button"
+          class="product-form__btn product-form__btn--primary"
+          (click)="submit()"
+          [disabled]="submitting() || images().length === 0"
+        >
+          @if (submitting()) {
+            <span class="product-form__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ (mode() === 'create' ? 'admin.products.createProduct' : 'admin.products.saveChanges') | translate }}
+          }
+        </button>
+      }
+    </div>
+  }
+</div>

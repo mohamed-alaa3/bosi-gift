@@ -1,0 +1,111 @@
+.app-modal {
+    &__backdrop {
+        position: fixed;
+        inset: 0;
+        background-color: var(--overlay);
+        backdrop-filter: blur(2px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+        z-index: var(--z-modal);
+        animation: fade-in var(--motion-duration-fast) var(--motion-ease-out) both;
+    }
+
+    position: relative;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    width: 100%;
+    max-height: calc(100vh - 2rem);
+    display: flex;
+    flex-direction: column;
+    animation: modal-in var(--motion-duration-base) var(--motion-ease-out) both;
+    overflow: hidden;
+
+    // Sizes
+    &--sm {
+        max-width: 400px;
+    }
+
+    &--md {
+        max-width: 560px;
+    }
+
+    &--lg {
+        max-width: 800px;
+    }
+
+    // Inner elements
+    &__close {
+        position: absolute;
+        top: 0.75rem;
+        inset-inline-end: 0.75rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-full);
+        background: transparent;
+        color: var(--text-muted);
+        border: none;
+        cursor: pointer;
+        z-index: 1;
+        transition: background-color var(--transition-fast), color var(--transition-fast);
+
+        &:hover {
+            background-color: var(--surface-hover);
+            color: var(--text);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+    }
+
+    &__header {
+        padding: 1.25rem 1.5rem 0.75rem;
+        border-bottom: 1px solid var(--border);
+
+        &:empty {
+            display: none;
+        }
+    }
+
+    &__body {
+        padding: 1.5rem;
+        overflow-y: auto;
+        flex: 1;
+
+        &:first-child {
+            padding-top: 2rem; // make room for the close button
+        }
+    }
+
+    &__footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+
+        &:empty {
+            display: none;
+        }
+    }
+}
+
+@keyframes modal-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

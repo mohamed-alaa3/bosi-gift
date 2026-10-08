@@ -1,0 +1,168 @@
+<div class="admin-categories">
+  <header class="admin-categories__header">
+    <div>
+      <h1 class="admin-categories__title">{{ 'admin.categories.title' | translate }}</h1>
+      <p class="admin-categories__subtitle">{{ 'admin.categories.subtitle' | translate }}</p>
+    </div>
+    <button type="button" class="admin-categories__add" (click)="openAdd()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      {{ 'admin.categories.addCategory' | translate }}
+    </button>
+  </header>
+
+  @if (state() === 'loading') {
+    <div class="admin-categories__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.categories.errorTitle' | translate"
+      [message]="'admin.categories.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="box"
+      [title]="'admin.categories.emptyTitle' | translate"
+      [message]="'admin.categories.emptyText' | translate"
+      [actionLabel]="'admin.categories.addCategory' | translate"
+      (actionClick)="openAdd()"
+    />
+  }
+
+  @if (state() === 'success') {
+    <div class="admin-categories__grid">
+      @for (cat of categories(); track cat._id) {
+        <article class="category-card" [class.is-inactive]="!cat.isActive">
+          <div class="category-card__media">
+            @if (cat.imageUrl || cat.image) {
+              <img [src]="(cat.imageUrl || cat.image) | safeImage" [alt]="cat.name | localized" class="category-card__image img-fallback" loading="lazy" />
+            } @else {
+              <div class="category-card__image img-fallback" aria-hidden="true"></div>
+            }
+          </div>
+
+          <div class="category-card__body">
+            <div class="category-card__head">
+              <h3 class="category-card__title">{{ cat.name | localized }}</h3>
+              <span class="category-card__status" [class.is-active]="cat.isActive">
+                {{ cat.isActive ? ('admin.categories.active' | translate) : ('admin.categories.inactive' | translate) }}
+              </span>
+            </div>
+
+            @if (cat.description.en || cat.description.ar) {
+              <p class="category-card__desc">{{ cat.description | localized }}</p>
+            }
+
+            <div class="category-card__actions">
+              <button type="button" class="category-card__action" (click)="openEdit(cat)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                {{ 'common.edit' | translate }}
+              </button>
+              <button
+                type="button"
+                class="category-card__action category-card__action--danger"
+                (click)="remove(cat)"
+                [disabled]="deletingId() === cat._id"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                {{ 'common.delete' | translate }}
+              </button>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+
+  <!-- Modal -->
+  @if (modalMode() !== 'closed') {
+    <div class="category-modal__backdrop" (click)="closeModal()" role="presentation"></div>
+
+    <div class="category-modal" role="dialog" aria-modal="true">
+      <div class="category-modal__header">
+        <h2 class="category-modal__title">
+          {{ (modalMode() === 'add' ? 'admin.categories.addCategory' : 'admin.categories.editCategory') | translate }}
+        </h2>
+        <button type="button" class="category-modal__close" (click)="closeModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form class="category-modal__form" [formGroup]="form" (ngSubmit)="submitForm()">
+        <!-- Image -->
+        <div class="category-modal__image-section">
+          <div class="category-modal__preview">
+            @if (previewUrl()) {
+              <img [src]="previewUrl()" alt="" class="category-modal__preview-img" />
+            } @else {
+              <div class="category-modal__preview-placeholder" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+              </div>
+            }
+          </div>
+
+          <label class="category-modal__upload">
+            <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onImageSelected($event)" hidden />
+            {{ 'admin.categories.chooseImage' | translate }}
+          </label>
+        </div>
+
+        <!-- Names -->
+        <div class="category-modal__grid">
+          <div class="category-modal__field">
+            <label class="category-modal__label">{{ 'admin.categories.nameEn' | translate }}</label>
+            <input type="text" class="category-modal__input" formControlName="nameEn" [class.is-invalid]="form.controls.nameEn.touched && form.controls.nameEn.invalid" />
+          </div>
+          <div class="category-modal__field">
+            <label class="category-modal__label">{{ 'admin.categories.nameAr' | translate }}</label>
+            <input type="text" class="category-modal__input" formControlName="nameAr" [class.is-invalid]="form.controls.nameAr.touched && form.controls.nameAr.invalid" dir="rtl" />
+          </div>
+        </div>
+
+        <!-- Descriptions -->
+        <div class="category-modal__grid">
+          <div class="category-modal__field">
+            <label class="category-modal__label">{{ 'admin.categories.descEn' | translate }}</label>
+            <textarea class="category-modal__input" formControlName="descriptionEn" rows="2"></textarea>
+          </div>
+          <div class="category-modal__field">
+            <label class="category-modal__label">{{ 'admin.categories.descAr' | translate }}</label>
+            <textarea class="category-modal__input" formControlName="descriptionAr" rows="2" dir="rtl"></textarea>
+          </div>
+        </div>
+
+        <!-- Sort + Active -->
+        <div class="category-modal__grid">
+          <div class="category-modal__field">
+            <label class="category-modal__label">{{ 'admin.categories.sortOrder' | translate }}</label>
+            <input type="number" class="category-modal__input" formControlName="sortOrder" />
+          </div>
+          <label class="category-modal__checkbox">
+            <input type="checkbox" formControlName="isActive" />
+            <span>{{ 'admin.categories.isActive' | translate }}</span>
+          </label>
+        </div>
+
+        <div class="category-modal__actions">
+          <button type="button" class="category-modal__btn category-modal__btn--ghost" (click)="closeModal()" [disabled]="submitting()">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button type="submit" class="category-modal__btn category-modal__btn--primary" [disabled]="submitting()">
+            @if (submitting()) {
+              <span class="category-modal__spinner" aria-hidden="true"></span>
+            } @else {
+              {{ 'common.save' | translate }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

@@ -1,0 +1,39 @@
+<div class="recent-orders">
+  <header class="recent-orders__header">
+    <h2 class="recent-orders__title">{{ 'admin.dashboard.recentOrders' | translate }}</h2>
+    <a routerLink="/admin/orders" class="recent-orders__view-all">
+      {{ 'admin.dashboard.viewAll' | translate }}
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </a>
+  </header>
+
+  @if (loading()) {
+    <div class="recent-orders__list">
+      @for (i of [1,2,3,4,5]; track i) {
+        <div class="recent-orders__skeleton"></div>
+      }
+    </div>
+  } @else if (orders().length === 0) {
+    <p class="recent-orders__empty">{{ 'admin.dashboard.noOrders' | translate }}</p>
+  } @else {
+    <ul class="recent-orders__list">
+      @for (order of orders(); track order._id) {
+        <li>
+          <a [routerLink]="['/admin/orders', order._id]" class="recent-orders__item">
+            <div class="recent-orders__info">
+              <p class="recent-orders__number">{{ order.orderNumber }}</p>
+              <p class="recent-orders__date">{{ order.createdAt | date:'short' }}</p>
+            </div>
+
+            <div class="recent-orders__right">
+              <span class="recent-orders__total">{{ order.total | price }}</span>
+              <span class="recent-orders__status" [class]="'is-' + order.status">
+                {{ 'orderStatus.' + order.status | translate }}
+              </span>
+            </div>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</div>

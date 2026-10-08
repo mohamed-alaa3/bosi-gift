@@ -1,0 +1,103 @@
+<div class="account-orders">
+  <header class="account-orders__header" appRevealOnScroll>
+    <div>
+      <h1 class="account-orders__title">{{ 'account.orderHistory' | translate }}</h1>
+      <p class="account-orders__subtitle">{{ 'account.orderHistoryDesc' | translate }}</p>
+    </div>
+  </header>
+
+  <!-- Filter pills -->
+  <div class="account-orders__filters" role="tablist" appRevealOnScroll variant="fade">
+    @for (opt of statusOptions; track opt.value) {
+      <button
+        type="button"
+        class="account-orders__filter"
+        [class.is-active]="statusFilter() === opt.value"
+        (click)="setFilter(opt.value)"
+        role="tab"
+        [attr.aria-selected]="statusFilter() === opt.value"
+      >
+        {{ opt.labelKey | translate }}
+      </button>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (state() === 'loading') {
+    <div class="account-orders__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  <!-- Error -->
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'account.ordersErrorTitle' | translate"
+      [message]="'account.ordersErrorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  <!-- Empty -->
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="box"
+      [title]="statusFilter() === 'all' ? ('account.noOrdersTitle' | translate) : ('account.noOrdersForFilter' | translate)"
+      [message]="'account.noOrdersText' | translate"
+      [actionLabel]="'shop.browseAll' | translate"
+      [actionLink]="'/shop'"
+    />
+  }
+
+  <!-- Success -->
+  @if (state() === 'success') {
+    <ul class="account-orders__list" appRevealOnScroll [stagger]="true">
+      @for (order of orders(); track order._id) {
+        <li class="account-orders__item">
+          <a [routerLink]="['/account/orders', order._id]" class="account-orders__link">
+            <!-- Left: order info -->
+            <div class="account-orders__info">
+              <p class="account-orders__number">{{ order.orderNumber }}</p>
+              <p class="account-orders__date">{{ order.createdAt | date:'mediumDate' }}</p>
+            </div>
+
+            <!-- Middle: items summary -->
+            <div class="account-orders__items">
+              @if (order.items && order.items.length > 0) {
+                <p class="account-orders__items-text">
+                  {{ order.items[0].nameSnapshot ? (order.items[0].nameSnapshot.en || order.items[0].nameSnapshot.ar) : '' }}
+                  @if (order.items.length > 1) {
+                    <span class="account-orders__items-more">+{{ order.items.length - 1 }}</span>
+                  }
+                </p>
+              }
+            </div>
+
+            <!-- Right: total + status -->
+            <div class="account-orders__meta">
+              <span class="account-orders__total">{{ order.total | price }}</span>
+              <span class="account-orders__status" [class]="statusClass(order.status)">
+                {{ 'orderStatus.' + order.status | translate }}
+              </span>
+            </div>
+
+            <!-- Arrow -->
+            <svg class="account-orders__arrow" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </li>
+      }
+    </ul>
+
+    @if (totalPages() > 1) {
+      <div class="account-orders__pagination">
+        <app-pagination
+          [page]="page()"
+          [totalPages]="totalPages()"
+          (pageChange)="onPageChange($event)"
+        />
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,28 @@
+<section class="occasion" aria-labelledby="occasion-title">
+  <div class="gift-wave gift-wave--flip occasion__wave occasion__wave--top" aria-hidden="true"></div>
+
+  <div class="occasion__inner">
+    <header class="occasion__header" appRevealOnScroll>
+      <p class="occasion__eyebrow">{{ 'home.occasions.eyebrow' | translate }}</p>
+      <h2 id="occasion-title" class="occasion__title">{{ 'home.occasions.title' | translate }}</h2>
+      <div class="gift-ornament" aria-hidden="true"><app-gift-icon name="heart" /></div>
+      <p class="occasion__subtitle">{{ 'home.occasions.subtitle' | translate }}</p>
+    </header>
+
+    <div class="occasion__grid" appRevealOnScroll [stagger]="true" [delay]="60">
+      @for (o of occasions; track o.slug; let i = $index) {
+        <a
+          class="occasion__card"
+          routerLink="/shop"
+          [queryParams]="{ occasion: o.slug }"
+          [attr.data-tone]="i % 3"
+        >
+          <span class="occasion__icon" aria-hidden="true">{{ o.emoji }}</span>
+          <span class="occasion__label">{{ o.labelKey | translate }}</span>
+        </a>
+      }
+    </div>
+  </div>
+
+  <div class="gift-wave occasion__wave occasion__wave--bottom" aria-hidden="true"></div>
+</section>

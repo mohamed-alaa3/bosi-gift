@@ -1,0 +1,29 @@
+<div class="app-empty" role="status">
+  <div class="app-empty__icon" aria-hidden="true">
+    @if (giftIcon(); as gift) {
+      <app-gift-icon class="app-empty__gift" [name]="gift" />
+    } @else {
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+        <path [attr.d]="iconPath()" />
+      </svg>
+    }
+  </div>
+
+  <h3 class="app-empty__title">{{ title() }}</h3>
+
+  @if (message()) {
+    <p class="app-empty__message">{{ message() }}</p>
+  }
+
+  @if (actionLabel()) {
+    @if (actionLink(); as link) {
+      <a [routerLink]="link" class="app-empty__action">{{ actionLabel() }}</a>
+    } @else {
+      <button type="button" class="app-empty__action" (click)="onAction()">
+        {{ actionLabel() }}
+      </button>
+    }
+  }
+
+  <ng-content />
+</div>

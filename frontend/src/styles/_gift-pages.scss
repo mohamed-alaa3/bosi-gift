@@ -1,0 +1,143 @@
+// ==========================================
+// Gift-shop polish for footer + product details
+// ==========================================
+// Global overrides with slightly higher specificity than the component styles,
+// so the existing component SCSS (and its budgets) stay untouched.
+
+:root {
+    --gift-wave-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 40' preserveAspectRatio='none'%3E%3Cpath d='M0 40V22C150 2 300 2 450 20S750 40 900 22S1100 6 1200 20V40Z'/%3E%3C/svg%3E");
+    --gift-heart-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21C4 14.5 2 10.5 2 7.5a5 5 0 0 1 10-1 5 5 0 0 1 10 1c0 3-2 7-10 13.5Z'/%3E%3C/svg%3E");
+}
+
+// ---------- Footer: soft wave edge ----------
+footer.app-footer {
+    position: relative;
+    margin-top: clamp(18px, 3vw, 34px);
+    border-top: 0;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        bottom: calc(100% - 1px);
+        height: clamp(18px, 3vw, 34px);
+        background-color: inherit; // follows light/dark footer colour
+        pointer-events: none;
+        -webkit-mask: var(--gift-wave-mask) center / 100% 100% no-repeat;
+        mask: var(--gift-wave-mask) center / 100% 100% no-repeat;
+    }
+}
+
+// ---------- Product details ----------
+section.product-details {
+    // Image frame
+    .product-details__main-image {
+        border-radius: 32px;
+        border: 1px solid var(--border);
+        background: linear-gradient(160deg, var(--brand-primary-soft), var(--bg-muted));
+        box-shadow: 0 10px 28px rgba(var(--brand-primary-rgb), 0.12);
+        overflow: hidden;
+    }
+
+    .product-details__thumb {
+        border-radius: 16px;
+        transition: transform var(--transition-base), box-shadow var(--transition-base);
+
+        &:hover { transform: translateY(-3px); }
+        &.is-active { box-shadow: 0 0 0 2px var(--brand-primary), 0 6px 14px rgba(var(--brand-primary-rgb), 0.2); }
+    }
+
+    // Sale badge -> gift tag
+    .product-details__badge--sale {
+        border-radius: 0 999px 999px 0;
+        inset-inline-start: 0;
+        box-shadow: 0 4px 10px rgba(var(--brand-primary-rgb), 0.25);
+    }
+
+    // Pill CTAs
+    .product-details__cta--primary {
+        border-radius: 999px;
+        box-shadow: 0 8px 20px rgba(var(--brand-primary-rgb), 0.3);
+        transition: transform var(--transition-base), box-shadow var(--transition-base), background-color var(--transition-base);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(var(--brand-primary-rgb), 0.4);
+        }
+
+        &:active:not(:disabled) { transform: translateY(1px) scale(0.98); }
+        &:disabled { box-shadow: none; }
+    }
+
+    .product-details__cta--wishlist {
+        border-radius: 50%;
+        transition: transform var(--transition-base), color var(--transition-base), background-color var(--transition-base);
+
+        &:hover { transform: scale(1.08); }
+        &:active { transform: scale(0.92); }
+        &.is-active { color: var(--brand-primary); animation: gift-heart-beat 500ms var(--motion-ease-spring); }
+    }
+
+    // Trust list -> soft chips
+    .product-details__trust li {
+        padding: 0.4rem 0.85rem;
+        border-radius: 999px;
+        background-color: var(--brand-primary-soft);
+    }
+
+    // Gift note
+    .product-details__gift-note {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 0.75rem 0 0;
+        padding: 0.85rem 1rem;
+        border: 2px dashed var(--brand-pink);
+        border-radius: 18px;
+        background-color: var(--brand-primary-soft);
+        color: var(--brand-primary);
+        font-size: 0.9375rem;
+        font-weight: 600;
+
+        svg { flex-shrink: 0; }
+    }
+
+    // Review cards + section titles
+    .product-details__review {
+        border-radius: 20px;
+        box-shadow: 0 4px 14px rgba(var(--brand-primary-rgb), 0.06);
+    }
+
+    .product-details__section-title::after {
+        content: '';
+        display: inline-block;
+        width: 0.7em;
+        height: 0.7em;
+        margin-inline-start: 0.5rem;
+        background-color: var(--brand-pink);
+        -webkit-mask: var(--gift-heart-mask) center / contain no-repeat;
+        mask: var(--gift-heart-mask) center / contain no-repeat;
+    }
+}
+
+@keyframes gift-heart-beat {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.3); }
+    70% { transform: scale(0.94); }
+    100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    section.product-details .product-details__thumb,
+    section.product-details .product-details__cta--primary,
+    section.product-details .product-details__cta--wishlist {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    section.product-details .product-details__thumb:hover,
+    section.product-details .product-details__cta--primary:hover,
+    section.product-details .product-details__cta--wishlist:hover {
+        transform: none !important;
+    }
+}

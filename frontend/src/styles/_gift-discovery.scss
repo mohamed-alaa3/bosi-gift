@@ -1,0 +1,312 @@
+// ==========================================
+// Gift discovery — shared styles for the homepage gift journey
+// (recipient / occasion / showcases / finder / reviews / wall) and
+// the Shop's active-filter chips. Uses ONLY the approved brand tokens.
+// ==========================================
+
+:root {
+    // Display face for gift-shop headings & key CTAs (Arabic + Latin).
+    --font-display: 'Lalezar', 'Poppins', 'Cairo', system-ui, sans-serif;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+// ---------- Section scaffold ----------
+.gd {
+    max-width: 1440px;
+    margin-inline: auto;
+    padding: 3.25rem 1rem;
+
+    @media (min-width: 1024px) {
+        padding: 4.5rem 2rem;
+    }
+}
+
+.gd-band {
+    // full-bleed tinted band; the inner .gd keeps the content width
+    position: relative;
+    overflow: hidden; // keeps decorative blobs from causing horizontal scroll
+}
+
+.gd-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.gd-eyebrow {
+    margin: 0;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brand-primary);
+}
+
+h2.gd-title,
+[dir='rtl'] h2.gd-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 400; // single-weight display face: never faux-bold it
+    font-size: clamp(1.9rem, 3.2vw + 0.8rem, 2.9rem);
+    line-height: 1.2;
+    letter-spacing: 0;
+    text-wrap: balance;
+    color: var(--text);
+}
+
+.gd-sub {
+    margin: 0;
+    max-width: 52ch;
+    color: var(--text-muted);
+    font-size: 1rem;
+}
+
+// ---------- Buttons ----------
+.gd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.6rem;
+    border: 0;
+    border-radius: var(--radius-full);
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    color: #fff;
+    background: var(--brand-primary);
+    box-shadow: 0 8px 20px rgba(var(--brand-primary-rgb), 0.28);
+    transition: transform var(--transition-fast), background-color var(--transition-fast);
+
+    &:hover { background: var(--brand-primary-hover); transform: translateY(-2px); }
+    &:focus-visible { outline: 3px solid var(--brand-secondary); outline-offset: 3px; }
+    &[disabled] { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    &--ghost {
+        color: var(--brand-primary);
+        background: transparent;
+        box-shadow: inset 0 0 0 2px var(--brand-primary);
+
+        &:hover { color: #fff; }
+    }
+}
+
+// ---------- Choice chips (finder) ----------
+.gd-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1.05rem;
+    border: 2px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast);
+
+    &:hover { border-color: var(--brand-primary); transform: translateY(-1px); }
+    &:focus-visible { outline: 3px solid var(--brand-secondary); outline-offset: 2px; }
+    &.is-active { border-color: var(--brand-primary); background: var(--brand-primary-soft); color: var(--brand-primary); }
+}
+
+// ---------- Horizontal rail (scroll-snap) ----------
+.gd-rail {
+    display: flex;
+    gap: 1rem;
+    margin-inline: -1rem;
+    padding: 1.25rem 1rem 1.5rem; // top room for the gift-tag pill
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+
+    &:focus-visible { outline: 3px solid var(--brand-secondary); outline-offset: -3px; border-radius: var(--radius-lg); }
+
+    > * { flex: 0 0 min(72vw, 270px); scroll-snap-align: start; }
+
+    @media (min-width: 640px) { > * { flex-basis: 260px; } }
+
+    @media (min-width: 1024px) {
+        margin-inline: 0;
+        padding-inline: 0.25rem;
+        gap: 1.5rem;
+        > * { flex-basis: calc((100% - 4.5rem) / 4); }
+    }
+}
+
+.gd-rail-nav {
+    display: none;
+    gap: 0.5rem;
+
+    @media (min-width: 1024px) { display: inline-flex; }
+
+    button {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border: 2px solid var(--border-strong);
+        border-radius: 50%;
+        background: var(--surface);
+        color: var(--brand-primary);
+        cursor: pointer;
+        transition: background-color var(--transition-fast), color var(--transition-fast);
+
+        &:hover { background: var(--brand-primary); color: #fff; border-color: var(--brand-primary); }
+        &:focus-visible { outline: 3px solid var(--brand-secondary); outline-offset: 2px; }
+    }
+
+    [dir='rtl'] & svg { transform: scaleX(-1); }
+}
+
+// ---------- Showcase item decorations ----------
+.gs-item {
+    position: relative;
+    min-width: 0;
+
+    app-product-card { display: block; height: 100%; }
+}
+
+// Gift-tag pill straddling the top edge of the card (never collides with the
+// card's own discount / wishlist badges).
+.gs-tag {
+    position: absolute;
+    top: -0.8rem;
+    left: 50%;
+    z-index: 3;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.95rem;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    line-height: 1.15;
+    white-space: nowrap;
+    color: #fff;
+    background: linear-gradient(90deg, var(--brand-primary), var(--brand-coral));
+    border-radius: var(--radius-full);
+    box-shadow: 0 4px 10px rgba(var(--brand-primary-rgb), 0.3);
+    pointer-events: none;
+}
+
+// Subtle image zoom on hover for showcase cards (existing card keeps its own hover)
+.gs-item .app-product-card__image { transition: transform 0.5s ease; }
+.gs-item:hover .app-product-card__image { transform: scale(1.06); }
+
+// ---------- Polaroids / scrapbook ----------
+.gd-polaroid {
+    --rot: 0deg;
+    position: relative;
+    padding: 0.7rem 0.7rem 1.1rem;
+    border-radius: 4px;
+    background: #fff;
+    color: #1f3f40;
+    box-shadow: 0 10px 24px rgba(31, 63, 64, 0.14), 0 2px 4px rgba(31, 63, 64, 0.08);
+    transform: rotate(var(--rot));
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    &:hover,
+    &:focus-within {
+        z-index: 2;
+        transform: rotate(0deg) translateY(-6px) scale(1.02);
+        box-shadow: 0 18px 34px rgba(31, 63, 64, 0.2);
+    }
+}
+
+.gd-tape {
+    position: absolute;
+    top: -11px;
+    inset-inline-start: 50%;
+    width: 86px;
+    height: 24px;
+    margin-inline-start: -43px;
+    background: rgba(247, 161, 176, 0.7);
+    box-shadow: 0 1px 3px rgba(31, 63, 64, 0.15);
+    transform: rotate(var(--tape-rot, -3deg));
+    pointer-events: none;
+
+    &--teal { background: rgba(120, 190, 186, 0.7); }
+    &--sun { background: rgba(255, 214, 140, 0.75); }
+}
+
+// Verified-purchase label (only rendered when the backend verified the order)
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.1rem 0.55rem;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--brand-secondary);
+    background: var(--brand-secondary-soft);
+    white-space: nowrap;
+}
+
+// ---------- Shop: active-filter chips ----------
+.shop-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: -1rem 0 1.25rem;
+
+    &__chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.8rem;
+        border: 1.5px solid var(--brand-primary);
+        border-radius: var(--radius-full);
+        background: var(--brand-primary-soft);
+        color: var(--brand-primary);
+        font-size: 0.875rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background-color var(--transition-fast), color var(--transition-fast);
+
+        &:hover { background: var(--brand-primary); color: #fff; }
+        &:focus-visible { outline: 3px solid var(--brand-secondary); outline-offset: 2px; }
+    }
+
+    &__x { font-size: 1.1rem; line-height: 1; }
+}
+
+// ---------- Motion safety ----------
+@media (prefers-reduced-motion: reduce) {
+    .gd-polaroid,
+    .gd-btn,
+    .gd-chip,
+    .gs-item .app-product-card__image {
+        transition: none;
+    }
+
+    .gd-polaroid:hover,
+    .gd-polaroid:focus-within,
+    .gs-item:hover .app-product-card__image,
+    .gd-btn:hover,
+    .gd-chip:hover {
+        transform: none;
+    }
+
+    .gd-rail { scroll-behavior: auto; }
+}

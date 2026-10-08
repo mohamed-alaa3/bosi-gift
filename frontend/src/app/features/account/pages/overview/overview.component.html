@@ -1,0 +1,21 @@
+<div class="overview">
+  <header class="overview__header" appRevealOnScroll>
+    <h1 class="overview__title">
+      {{ 'account.welcomeBack' | translate }}, {{ firstName() }}!
+    </h1>
+    <p class="overview__subtitle">
+      {{ 'account.manageOrders' | translate }}
+    </p>
+  </header>
+
+  <div class="overview__stats" appRevealOnScroll [stagger]="true">
+    <div class="overview__stat">
+      <p class="overview__stat-label">Cart Items</p>
+      <p class="overview__stat-value">{{ cartCount() }}</p>
+    </div>
+    <div class="overview__stat">
+      <p class="overview__stat-label">Wishlist Items</p>
+      <p class="overview__stat-value">{{ wishlistCount() }}</p>
+    </div>
+  </div>
+</div>

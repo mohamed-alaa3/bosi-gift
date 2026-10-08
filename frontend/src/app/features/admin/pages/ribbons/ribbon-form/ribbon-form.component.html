@@ -1,0 +1,92 @@
+<div class="ribbon-form">
+  <header class="ribbon-form__header">
+    <a routerLink="/admin/ribbons" class="ribbon-form__back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      {{ 'admin.ribbons.backToList' | translate }}
+    </a>
+    <h1 class="ribbon-form__title">{{ getFormLabel() | translate }}</h1>
+  </header>
+
+  @if (loading()) {
+    <div class="ribbon-form__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (!loading()) {
+    <form [formGroup]="form" class="ribbon-form__panel" (ngSubmit)="submit()">
+      <!-- Image (optional) -->
+      <div class="ribbon-form__image-section">
+        <div class="ribbon-form__preview" [style.background-color]="form.controls.color.value">
+          @if (previewUrl()) {
+            <img [src]="previewUrl()" alt="" class="ribbon-form__preview-img" />
+          } @else {
+            <div class="ribbon-form__preview-placeholder" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            </div>
+          }
+        </div>
+
+        <label class="ribbon-form__upload">
+          <input type="file" accept="image/jpeg,image/png,image/webp" hidden (change)="onImageSelected($event)" />
+          {{ 'admin.ribbons.chooseImage' | translate }}
+        </label>
+      </div>
+
+      <!-- Names -->
+      <div class="ribbon-form__grid">
+        <div class="ribbon-form__field">
+          <label class="ribbon-form__label">{{ 'admin.ribbons.nameEn' | translate }} *</label>
+          <input type="text" class="ribbon-form__input" formControlName="nameEn" />
+        </div>
+        <div class="ribbon-form__field">
+          <label class="ribbon-form__label">{{ 'admin.ribbons.nameAr' | translate }} *</label>
+          <input type="text" dir="rtl" class="ribbon-form__input" formControlName="nameAr" />
+        </div>
+      </div>
+
+      <!-- Color + Price -->
+      <div class="ribbon-form__grid">
+        <div class="ribbon-form__field">
+          <label class="ribbon-form__label">{{ 'admin.ribbons.color' | translate }} *</label>
+          <div class="ribbon-form__color-row">
+            <input type="color" class="ribbon-form__color-input" formControlName="color" />
+            <input type="text" class="ribbon-form__input" formControlName="color" />
+          </div>
+          <p class="ribbon-form__hint">{{ 'admin.ribbons.colorHint' | translate }}</p>
+        </div>
+        <div class="ribbon-form__field">
+          <label class="ribbon-form__label">{{ 'admin.ribbons.price' | translate }} *</label>
+          <input type="number" min="0" step="0.01" class="ribbon-form__input" formControlName="price" />
+          <p class="ribbon-form__hint">{{ 'admin.ribbons.priceHint' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Sort + Active -->
+      <div class="ribbon-form__grid">
+        <div class="ribbon-form__field">
+          <label class="ribbon-form__label">{{ 'admin.ribbons.sortOrder' | translate }}</label>
+          <input type="number" class="ribbon-form__input" formControlName="sortOrder" />
+        </div>
+        <label class="ribbon-form__check">
+          <input type="checkbox" formControlName="isActive" />
+          <span>{{ 'admin.ribbons.isActive' | translate }}</span>
+        </label>
+      </div>
+
+      <!-- Actions -->
+      <div class="ribbon-form__actions">
+        <a routerLink="/admin/ribbons" class="ribbon-form__btn ribbon-form__btn--ghost">
+          {{ 'common.cancel' | translate }}
+        </a>
+        <button type="submit" class="ribbon-form__btn ribbon-form__btn--primary" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="ribbon-form__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'common.save' | translate }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</div>

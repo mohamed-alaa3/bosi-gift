@@ -1,0 +1,151 @@
+<section class="shop">
+  <!-- Page header -->
+  <header class="shop__header" appRevealOnScroll>
+    <p class="shop__eyebrow">{{ 'shop.eyebrow' | translate }}</p>
+    <h1 class="shop__title">{{ 'shop.title' | translate }}</h1>
+    <p class="shop__subtitle">{{ 'shop.subtitle' | translate }}</p>
+  </header>
+
+  <!-- Active gift filters (removable chips) -->
+  @if (activeChips().length > 0) {
+    <div class="shop-chips" role="group" [attr.aria-label]="'shop.activeFilters' | translate">
+      @for (c of activeChips(); track c.key) {
+        <button type="button" class="shop-chips__chip" (click)="removeChip(c.key)">
+          <span aria-hidden="true">{{ c.emoji }}</span>
+          <span>{{ c.labelKey | translate }}</span>
+          <span class="shop-chips__x" aria-hidden="true">×</span>
+          <span class="sr-only">{{ 'shop.removeFilter' | translate }}</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Toolbar -->
+  <div class="shop__toolbar" appRevealOnScroll variant="fade">
+    <div class="shop__toolbar-start">
+      <button
+        type="button"
+        class="shop__filters-toggle"
+        (click)="toggleFiltersDrawer()"
+        [attr.aria-expanded]="filtersOpen()"
+        aria-controls="shop-filters"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/></svg>
+        <span>{{ 'shop.filters' | translate }}</span>
+        @if (activeFiltersCount() > 0) {
+          <span class="shop__filters-badge">{{ activeFiltersCount() }}</span>
+        }
+      </button>
+
+      @if (state() === 'success') {
+        <p class="shop__count">
+          {{ 'shop.showing' | translate }} {{ products().length }}
+          {{ 'shop.of' | translate }} {{ total() }}
+        </p>
+      }
+    </div>
+
+    <div class="shop__toolbar-end">
+      <app-sort-dropdown
+        [value]="sort()"
+        (valueChange)="onSortChange($event)"
+      />
+    </div>
+  </div>
+
+  <!-- Layout: sidebar + grid -->
+  <div class="shop__layout">
+    <!-- Desktop sidebar -->
+<aside class="shop__sidebar" aria-label="Product filters">
+  <app-filter-sidebar
+    [categories]="categories()"
+    [value]="filters()"
+    (valueChange)="onFiltersChange($event)"
+  />
+</aside>
+
+    <!-- Mobile filters drawer -->
+    <div
+      class="shop__drawer-backdrop"
+      [class.is-open]="filtersOpen()"
+      (click)="closeFiltersDrawer()"
+      role="presentation"
+    ></div>
+
+    <aside
+      id="shop-filters"
+      class="shop__drawer"
+      [class.is-open]="filtersOpen()"
+      aria-label="Product filters"
+    >
+      <div class="shop__drawer-header">
+        <h2 class="shop__drawer-title">{{ 'shop.filters' | translate }}</h2>
+        <button
+          type="button"
+          class="shop__drawer-close"
+          (click)="closeFiltersDrawer()"
+          aria-label="Close filters"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="shop__drawer-body">
+        <app-filter-sidebar
+          [categories]="categories()"
+          [value]="filters()"
+          (valueChange)="onFiltersChange($event)"
+        />
+      </div>
+    </aside>
+
+    <!-- Products area -->
+    <div class="shop__main">
+      <!-- Loading -->
+      @if (state() === 'loading') {
+        <div class="shop__grid" aria-busy="true" aria-live="polite">
+          @for (i of skeletons; track i) {
+            <app-skeleton-card variant="card" />
+          }
+        </div>
+      }
+
+      <!-- Success -->
+      @if (state() === 'success') {
+        <app-product-grid [products]="products()" />
+
+        @if (totalPages() > 1) {
+          <div class="shop__pagination">
+            <app-pagination
+              [page]="currentPage()"
+              [totalPages]="totalPages()"
+              (pageChange)="onPageChange($event)"
+            />
+          </div>
+        }
+      }
+
+      <!-- Empty -->
+      @if (state() === 'empty') {
+<app-empty-state
+  icon="search"
+  [title]="'shop.emptyTitle' | translate"
+  [message]="'shop.emptyText' | translate"
+  [actionLabel]="(hasFilters() ? 'shop.clearFilters' : 'shop.browseAll') | translate"
+  (actionClick)="hasFilters() ? clearFilters() : onPageChange(1)"
+/>
+      }
+
+      <!-- Error -->
+      @if (state() === 'error') {
+        <app-empty-state
+          icon="inbox"
+          titleKey="shop.errorTitle"
+          messageKey="shop.errorText"
+          actionLabelKey="common.retry"
+          (actionClick)="loadProducts()"
+        />
+      }
+    </div>
+  </div>
+</section>

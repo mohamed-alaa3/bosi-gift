@@ -1,0 +1,97 @@
+:host { display: block; }
+
+.gs { position: relative; }
+
+.gs__top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+
+  .gd-head { align-items: flex-start; text-align: start; margin-bottom: 0; }
+}
+
+.gs__more { display: flex; justify-content: center; margin-top: 0.5rem; }
+
+// Floating decor (clipped by .gd-band, so no horizontal overflow)
+.gs__deco {
+  position: absolute;
+  font-size: 2.6rem;
+  opacity: 0.18;
+  pointer-events: none;
+  user-select: none;
+  &--a { top: 1.5rem; inset-inline-end: 2rem; transform: rotate(14deg); }
+  &--b { bottom: 3rem; inset-inline-start: 1.5rem; font-size: 2rem; }
+}
+
+// ---------- Trending: clean, white ----------
+.gs--trending { background: var(--bg); }
+
+// ---------- Daily offers: warm coral/pink, dashed "coupon" frame ----------
+.gs--offers {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(247, 161, 176, 0.35), transparent 42%),
+    linear-gradient(135deg, var(--brand-primary-soft), color-mix(in srgb, var(--brand-coral) 22%, var(--surface)));
+
+  .gd-eyebrow { color: var(--brand-outline); }
+  .gs-tag { background: linear-gradient(90deg, var(--brand-outline), var(--brand-primary)); }
+}
+
+// ---------- Ready-made boxes: pastel panels + ribbon ----------
+.gs--boxes {
+  background:
+    radial-gradient(circle at 88% 12%, rgba(31, 106, 106, 0.1), transparent 40%),
+    linear-gradient(180deg, var(--brand-secondary-soft), var(--bg));
+
+  .gs-item {
+    padding: 1.1rem 0.6rem 0.6rem;
+    border-radius: 28px;
+    border-end-start-radius: 10px;
+    background: color-mix(in srgb, var(--brand-pink) 18%, var(--surface));
+    box-shadow: var(--shadow-md);
+
+    // vertical ribbon + bow stripe behind the card
+    &::before {
+      content: '';
+      position: absolute;
+      inset-block: 0;
+      left: 50%;
+      width: 22px;
+      margin-left: -11px;
+      background: linear-gradient(90deg, rgba(var(--brand-primary-rgb), 0.16), rgba(var(--brand-primary-rgb), 0.28), rgba(var(--brand-primary-rgb), 0.16));
+      border-radius: 28px;
+      pointer-events: none;
+    }
+
+    app-product-card { position: relative; }
+  }
+
+  .gs-tag { background: linear-gradient(90deg, var(--brand-secondary), #2c8c8a); box-shadow: 0 4px 10px rgba(31, 106, 106, 0.3); }
+}
+
+// ---------- Featured: larger cards, soft pastel stage ----------
+.gs--featured {
+  background: linear-gradient(180deg, var(--bg-elevated), var(--bg-muted));
+}
+
+.gs-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  padding-top: 0.5rem;
+
+  @media (min-width: 600px) { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+  @media (min-width: 1024px) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; }
+
+  .gs-item {
+    transition: transform var(--transition-base);
+    &:hover { transform: translateY(-6px); }
+  }
+}
+
+.gs--featured .gs__top { justify-content: center; .gd-head { align-items: center; text-align: center; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .gs-grid .gs-item { transition: none; &:hover { transform: none; } }
+}

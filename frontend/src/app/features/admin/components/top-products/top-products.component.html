@@ -1,0 +1,47 @@
+<div class="top-products">
+  <header class="top-products__header">
+    <h2 class="top-products__title">{{ 'admin.dashboard.topProducts' | translate }}</h2>
+    <p class="top-products__subtitle">{{ 'admin.dashboard.topProductsDesc' | translate }}</p>
+  </header>
+
+  @if (loading()) {
+    <div class="top-products__list">
+      @for (i of [1,2,3]; track i) {
+        <div class="top-products__skeleton"></div>
+      }
+    </div>
+  } @else if (products().length === 0) {
+    <p class="top-products__empty">{{ 'admin.dashboard.noProducts' | translate }}</p>
+  } @else {
+    <ul class="top-products__list">
+      @for (p of products(); track p.productId; let i = $index) {
+        <li class="top-products__item">
+          <span class="top-products__rank" [class.is-top]="i < 3">{{ i + 1 }}</span>
+
+          <div class="top-products__media">
+            @if (p.image) {
+              <img [src]="p.image | safeImage" [alt]="p.name | localized" class="top-products__image img-fallback" loading="lazy" />
+            } @else {
+              <div class="top-products__image img-fallback" aria-hidden="true"></div>
+            }
+          </div>
+
+          <div class="top-products__info">
+            <p class="top-products__name">{{ p.name | localized }}</p>
+            <div class="top-products__bar">
+              <div
+                class="top-products__bar-fill"
+                [style.width.%]="(p.totalRevenue / (maxRevenue() || 1)) * 100"
+              ></div>
+            </div>
+            <p class="top-products__sales">
+              {{ p.totalSold }} {{ 'admin.dashboard.sales' | translate }}
+            </p>
+          </div>
+
+          <span class="top-products__revenue">{{ p.totalRevenue | price }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

@@ -1,0 +1,192 @@
+<header
+  class="app-header"
+  [class.is-scrolled]="isScrolled()"
+  [class.is-hidden]="isHidden()"
+  role="banner"
+>
+  <div class="app-header__inner">
+    <!-- Mobile menu button -->
+    <button
+      type="button"
+      class="app-header__icon-btn app-header__hamburger"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      aria-label="Toggle menu"
+    >
+      @if (mobileMenuOpen()) {
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      }
+    </button>
+
+    <!-- Logo -->
+    <a routerLink="/" class="app-header__logo" aria-label="Bosi Gift — Home">
+      <img
+        src="assets/logo/bosi-logo.png"
+        alt=""
+        class="app-header__logo-icon"
+        width="64"
+        height="64"
+        aria-hidden="true"
+      />
+    </a>
+
+    <!-- Desktop navigation -->
+    @if (showNav()) {
+      <nav class="app-header__nav" aria-label="Main navigation">
+        <ul class="app-header__nav-list">
+          @for (item of navItems; track item.path) {
+            <li>
+              <a
+                [routerLink]="item.path"
+                routerLinkActive="is-active"
+                [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+                class="app-header__nav-link"
+              >
+                {{ item.labelKey | translate }}
+              </a>
+            </li>
+          }
+        </ul>
+      </nav>
+    }
+
+    <!-- Desktop search -->
+    <div class="app-header__search">
+      <app-search-bar
+        [placeholder]="'nav.search' | translate"
+        [showShortcut]="false"
+        (submitted)="onSearchSubmit($event)"
+      />
+    </div>
+
+    <!-- Right-side actions -->
+    <div class="app-header__actions">
+      <!-- Mobile search toggle -->
+      <button
+        type="button"
+        class="app-header__icon-btn app-header__search-btn"
+        (click)="toggleMobileSearch()"
+        [attr.aria-label]="'nav.search' | translate"
+        [attr.aria-expanded]="mobileSearchOpen()"
+      >
+        @if (mobileSearchOpen()) {
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        }
+      </button>
+
+      <!-- Language + Theme -->
+      <div class="app-header__actions-extras">
+        <app-language-switcher variant="compact" />
+        <app-theme-toggle />
+      </div>
+
+      <!-- Wishlist -->
+      <a
+        routerLink="/account/wishlist"
+        class="app-header__icon-btn"
+        [attr.aria-label]="'nav.wishlist' | translate"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+        @if (wishlistCount() > 0) {
+          <span class="app-header__badge app-header__badge--muted">{{ wishlistCount() }}</span>
+        }
+      </a>
+
+      <!-- Cart -->
+      <button
+        type="button"
+        class="app-header__icon-btn"
+        (click)="openCart()"
+        [attr.aria-label]="'nav.cart' | translate"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+        @if (cartCount() > 0) {
+          <span class="app-header__badge">{{ cartCount() }}</span>
+        }
+      </button>
+
+      <!-- Account -->
+      <a
+        [routerLink]="accountLink()"
+        class="app-header__icon-btn app-header__account"
+        [attr.aria-label]="'nav.account' | translate"
+      >
+        @if (isAuthenticated()) {
+          <span class="app-header__avatar" aria-hidden="true">{{ userInitial() }}</span>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+        }
+      </a>
+    </div>
+  </div>
+  <!-- ⬆️ app-header__inner يقفل هنا -->
+
+  <!-- Mobile search bar (below the header when open) -->
+  @if (mobileSearchOpen()) {
+    <div class="app-header__mobile-search">
+      <app-search-bar
+        [placeholder]="'nav.search' | translate"
+        (submitted)="onSearchSubmit($event); toggleMobileSearch()"
+      />
+    </div>
+  }
+</header>
+
+<!--
+  Mobile navigation drawer + backdrop.
+  These MUST stay siblings of <header>, not children: .app-header has
+  backdrop-filter / transform, which makes it the containing block for
+  position: fixed descendants and would shrink the drawer to header height.
+-->
+<div
+  class="app-header__mobile-backdrop"
+  [class.is-open]="mobileMenuOpen()"
+  (click)="closeMobileMenu()"
+  role="presentation"
+></div>
+
+<aside
+  class="app-header__mobile-drawer"
+  [class.is-open]="mobileMenuOpen()"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Mobile navigation"
+>
+  <div class="app-header__mobile-head">
+    <button
+      type="button"
+      class="app-header__icon-btn app-header__mobile-close"
+      (click)="closeMobileMenu()"
+      [attr.aria-label]="'nav.closeMenu' | translate"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <nav>
+    <ul class="app-header__mobile-list">
+      @for (item of navItems; track item.path) {
+        <li>
+          <a
+            [routerLink]="item.path"
+            routerLinkActive="is-active"
+            [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+            class="app-header__mobile-link"
+            (click)="closeMobileMenu()"
+          >
+            {{ item.labelKey | translate }}
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <div class="app-header__mobile-footer">
+    <app-language-switcher variant="full" />
+    <app-theme-toggle />
+  </div>
+</aside>

@@ -1,0 +1,206 @@
+<div class="coupon-form">
+  <header class="coupon-form__header">
+    <a routerLink="/admin/coupons" class="coupon-form__back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      {{ 'admin.coupons.backToList' | translate }}
+    </a>
+    <h1 class="coupon-form__title">{{ getFormLabel() | translate }}</h1>
+  </header>
+
+  @if (loading()) {
+    <div class="coupon-form__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (!loading()) {
+    <form [formGroup]="form" class="coupon-form__panel" (ngSubmit)="submit()" novalidate>
+      <!-- Code -->
+      <div class="coupon-form__field">
+        <label class="coupon-form__label" for="cf-code">{{ 'admin.coupons.code' | translate }} *</label>
+        <input
+          id="cf-code"
+          type="text"
+          class="coupon-form__input coupon-form__input--code"
+          formControlName="code"
+          maxlength="32"
+          autocomplete="off"
+          spellcheck="false"
+          (input)="onCodeInput($event)"
+        />
+        @if (form.controls.code.touched && form.controls.code.invalid) {
+          <p class="coupon-form__error">{{ 'admin.coupons.errorCode' | translate }}</p>
+        } @else {
+          <p class="coupon-form__hint">{{ 'admin.coupons.codeHint' | translate }}</p>
+        }
+      </div>
+
+      <!-- Type + Value -->
+      <div class="coupon-form__grid">
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-type">{{ 'admin.coupons.type' | translate }} *</label>
+          <select id="cf-type" class="coupon-form__input" formControlName="type">
+            <option value="percentage">{{ 'admin.coupons.typePercentage' | translate }}</option>
+            <option value="fixed">{{ 'admin.coupons.typeFixed' | translate }}</option>
+          </select>
+        </div>
+
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-value">
+            {{ (isPercentage() ? 'admin.coupons.valuePercent' : 'admin.coupons.valueFixed') | translate }} *
+          </label>
+          <input
+            id="cf-value"
+            type="number"
+            min="0"
+            step="0.01"
+            [attr.max]="isPercentage() ? 100 : null"
+            class="coupon-form__input"
+            formControlName="value"
+          />
+          @if (form.controls.value.touched && form.controls.value.invalid) {
+            <p class="coupon-form__error">
+              {{ (isPercentage() ? 'admin.coupons.errorPercent' : 'admin.coupons.errorValue') | translate }}
+            </p>
+          }
+        </div>
+      </div>
+
+      <!-- Min order + Max discount -->
+      <div class="coupon-form__grid">
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-min">{{ 'admin.coupons.minOrderAmount' | translate }}</label>
+          <input id="cf-min" type="number" min="0" step="0.01" class="coupon-form__input" formControlName="minOrderAmount" />
+          <p class="coupon-form__hint">{{ 'admin.coupons.minOrderHint' | translate }}</p>
+        </div>
+
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-max">{{ 'admin.coupons.maxDiscountAmount' | translate }}</label>
+          <input id="cf-max" type="number" min="0" step="0.01" class="coupon-form__input" formControlName="maxDiscountAmount" />
+          <p class="coupon-form__hint">
+            {{ (isPercentage() ? 'admin.coupons.maxDiscountHint' : 'admin.coupons.maxDiscountDisabled') | translate }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Limits -->
+      <div class="coupon-form__grid">
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-usage">{{ 'admin.coupons.usageLimit' | translate }}</label>
+          <input id="cf-usage" type="number" min="1" step="1" class="coupon-form__input" formControlName="usageLimit" />
+          <p class="coupon-form__hint">{{ 'admin.coupons.usageLimitHint' | translate }}</p>
+        </div>
+
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-user">{{ 'admin.coupons.perUserLimit' | translate }} *</label>
+          <input id="cf-user" type="number" min="1" step="1" class="coupon-form__input" formControlName="perUserLimit" />
+          <p class="coupon-form__hint">{{ 'admin.coupons.perUserLimitHint' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Dates -->
+      <div class="coupon-form__grid">
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-from">{{ 'admin.coupons.validFrom' | translate }}</label>
+          <input id="cf-from" type="datetime-local" class="coupon-form__input" formControlName="validFrom" />
+        </div>
+
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-until">{{ 'admin.coupons.validUntil' | translate }}</label>
+          <input id="cf-until" type="datetime-local" class="coupon-form__input" formControlName="validUntil" />
+        </div>
+      </div>
+
+      <!-- Scope -->
+      <fieldset class="coupon-form__fieldset">
+        <legend class="coupon-form__legend">{{ 'admin.coupons.scopeTitle' | translate }}</legend>
+        <p class="coupon-form__hint">{{ 'admin.coupons.scopeHint' | translate }}</p>
+
+        <div class="coupon-form__field">
+          <span class="coupon-form__label">{{ 'admin.coupons.categories' | translate }}</span>
+          <div class="coupon-form__chips">
+            @for (cat of categories(); track cat._id) {
+              <button
+                type="button"
+                class="coupon-form__chip"
+                [class.is-selected]="isCategorySelected(cat._id)"
+                [attr.aria-pressed]="isCategorySelected(cat._id)"
+                (click)="toggleCategory(cat._id)"
+              >
+                {{ cat.name | localized }}
+              </button>
+            } @empty {
+              <span class="coupon-form__hint">{{ 'admin.coupons.noCategories' | translate }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="coupon-form__field">
+          <label class="coupon-form__label" for="cf-products">{{ 'admin.coupons.products' | translate }}</label>
+
+          @if (selectedProducts().length > 0) {
+            <div class="coupon-form__chips">
+              @for (p of selectedProducts(); track p._id) {
+                <span class="coupon-form__chip is-selected coupon-form__chip--removable">
+                  {{ p.name | localized }}
+                  <button
+                    type="button"
+                    class="coupon-form__chip-remove"
+                    (click)="removeProduct(p._id)"
+                    [attr.aria-label]="'common.remove' | translate"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                  </button>
+                </span>
+              }
+            </div>
+          }
+
+          <input
+            id="cf-products"
+            type="search"
+            class="coupon-form__input"
+            [formControl]="productSearch"
+            [placeholder]="'admin.coupons.searchProducts' | translate"
+            autocomplete="off"
+          />
+
+          @if (searchingProducts()) {
+            <p class="coupon-form__hint">{{ 'common.loading' | translate }}</p>
+          } @else if (availableResults().length > 0) {
+            <ul class="coupon-form__results">
+              @for (p of availableResults(); track p._id) {
+                <li>
+                  <button type="button" class="coupon-form__result" (click)="addProduct(p)">
+                    <span>{{ p.name | localized }}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </fieldset>
+
+      <!-- Active -->
+      <label class="coupon-form__check">
+        <input type="checkbox" formControlName="isActive" />
+        <span>{{ 'admin.coupons.isActive' | translate }}</span>
+      </label>
+
+      <!-- Actions -->
+      <div class="coupon-form__actions">
+        <a routerLink="/admin/coupons" class="coupon-form__btn coupon-form__btn--ghost">
+          {{ 'common.cancel' | translate }}
+        </a>
+        <button type="submit" class="coupon-form__btn coupon-form__btn--primary" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="coupon-form__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'common.save' | translate }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</div>

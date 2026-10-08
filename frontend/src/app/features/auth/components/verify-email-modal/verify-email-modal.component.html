@@ -1,0 +1,78 @@
+    <app-modal
+  [isOpen]="isOpen()"
+  size="md"
+  [closeOnBackdrop]="!submitting()"
+  [showCloseButton]="true"
+  [ariaLabel]="'auth.verify.title' | translate"
+  (closed)="close()"
+>
+  <div class="verify">
+    <!-- Illustration -->
+    <div class="verify__icon" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect width="20" height="16" x="2" y="4" rx="2" />
+        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+      </svg>
+    </div>
+
+    <header class="verify__header">
+      <h2 class="verify__title">{{ 'auth.verify.title' | translate }}</h2>
+      <p class="verify__subtitle">
+        {{ 'auth.verify.subtitle' | translate }} <strong>{{ email() }}</strong>
+      </p>
+    </header>
+
+    <div class="verify__otp" (paste)="onOtpPaste($event)">
+      @for (digit of otpDigits(); track $index; let i = $index) {
+        <input
+          [id]="'verify-otp-' + i"
+          type="text"
+          inputmode="numeric"
+          maxlength="1"
+          autocomplete="one-time-code"
+          class="verify__otp-input"
+          [value]="digit"
+          (input)="onOtpInput(i, $event)"
+          (keydown)="onOtpKeydown(i, $event)"
+          [attr.aria-label]="'Digit ' + (i + 1)"
+        />
+      }
+    </div>
+
+    <div class="verify__resend">
+      @if (canResend()) {
+        <button
+          type="button"
+          class="verify__link"
+          [disabled]="resending()"
+          (click)="resend()"
+        >
+          @if (resending()) {
+            <span class="verify__spinner-sm" aria-hidden="true"></span>
+          } @else {
+            {{ 'auth.verify.resend' | translate }}
+          }
+        </button>
+      } @else {
+        <span class="verify__resend-timer">
+          {{ 'auth.verify.resendIn' | translate: { seconds: resendIn() } }}
+        </span>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="verify__submit"
+      [disabled]="!isOtpComplete() || submitting()"
+      (click)="submit()"
+    >
+      @if (submitting()) {
+        <span class="verify__spinner" aria-hidden="true"></span>
+      } @else {
+        {{ 'auth.verify.submit' | translate }}
+      }
+    </button>
+
+    <p class="verify__hint">{{ 'auth.verify.hint' | translate }}</p>
+  </div>
+</app-modal>

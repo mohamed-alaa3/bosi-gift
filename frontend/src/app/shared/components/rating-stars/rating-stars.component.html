@@ -1,0 +1,44 @@
+<div
+  class="app-rating"
+  [class]="'app-rating--' + size()"
+  [class.is-interactive]="interactive()"
+  role="img"
+  [attr.aria-label]="value() + ' out of ' + max() + ' stars'"
+  (mouseleave)="onLeave()"
+>
+  <div class="app-rating__stars">
+    @for (star of starsArray(); track star) {
+      <button
+        type="button"
+        class="app-rating__star"
+        [class.is-full]="starState(star) === 'full'"
+        [class.is-half]="starState(star) === 'half'"
+        [disabled]="!interactive()"
+        (click)="onStarClick(star)"
+        (mouseenter)="onStarHover(star)"
+        [attr.aria-label]="'Rate ' + star + ' stars'"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+          <defs>
+            <linearGradient [attr.id]="'half-' + star">
+              <stop offset="50%" stop-color="currentColor" />
+              <stop offset="50%" stop-color="transparent" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+            [attr.fill]="starState(star) === 'full' ? 'currentColor' : (starState(star) === 'half' ? 'url(#half-' + star + ')' : 'none')"
+          />
+        </svg>
+      </button>
+    }
+  </div>
+
+  @if (showValue()) {
+    <span class="app-rating__value">{{ formattedValue() }}</span>
+  }
+
+  @if (showCount() && count() > 0) {
+    <span class="app-rating__count">({{ count() }})</span>
+  }
+</div>

@@ -1,0 +1,179 @@
+<div class="account-addresses">
+  <header class="account-addresses__header" appRevealOnScroll>
+    <div>
+      <h1 class="account-addresses__title">{{ 'account.addresses' | translate }}</h1>
+      <p class="account-addresses__subtitle">{{ 'account.addressesDesc' | translate }}</p>
+    </div>
+
+    <button type="button" class="account-addresses__add" (click)="openAdd()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      {{ 'account.addAddress' | translate }}
+    </button>
+  </header>
+
+  <!-- Loading -->
+  @if (state() === 'loading') {
+    <div class="account-addresses__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  <!-- Error -->
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'account.addressesErrorTitle' | translate"
+      [message]="'account.addressesErrorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  <!-- Empty -->
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'account.addressesEmptyTitle' | translate"
+      [message]="'account.addressesEmptyText' | translate"
+      [actionLabel]="'account.addAddress' | translate"
+      (actionClick)="openAdd()"
+    />
+  }
+
+  <!-- Success -->
+  @if (state() === 'success') {
+    <ul class="account-addresses__grid" appRevealOnScroll [stagger]="true">
+      @for (address of addresses(); track address._id) {
+        <li class="address-card" [class.is-default]="address.isDefault">
+          @if (address.isDefault) {
+            <span class="address-card__badge">
+              {{ 'checkout.default' | translate }}
+            </span>
+          }
+
+          <p class="address-card__name">{{ address.fullName }}</p>
+
+          <div class="address-card__details">
+            <p class="address-card__line">
+              {{ address.street }}{{ address.building ? ', ' + address.building : '' }}{{ address.apartment ? ', ' + address.apartment : '' }}
+            </p>
+            <p class="address-card__line">
+              {{ address.area ? address.area + ', ' : '' }}{{ address.city }}, {{ address.country }}
+            </p>
+            @if (address.postalCode) {
+              <p class="address-card__line">{{ 'checkout.postalCode' | translate }}: {{ address.postalCode }}</p>
+            }
+            <p class="address-card__line">{{ address.phone }}</p>
+          </div>
+
+          <div class="address-card__actions">
+            @if (!address.isDefault) {
+              <button
+                type="button"
+                class="address-card__action"
+                (click)="setDefault(address)"
+                [disabled]="processingId() === address._id"
+              >
+                {{ 'account.setDefault' | translate }}
+              </button>
+            }
+            <button
+              type="button"
+              class="address-card__action"
+              (click)="openEdit(address)"
+            >
+              {{ 'common.edit' | translate }}
+            </button>
+            <button
+              type="button"
+              class="address-card__action address-card__action--danger"
+              (click)="remove(address)"
+              [disabled]="processingId() === address._id"
+            >
+              {{ 'common.delete' | translate }}
+            </button>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  <!-- Modal -->
+  @if (modalMode() !== 'closed') {
+    <div class="address-modal__backdrop" (click)="closeModal()" role="presentation"></div>
+
+    <div class="address-modal" role="dialog" aria-modal="true" aria-labelledby="address-modal-title">
+      <div class="address-modal__header">
+        <h2 id="address-modal-title" class="address-modal__title">
+          {{ (modalMode() === 'add' ? 'account.addAddress' : 'account.editAddress') | translate }}
+        </h2>
+        <button type="button" class="address-modal__close" (click)="closeModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form class="address-modal__form" [formGroup]="form" (ngSubmit)="submitForm()">
+        <div class="address-modal__grid">
+          <div class="address-modal__field">
+            <label class="address-modal__label">{{ 'checkout.fullName' | translate }}</label>
+            <input type="text" class="address-modal__input" formControlName="fullName" [class.is-invalid]="form.controls.fullName.touched && form.controls.fullName.invalid" />
+          </div>
+          <div class="address-modal__field">
+            <label class="address-modal__label">{{ 'checkout.phone' | translate }}</label>
+            <input type="tel" class="address-modal__input" formControlName="phone" [class.is-invalid]="form.controls.phone.touched && form.controls.phone.invalid" />
+          </div>
+          <div class="address-modal__field">
+            <label class="address-modal__label">{{ 'checkout.country' | translate }}</label>
+            <input type="text" class="address-modal__input" formControlName="country" [class.is-invalid]="form.controls.country.touched && form.controls.country.invalid" />
+          </div>
+          <div class="address-modal__field">
+            <label class="address-modal__label">{{ 'checkout.city' | translate }}</label>
+            <input type="text" class="address-modal__input" formControlName="city" [class.is-invalid]="form.controls.city.touched && form.controls.city.invalid" />
+          </div>
+          <div class="address-modal__field">
+            <label class="address-modal__label">{{ 'checkout.area' | translate }}</label>
+            <input type="text" class="address-modal__input" formControlName="area" />
+          </div>
+          <div class="address-modal__field">
+            <label class="address-modal__label">{{ 'checkout.postalCode' | translate }}</label>
+            <input type="text" class="address-modal__input" formControlName="postalCode" />
+          </div>
+        </div>
+
+        <div class="address-modal__field">
+          <label class="address-modal__label">{{ 'checkout.street' | translate }}</label>
+          <input type="text" class="address-modal__input" formControlName="street" [class.is-invalid]="form.controls.street.touched && form.controls.street.invalid" />
+        </div>
+
+        <div class="address-modal__grid">
+          <div class="address-modal__field">
+            <label class="address-modal__label">{{ 'checkout.building' | translate }}</label>
+            <input type="text" class="address-modal__input" formControlName="building" />
+          </div>
+          <div class="address-modal__field">
+            <label class="address-modal__label">{{ 'checkout.apartment' | translate }}</label>
+            <input type="text" class="address-modal__input" formControlName="apartment" />
+          </div>
+        </div>
+
+        <label class="address-modal__checkbox">
+          <input type="checkbox" formControlName="isDefault" />
+          <span>{{ 'account.setAsDefault' | translate }}</span>
+        </label>
+
+        <div class="address-modal__actions">
+          <button type="button" class="address-modal__btn address-modal__btn--ghost" (click)="closeModal()" [disabled]="submitting()">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button type="submit" class="address-modal__btn address-modal__btn--primary" [disabled]="submitting()">
+            @if (submitting()) {
+              <span class="address-modal__spinner" aria-hidden="true"></span>
+            } @else {
+              {{ 'common.save' | translate }}
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

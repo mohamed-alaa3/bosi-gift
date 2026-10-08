@@ -1,0 +1,250 @@
+<section class="cart-page">
+  <header class="cart-page__header" appRevealOnScroll>
+    <h1 class="cart-page__title">{{ 'cart.pageTitle' | translate }}</h1>
+  </header>
+
+  <!-- Not signed in -->
+  @if (!isAuthenticated()) {
+    <app-empty-state
+      icon="cart"
+      [title]="'cart.signInTitle' | translate"
+      [message]="'cart.signInText' | translate"
+      [actionLabel]="'nav.signIn' | translate"
+      (actionClick)="signIn()"
+    />
+  }
+
+  <!-- Loading -->
+  @if (isAuthenticated() && state() === 'loading') {
+    <div class="cart-page__loader">
+      <app-loader size="lg" variant="spinner" [label]="'common.loading' | translate" />
+    </div>
+  }
+
+  <!-- Error -->
+  @if (isAuthenticated() && state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'cart.errorTitle' | translate"
+      [message]="'cart.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  <!-- Empty -->
+  @if (isAuthenticated() && state() === 'empty') {
+    <app-empty-state
+      icon="cart"
+      [title]="'cart.emptyTitle' | translate"
+      [message]="'cart.emptyText' | translate"
+      [actionLabel]="'cart.continueShopping' | translate"
+      (actionClick)="goToShop()"
+    />
+  }
+
+  <!-- Success -->
+  @if (isAuthenticated() && state() === 'success') {
+    <div class="cart-page__layout" appRevealOnScroll [stagger]="true">
+      <!-- Items -->
+      <div class="cart-page__main">
+        @if (hasUnavailable()) {
+          <div class="cart-page__warning" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            <span>{{ 'cart.unavailableWarning' | translate }}</span>
+          </div>
+        }
+
+        <ul class="cart-page__list">
+          @for (item of items(); track item._id) {
+            <!-- ============================================ -->
+            <!-- GIFT BOX ITEM -->
+            <!-- ============================================ -->
+            @if (item.type === 'gift-box' && item.giftBox) {
+              <li class="cart-page__item cart-page__item--gift" [class.is-unavailable]="!item.available">
+                <div class="cart-page__item-media">
+                  @if (item.giftBox.boxImageUrl) {
+                    <img
+                      [src]="item.giftBox.boxImageUrl | safeImage"
+                      [alt]="item.giftBox.boxName | localized"
+                      class="cart-page__item-image img-fallback"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  } @else {
+                    <div class="cart-page__item-image img-fallback" aria-hidden="true"></div>
+                  }
+                </div>
+
+                <div class="cart-page__item-info">
+                  <div class="cart-page__item-head">
+                    <p class="cart-page__item-name">
+                      {{ item.giftBox.boxName | localized }}
+                    </p>
+                    <span class="cart-page__gift-badge">
+                      {{ 'giftBuilder.giftBox' | translate }}
+                    </span>
+                  </div>
+
+                  <p class="cart-page__item-options">
+                    {{ item.giftBox.items.length }} {{ 'giftBuilder.items' | translate }}
+                    @if (item.giftBox.wrap) {
+                      <span> · {{ item.giftBox.wrap.name | localized }}</span>
+                    }
+                    @if (item.giftBox.ribbon) {
+                      <span> · {{ item.giftBox.ribbon.name | localized }}</span>
+                    }
+                  </p>
+
+                  <p class="cart-page__item-price">
+                    {{ item.lineTotal ?? 0 | price }}
+                  </p>
+
+                  @if (!item.available && item.reason) {
+                    <p class="cart-page__item-reason">{{ item.reason }}</p>
+                  }
+
+                  <div class="cart-page__item-actions">
+                    <button
+                      type="button"
+                      class="cart-page__remove"
+                      (click)="removeItem(item)"
+                      [disabled]="updatingItemId() === item._id"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                      <span>{{ 'cart.removeItem' | translate }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="cart-page__item-total">
+                  <span class="cart-page__item-total-value">
+                    {{ item.lineTotal ?? 0 | price }}
+                  </span>
+                </div>
+              </li>
+            } @else {
+              <!-- ============================================ -->
+              <!-- REGULAR PRODUCT ITEM -->
+              <!-- ============================================ -->
+              <li class="cart-page__item" [class.is-unavailable]="!item.available">
+                <div class="cart-page__item-media">
+                  @if (item.product?.imageUrl) {
+                    <img
+                      [src]="item.product!.imageUrl | safeImage"
+                      [alt]="item.product!.name | localized"
+                      class="cart-page__item-image img-fallback"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  } @else {
+                    <div class="cart-page__item-image img-fallback" aria-hidden="true"></div>
+                  }
+                </div>
+
+                <div class="cart-page__item-info">
+                  <p class="cart-page__item-name">
+                    {{ item.product ? (item.product.name | localized) : ('cart.unavailable' | translate) }}
+                  </p>
+
+                  @if (item.selectedOptions.length > 0) {
+                    <p class="cart-page__item-options">
+                      @for (opt of item.selectedOptions; track opt.name.en; let last = $last) {
+                        <span>{{ opt.name | localized }}: {{ opt.value | localized }}</span>@if (!last) {<span>, </span>}
+                      }
+                    </p>
+                  }
+
+                  <p class="cart-page__item-price">
+                    {{ item.product?.effectivePrice ?? 0 | price }}
+                  </p>
+
+                  @if (!item.available && item.reason) {
+                    <p class="cart-page__item-reason">{{ item.reason }}</p>
+                  }
+
+                  <div class="cart-page__item-actions">
+                    <app-quantity-stepper
+                      [min]="1"
+                      [max]="item.product?.stock ?? 1"
+                      (valueChange)="updateQuantity(item, $event)"
+                    />
+
+                    <button
+                      type="button"
+                      class="cart-page__remove"
+                      (click)="removeItem(item)"
+                      [disabled]="updatingItemId() === item._id"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                      <span>{{ 'cart.removeItem' | translate }}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="cart-page__item-total">
+                  <span class="cart-page__item-total-value">
+                    {{ item.lineTotal ?? 0 | price }}
+                  </span>
+                </div>
+              </li>
+            }
+          }
+        </ul>
+
+        <div class="cart-page__actions">
+          <a routerLink="/shop" class="cart-page__continue">
+            {{ 'cart.continueShopping' | translate }}
+          </a>
+
+          <button type="button" class="cart-page__clear" (click)="clearCart()">
+            {{ 'cart.clearCart' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <aside class="cart-page__summary" aria-label="Order summary">
+        <h2 class="cart-page__summary-title">{{ 'cart.summary' | translate }}</h2>
+
+        @if (isAuthenticated()) {
+          <app-coupon-input />
+          <div class="cart-page__summary-divider"></div>
+        }
+
+        <div class="cart-page__summary-row">
+          <span>{{ 'cart.subtotal' | translate }}</span>
+          <span class="cart-page__summary-value">{{ subtotal() | price }}</span>
+        </div>
+
+        @if (discount() > 0) {
+          <div class="cart-page__summary-row cart-page__summary-row--discount">
+            <span>{{ 'cart.discount' | translate }}</span>
+            <span class="cart-page__summary-value">-{{ discount() | price }}</span>
+          </div>
+        }
+
+        <div class="cart-page__summary-row">
+          <span>{{ 'cart.shipping' | translate }}</span>
+          <span class="cart-page__summary-value">{{ 'cart.calculatedAtCheckout' | translate }}</span>
+        </div>
+
+        <div class="cart-page__summary-divider"></div>
+
+        <div class="cart-page__summary-total">
+          <span>{{ 'cart.total' | translate }}</span>
+          <span class="cart-page__summary-total-value">{{ total() | price }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="cart-page__checkout"
+          [disabled]="!canCheckout()"
+          (click)="goToCheckout()"
+        >
+          {{ 'cart.checkout' | translate }}
+        </button>
+      </aside>
+    </div>
+  }
+</section>

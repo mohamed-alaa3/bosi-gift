@@ -1,0 +1,542 @@
+.order-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+
+    &__loader {
+        display: flex;
+        justify-content: center;
+        padding: 4rem 1rem;
+    }
+
+    // ---------- Header ----------
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    &__eyebrow {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-subtle);
+        margin: 0 0 0.25rem;
+    }
+
+    &__title {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: clamp(1.25rem, 2vw + 0.5rem, 1.75rem);
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__date {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin: 0.25rem 0 0;
+    }
+
+    &__status {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.875rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border-radius: var(--radius-full);
+
+        &.is-pending {
+            color: var(--warning);
+            background-color: var(--warning-soft);
+        }
+
+        &.is-confirmed {
+            color: var(--info);
+            background-color: var(--info-soft);
+        }
+
+        &.is-processing {
+            color: var(--info);
+            background-color: var(--info-soft);
+        }
+
+        &.is-shipped {
+            color: var(--brand-primary);
+            background-color: var(--brand-primary-soft);
+        }
+
+        &.is-delivered {
+            color: var(--success);
+            background-color: var(--success-soft);
+        }
+
+        &.is-cancelled {
+            color: var(--danger);
+            background-color: var(--danger-soft);
+        }
+    }
+
+    // ---------- Timeline ----------
+    &__timeline {
+        padding: 1.5rem;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+    }
+
+    &__steps {
+        display: flex;
+        justify-content: space-between;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        position: relative;
+
+        &::before {
+            content: '';
+            position: absolute;
+            top: 14px;
+            inset-inline: 28px;
+            height: 2px;
+            background-color: var(--border);
+            z-index: 0;
+        }
+    }
+
+    &__step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+    }
+
+    &__step-dot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: var(--radius-full);
+        background-color: var(--bg);
+        border: 2px solid var(--border);
+        color: var(--text-subtle);
+        font-size: 0.75rem;
+        transition: all var(--transition-base);
+    }
+
+    &__step-label {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-subtle);
+        text-align: center;
+
+        @media (max-width: 640px) {
+            font-size: 0.6875rem;
+        }
+    }
+
+    &__step.is-complete &__step-dot {
+        background-color: var(--brand-primary-soft);
+        border-color: var(--brand-primary);
+        color: var(--brand-primary);
+    }
+
+    &__step.is-complete &__step-label {
+        color: var(--text);
+    }
+
+    &__step.is-current &__step-dot {
+        background-color: var(--brand-primary);
+        border-color: var(--brand-primary);
+        color: #ffffff;
+    }
+
+    &__step.is-current &__step-label {
+        color: var(--brand-primary);
+        font-weight: 700;
+    }
+
+    &__cancelled {
+        padding: 1rem 1.25rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+        color: var(--danger);
+        background-color: var(--danger-soft);
+        border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+        border-radius: var(--radius-md);
+        text-align: center;
+    }
+
+    // ---------- Grid ----------
+    &__grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+
+        @media (min-width: 1024px) {
+            grid-template-columns: 1fr 340px;
+        }
+    }
+
+    &__section {
+        padding: 1.5rem;
+        background-color: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    &__section-title {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: var(--text);
+        margin: 0;
+    }
+
+    // ---------- Items ----------
+    &__items {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: 0.875rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+
+        &:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        &:first-child {
+            padding-top: 0;
+        }
+    }
+
+    &__item-media {
+        width: 64px;
+        height: 64px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+        background-color: var(--bg-muted);
+    }
+
+    &__item-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    &__item-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__item-name {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0;
+    }
+
+    &__item-options {
+        font-size: 0.75rem;
+        color: var(--text-subtle);
+        margin: 0.125rem 0;
+    }
+
+    &__item-qty {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin: 0.125rem 0 0;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__item-subtotal {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 700;
+        color: var(--text);
+        font-variant-numeric: tabular-nums;
+        flex-shrink: 0;
+    }
+
+    // ---------- Summary ----------
+    &__summary {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    &__summary-card {
+        padding: 1.25rem;
+        background-color: var(--bg-muted);
+        border-radius: var(--radius-lg);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    &__summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+
+        span:last-child {
+            color: var(--text);
+            font-weight: 500;
+            font-variant-numeric: tabular-nums;
+        }
+
+        &.is-discount span:last-child {
+            color: var(--success);
+        }
+    }
+
+    &__summary-divider {
+        height: 1px;
+        background-color: var(--border);
+        margin: 0.25rem 0;
+    }
+
+    &__summary-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 1rem;
+        font-weight: 700;
+        color: var(--text);
+
+        span:last-child {
+            font-family: 'Poppins', system-ui, sans-serif;
+            font-size: 1.375rem;
+            color: var(--brand-primary);
+            font-variant-numeric: tabular-nums;
+        }
+    }
+
+    &__address-name {
+        font-weight: 600;
+        color: var(--text);
+        margin: 0;
+        font-size: 0.875rem;
+    }
+
+    &__address-line {
+        font-size: 0.8125rem;
+        color: var(--text-muted);
+        margin: 0;
+        line-height: 1.5;
+
+        strong {
+            color: var(--text);
+            text-transform: capitalize;
+        }
+    }
+
+    &__notes {
+        font-size: 0.875rem;
+        line-height: 1.5;
+        color: var(--text);
+        margin: 0;
+        white-space: pre-wrap;
+    }
+
+    // ---------- Footer ----------
+    &__footer {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    &__back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--brand-primary);
+        text-decoration: none;
+        transition: color var(--transition-fast);
+
+        &:hover {
+            color: var(--brand-primary-hover);
+        }
+    }
+}
+// ============================================
+// Gift Box Item
+// ============================================
+.order-details__item--gift {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: linear-gradient(135deg, var(--brand-primary-soft) 0%, var(--surface) 100%);
+    border: 1px solid var(--brand-primary);
+    border-radius: var(--radius-lg);
+}
+
+.order-details__gift-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.order-details__gift-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-md);
+    background-color: var(--brand-primary);
+    color: #ffffff;
+    flex-shrink: 0;
+}
+
+.order-details__gift-title {
+    flex: 1;
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--brand-primary);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.order-details__gift-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-block: 0.75rem;
+    border-top: 1px dashed color-mix(in srgb, var(--brand-primary) 30%, transparent);
+
+    &:first-of-type {
+        border-top: none;
+        padding-top: 0;
+    }
+}
+
+.order-details__gift-label {
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand-primary);
+    margin: 0;
+}
+
+.order-details__gift-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.order-details__gift-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: var(--bg-muted);
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+}
+
+.order-details__gift-color {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.08);
+}
+
+.order-details__gift-name-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.order-details__gift-name {
+    flex: 1;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+}
+
+.order-details__gift-qty {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin: 0.125rem 0 0;
+}
+
+.order-details__gift-price {
+    font-family: 'Poppins', system-ui, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+}
+
+.order-details__gift-note {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0;
+    padding: 0.75rem 1rem;
+    background-color: var(--surface);
+    border-radius: var(--radius-md);
+    white-space: pre-wrap;
+    font-style: italic;
+}
+.order-details__cancelled {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.order-details__cancelled-reason {
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.order-details__reviews:empty { display: none; }
+.order-details__reviews { margin-block: 1.5rem; }

@@ -1,0 +1,90 @@
+<div class="admin-dashboard">
+  <!-- Header -->
+  <header class="admin-dashboard__header">
+    <div>
+      <h1 class="admin-dashboard__title">{{ 'admin.dashboard.title' | translate }}</h1>
+      <p class="admin-dashboard__subtitle">{{ 'admin.dashboard.subtitle' | translate }}</p>
+    </div>
+
+    <div class="admin-dashboard__range" role="tablist" aria-label="Date range">
+      @for (opt of rangeOptions; track opt.value) {
+        <button
+          type="button"
+          class="admin-dashboard__range-btn"
+          [class.is-active]="range() === opt.value"
+          (click)="setRange(opt.value)"
+          role="tab"
+          [attr.aria-selected]="range() === opt.value"
+        >
+          {{ opt.labelKey | translate }}
+        </button>
+      }
+    </div>
+  </header>
+
+  <!-- KPI cards -->
+  <div class="admin-dashboard__kpis">
+    <app-admin-kpi-card
+      [label]="'admin.dashboard.totalRevenue' | translate"
+      [value]="overview() ? formatCurrency(overview()!.revenue.total) : '—'"
+      [growth]="overview()?.revenue?.growthPercent ?? null"
+      icon="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+      iconColor="primary"
+      [loading]="loading()"
+    />
+
+    <app-admin-kpi-card
+      [label]="'admin.dashboard.totalOrders' | translate"
+      [value]="overview() ? formatNumber(overview()!.orders.total) : '—'"
+      [growth]="overview()?.orders?.growthPercent ?? null"
+      icon="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"
+      iconColor="info"
+      [loading]="loading()"
+    />
+
+    <app-admin-kpi-card
+      [label]="'admin.dashboard.newCustomers' | translate"
+      [value]="overview() ? formatNumber(overview()!.customers.newInRange) : '—'"
+      [growth]="overview()?.customers?.growthPercent ?? null"
+      icon="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+      iconColor="success"
+      [loading]="loading()"
+    />
+
+    <app-admin-kpi-card
+      [label]="'admin.dashboard.conversionRate' | translate"
+      [value]="overview() ? formatPercent(overview()!.conversionRate) : '—'"
+      icon="M3 3v18h18M7 12l4-4 4 4 5-5"
+      iconColor="warning"
+      [loading]="loading()"
+    />
+  </div>
+
+  <!-- Revenue chart -->
+  <app-admin-revenue-chart
+    [points]="revenueSeries()"
+    [loading]="loading()"
+  />
+
+  <!-- Bottom grid -->
+  <div class="admin-dashboard__grid">
+    <!-- Recent orders -->
+    <app-admin-recent-orders
+      [orders]="recentOrders()"
+      [loading]="loading()"
+    />
+
+    <!-- Low stock -->
+    <app-admin-low-stock-alert
+      [products]="lowStock()"
+      [loading]="loading()"
+    />
+
+    <!-- Top products -->
+    <app-admin-top-products
+      [products]="topProducts()"
+      [maxRevenue]="maxRevenue()"
+      [loading]="loading()"
+    />
+  </div>
+</div>

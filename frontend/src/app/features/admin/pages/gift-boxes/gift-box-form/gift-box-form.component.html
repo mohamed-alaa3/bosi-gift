@@ -1,0 +1,100 @@
+<div class="gift-box-form">
+  <header class="gift-box-form__header">
+    <a routerLink="/admin/gift-boxes" class="gift-box-form__back">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      {{ 'admin.giftBoxes.backToList' | translate }}
+    </a>
+    <h1 class="gift-box-form__title">{{ getFormLabel() | translate }}</h1>
+  </header>
+
+  @if (loading()) {
+    <div class="gift-box-form__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (!loading()) {
+    <form [formGroup]="form" class="gift-box-form__panel" (ngSubmit)="submit()">
+      <!-- Image -->
+      <div class="gift-box-form__image-section">
+        <div class="gift-box-form__preview">
+          @if (previewUrl()) {
+            <img [src]="previewUrl()" alt="" class="gift-box-form__preview-img" />
+          } @else {
+            <div class="gift-box-form__preview-placeholder" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            </div>
+          }
+        </div>
+
+        <label class="gift-box-form__upload">
+          <input type="file" accept="image/jpeg,image/png,image/webp" hidden (change)="onImageSelected($event)" />
+          {{ 'admin.giftBoxes.chooseImage' | translate }}
+        </label>
+      </div>
+
+      <!-- Names -->
+      <div class="gift-box-form__grid">
+        <div class="gift-box-form__field">
+          <label class="gift-box-form__label">{{ 'admin.giftBoxes.nameEn' | translate }} *</label>
+          <input type="text" class="gift-box-form__input" formControlName="nameEn" />
+        </div>
+        <div class="gift-box-form__field">
+          <label class="gift-box-form__label">{{ 'admin.giftBoxes.nameAr' | translate }} *</label>
+          <input type="text" dir="rtl" class="gift-box-form__input" formControlName="nameAr" />
+        </div>
+      </div>
+
+      <!-- Descriptions -->
+      <div class="gift-box-form__grid">
+        <div class="gift-box-form__field">
+          <label class="gift-box-form__label">{{ 'admin.giftBoxes.descEn' | translate }}</label>
+          <textarea rows="3" class="gift-box-form__input" formControlName="descriptionEn"></textarea>
+        </div>
+        <div class="gift-box-form__field">
+          <label class="gift-box-form__label">{{ 'admin.giftBoxes.descAr' | translate }}</label>
+          <textarea rows="3" dir="rtl" class="gift-box-form__input" formControlName="descriptionAr"></textarea>
+        </div>
+      </div>
+
+      <!-- Price + Capacity -->
+      <div class="gift-box-form__grid">
+        <div class="gift-box-form__field">
+          <label class="gift-box-form__label">{{ 'admin.giftBoxes.basePrice' | translate }} *</label>
+          <input type="number" min="0" step="0.01" class="gift-box-form__input" formControlName="basePrice" />
+          <p class="gift-box-form__hint">{{ 'admin.giftBoxes.basePriceHint' | translate }}</p>
+        </div>
+        <div class="gift-box-form__field">
+          <label class="gift-box-form__label">{{ 'admin.giftBoxes.capacity' | translate }} *</label>
+          <input type="number" min="1" max="50" step="1" class="gift-box-form__input" formControlName="capacity" />
+          <p class="gift-box-form__hint">{{ 'admin.giftBoxes.capacityHint' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Sort + Active -->
+      <div class="gift-box-form__grid">
+        <div class="gift-box-form__field">
+          <label class="gift-box-form__label">{{ 'admin.giftBoxes.sortOrder' | translate }}</label>
+          <input type="number" class="gift-box-form__input" formControlName="sortOrder" />
+        </div>
+        <label class="gift-box-form__check">
+          <input type="checkbox" formControlName="isActive" />
+          <span>{{ 'admin.giftBoxes.isActive' | translate }}</span>
+        </label>
+      </div>
+
+      <div class="gift-box-form__actions">
+        <a routerLink="/admin/gift-boxes" class="gift-box-form__btn gift-box-form__btn--ghost">
+          {{ 'common.cancel' | translate }}
+        </a>
+        <button type="submit" class="gift-box-form__btn gift-box-form__btn--primary" [disabled]="submitting()">
+          @if (submitting()) {
+            <span class="gift-box-form__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'common.save' | translate }}
+          }
+        </button>
+      </div>
+    </form>
+  }
+</div>

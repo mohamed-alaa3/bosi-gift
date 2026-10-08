@@ -1,0 +1,115 @@
+.app-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 0.75rem;
+    padding: 3rem 1.5rem;
+    max-width: 480px;
+    margin-inline: auto;
+
+    &__icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        width: 92px;
+        height: 92px;
+        border-radius: var(--radius-full);
+        background: linear-gradient(160deg, var(--brand-primary-soft), var(--bg-muted));
+        border: 2px dashed var(--brand-pink);
+        color: var(--brand-primary);
+        margin-bottom: 0.75rem;
+
+        // tiny sparkle + heart accents
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            pointer-events: none;
+            background-color: var(--brand-coral);
+        }
+
+        &::before {
+            width: 16px;
+            height: 16px;
+            top: -4px;
+            inset-inline-end: -2px;
+            -webkit-mask: var(--gift-sparkle-mask) center / contain no-repeat;
+            mask: var(--gift-sparkle-mask) center / contain no-repeat;
+        }
+
+        &::after {
+            width: 12px;
+            height: 12px;
+            bottom: 2px;
+            inset-inline-start: -4px;
+            background-color: var(--brand-pink);
+            -webkit-mask: var(--gift-heart-mask) center / contain no-repeat;
+            mask: var(--gift-heart-mask) center / contain no-repeat;
+        }
+    }
+
+    &__gift {
+        width: 54px;
+        height: 54px;
+    }
+
+    &__title {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 0;
+    }
+
+    &__message {
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    &__action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: #ffffff;
+        background-color: var(--brand-primary);
+        border: none;
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        text-decoration: none;
+        box-shadow: 0 6px 16px rgba(var(--brand-primary-rgb), 0.28);
+        transition: background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+
+        &:hover {
+            background-color: var(--brand-primary-hover);
+            transform: translateY(-2px);
+        }
+
+        &:active {
+            transform: translateY(1px);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--brand-primary);
+            outline-offset: 2px;
+        }
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .app-empty__action {
+        transition: none;
+    }
+
+    .app-empty__action:hover {
+        transform: none;
+    }
+}

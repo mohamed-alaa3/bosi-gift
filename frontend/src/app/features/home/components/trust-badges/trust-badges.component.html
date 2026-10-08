@@ -1,0 +1,17 @@
+<section class="trust-badges" aria-label="Store guarantees">
+  <ul class="trust-badges__list" role="list">
+    @for (badge of badges; track badge.id) {
+      <li class="trust-badges__item">
+        <span class="trust-badges__icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path [attr.d]="badge.iconPath" />
+          </svg>
+        </span>
+        <div class="trust-badges__body">
+          <h3 class="trust-badges__title">{{ badge.titleKey | translate }}</h3>
+          <p class="trust-badges__text">{{ badge.textKey | translate }}</p>
+        </div>
+      </li>
+    }
+  </ul>
+</section>

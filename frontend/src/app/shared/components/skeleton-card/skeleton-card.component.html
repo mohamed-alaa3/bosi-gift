@@ -1,0 +1,29 @@
+@switch (variant()) {
+  @case ('card') {
+    <div [class]="classes()" [style.height]="height() || null" aria-hidden="true">
+      <div class="app-skeleton__image"></div>
+      <div class="app-skeleton__body">
+        <div class="app-skeleton__line app-skeleton__line--title"></div>
+        <div class="app-skeleton__line"></div>
+        <div class="app-skeleton__line app-skeleton__line--short"></div>
+        <div class="app-skeleton__line app-skeleton__line--price"></div>
+      </div>
+    </div>
+  }
+
+  @case ('text-block') {
+    <div [class]="classes()" aria-hidden="true">
+      @for (line of linesArray(); track line) {
+        <div class="app-skeleton__line" [class.app-skeleton__line--short]="line === lines() - 1"></div>
+      }
+    </div>
+  }
+
+  @default {
+    <div
+      [class]="classes()"
+      [style.height]="height() || null"
+      aria-hidden="true"
+    ></div>
+  }
+}
