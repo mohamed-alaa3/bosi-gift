@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+const connectDB = require("./config/db");
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
@@ -30,7 +32,28 @@ const wrapStyleRoutes = require("./routes/wrapStyle.routes");
 const ribbonRoutes = require("./routes/ribbon.routes");
 const reviewFeedRoutes = require("./routes/reviewFeed.routes");
 const app = express();
+///////
+// Cache the MongoDB connection across requests
+let dbConnectionPromise;
 
+app.use(async (req, res, next) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      if (!dbConnectionPromise) {
+        dbConnectionPromise = connectDB().catch((err) => {
+          dbConnectionPromise = null;
+          throw err;
+        });
+      }
+
+      await dbConnectionPromise;
+    }
+
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 // Don't advertise Express
 app.disable("x-powered-by");
 

@@ -24,7 +24,7 @@ async function connectDB() {
     return conn;
   } catch (err) {
     console.error("[db] MongoDB initial connection failed:", err.message);
-    process.exit(1);
+    throw err;
   }
 }
 
