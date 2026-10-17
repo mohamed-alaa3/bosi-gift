@@ -1,4 +1,4 @@
-const fs = require("fs");
+
 
 const asyncHandler = require("../utils/asyncHandler");
 const { ok, fail } = require("../utils/apiResponse");
@@ -72,27 +72,27 @@ const create = asyncHandler(async (req, res) => {
  * GET /api/orders/:id/payment-proof
  * Streams the private proof image. Owner or admin only.
  */
+
 const getPaymentProof = asyncHandler(async (req, res) => {
-  const { filePath, mimeType, filename } =
+  const { downloadUrl, mimeType, filename } =
     await orderService.getPaymentProofFile(req.user, req.params.id);
 
-  res.setHeader("Content-Type", mimeType || "application/octet-stream");
-  res.setHeader(
-    "Content-Disposition",
-    `inline; filename="${filename || "proof"}"`,
-  );
-  res.setHeader("Cache-Control", "private, no-store");
+  const upstream = await fetch(downloadUrl);
 
-  const stream = fs.createReadStream(filePath);
-  stream.on("error", () => {
-    if (!res.headersSent) {
-      res.status(500).json({ success: false, message: "Could not read file" });
-    } else {
-      res.end();
-    }
-  });
-  stream.pipe(res);
+  if (!upstream.ok) {
+    throw ApiError.internal("Could not retrieve payment proof");
+  }
+
+  const buffer = Buffer.from(await upstream.arrayBuffer());
+
+  res.setHeader("Content-Type", mimeType);
+  res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
+  res.setHeader("Cache-Control", "private, no-store");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+
+  return res.send(buffer);
 });
+
 
 /**
  * GET /api/orders

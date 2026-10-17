@@ -9,13 +9,13 @@ const cartService = require("./cart.service");
 const couponService = require("./coupon.service");
 const settingService = require("./setting.service");
 const env = require("../config/env");
-const path = require("path");
-const fs = require("fs");
+
 const { buildImageUrl } = require("../utils/buildImageUrl");
 const { assertTransition } = require("../utils/orderTransitions");
 const { computePricing } = require("./orderPricing.service");
 const { buildOrderMessage } = require("./whatsappMessage.service");
-const { PRIVATE_UPLOAD_DIR } = require("../middleware/upload");
+const cloudinaryService = require("./cloudinary.service");
+const { CLOUDINARY_FOLDERS } = require("../config/cloudinary");
 const {
   ORDER_STATUSES,
   PAYMENT_STATUSES,
@@ -551,47 +551,65 @@ async function createOrder(userId, input) {
     governorate: gov.key,
     governorateName: gov.name,
   };
+  let paymentProofAsset = null;
+
+  if (paymentProofFile) {
+    paymentProofAsset = await cloudinaryService.uploadBuffer(
+      paymentProofFile.buffer,
+      CLOUDINARY_FOLDERS.paymentProofs,
+      { type: "authenticated" },
+    );
+  }
 
   // ---- 8. Create order (retry on orderNumber collision) ----
   let order;
   let attempts = 0;
-  while (!order && attempts < 5) {
-    attempts += 1;
-    const orderNumber = generateOrderNumber();
-    // eslint-disable-next-line no-await-in-loop
-    const exists = await Order.exists({ orderNumber });
-    if (exists) continue;
 
-    // eslint-disable-next-line no-await-in-loop
-    const created = await Order.create({
-      user: userId,
-      orderNumber,
-      items: orderItems,
-      shippingAddress: snapshotAddress,
-      subtotal: pricing.subtotal,
-      shippingFee: pricing.shippingFee,
-      tax: pricing.tax,
-      discount: pricing.couponDiscount,
-      paymentDiscount: pricing.paymentDiscount,
-      couponCode: appliedCoupon ? appliedCoupon.code : "",
-      coupon: appliedCoupon ? appliedCoupon._id : null,
-      total: pricing.total,
-      amountDueNow: pricing.amountDueNow,
-      remainingAmount: pricing.remainingAmount,
-      status: ORDER_STATUSES.PENDING,
-      paymentStatus: PAYMENT_STATUSES.PENDING,
-      paymentMethod,
-      paymentProofImage: paymentProofFile ? paymentProofFile.filename : "",
-      paymentProofMethod: paymentProofFile ? paymentProofMethod : "",
-      paymentProofUploadedAt: paymentProofFile ? new Date() : null,
-      notes: notes || "",
-    });
+  try {
+    while (!order && attempts < 5) {
+      attempts += 1;
+      const orderNumber = generateOrderNumber();
 
-    order = created;
-  }
+      // eslint-disable-next-line no-await-in-loop
+      const exists = await Order.exists({ orderNumber });
+      if (exists) continue;
 
-  if (!order) {
-    throw ApiError.internal("Could not generate a unique order number");
+      // eslint-disable-next-line no-await-in-loop
+      order = await Order.create({
+        user: userId,
+        orderNumber,
+        items: orderItems,
+        shippingAddress: snapshotAddress,
+        subtotal: pricing.subtotal,
+        shippingFee: pricing.shippingFee,
+        tax: pricing.tax,
+        discount: pricing.couponDiscount,
+        paymentDiscount: pricing.paymentDiscount,
+        couponCode: appliedCoupon ? appliedCoupon.code : "",
+        coupon: appliedCoupon ? appliedCoupon._id : null,
+        total: pricing.total,
+        amountDueNow: pricing.amountDueNow,
+        remainingAmount: pricing.remainingAmount,
+        status: ORDER_STATUSES.PENDING,
+        paymentStatus: PAYMENT_STATUSES.PENDING,
+        paymentMethod,
+        paymentProofImage: paymentProofAsset ? paymentProofAsset.public_id : "",
+        paymentProofMethod: paymentProofFile ? paymentProofMethod : "",
+        paymentProofUploadedAt: paymentProofFile ? new Date() : null,
+        notes: notes || "",
+      });
+    }
+
+    if (!order) {
+      throw ApiError.internal("Could not generate a unique order number");
+    }
+  } catch (err) {
+    if (paymentProofAsset?.public_id) {
+      await cloudinaryService.deleteAsset(paymentProofAsset.public_id, {
+        type: "authenticated",
+      });
+    }
+    throw err;
   }
 
   // ---- 9. Decrement stock + reserve coupon (with rollback) ----
@@ -625,10 +643,11 @@ async function createOrder(userId, input) {
       ).catch(() => {});
     }
     await Order.deleteOne({ _id: order._id }).catch(() => {});
-    // Clean up the uploaded proof on rollback
-    if (paymentProofFile?.filename) {
-      const fp = path.join(PRIVATE_UPLOAD_DIR, paymentProofFile.filename);
-      fs.promises.unlink(fp).catch(() => {});
+    // Clean up the private Cloudinary proof on rollback.
+    if (paymentProofAsset?.public_id) {
+      await cloudinaryService.deleteAsset(paymentProofAsset.public_id, {
+        type: "authenticated",
+      });
     }
     throw err;
   }
@@ -716,6 +735,7 @@ async function getOrderTracking(user, orderId) {
  * Return the physical path + mime type of an order's payment proof,
  * enforcing that only the owner or an admin can access it.
  */
+
 async function getPaymentProofFile(user, orderId) {
   const order = await Order.findById(orderId);
   if (!order) throw ApiError.notFound("Order not found");
@@ -728,31 +748,26 @@ async function getPaymentProofFile(user, orderId) {
     throw ApiError.notFound("No payment proof uploaded for this order");
   }
 
-  const filePath = path.join(PRIVATE_UPLOAD_DIR, order.paymentProofImage);
+  const asset = await cloudinaryService.getAuthenticatedDownloadUrl(
+    order.paymentProofImage,
+  );
 
-  // Guard against path traversal in the stored filename.
-  if (!filePath.startsWith(PRIVATE_UPLOAD_DIR)) {
-    throw ApiError.badRequest("Invalid file path");
-  }
-
-  if (!fs.existsSync(filePath)) {
-    throw ApiError.notFound("Payment proof file is missing");
-  }
-
-  const ext = path.extname(filePath).toLowerCase();
-  const mimeType =
-    ext === ".png"
-      ? "image/png"
-      : ext === ".webp"
-        ? "image/webp"
-        : "image/jpeg";
+  const mimeTypes = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp",
+    avif: "image/avif",
+  };
 
   return {
-    filePath,
-    mimeType,
-    filename: order.paymentProofImage,
+    downloadUrl: asset.downloadUrl,
+    mimeType:
+      mimeTypes[asset.format.toLowerCase()] || "application/octet-stream",
+    filename: `payment-proof-${order._id}.${asset.format}`,
   };
 }
+
 
 // ============================================================
 // Public API — admin status transitions (Phase 1 + Phase 3)

@@ -1,21 +1,3 @@
-/**
- * Thin wrapper around the Cloudinary SDK.
- *
- * Responsibilities:
- *   - uploadBuffer(buffer, folder, options) → { secure_url, public_id }
- *   - deleteAsset(publicId)                  → boolean
- *   - isConfigured()                         → boolean
- *
- * Design notes:
- *   - uploadBuffer throws when Cloudinary is not configured, because by the
- *     time it is called the caller has already accepted a real file. Failing
- *     silently would lose the upload with no trace.
- *   - deleteAsset is best-effort and never throws — matches the existing
- *     `deleteUploadedFile(...).catch(() => {})` convention in the services.
- *   - Uses `cloudinary.uploader.upload_stream` with an in-memory Buffer.
- *     No multer-storage-cloudinary dependency.
- */
-
 const {
   cloudinary,
   isConfigured,
@@ -23,21 +5,10 @@ const {
 } = require("../config/cloudinary");
 const ApiError = require("../utils/ApiError");
 
-/**
- * Whether the Cloudinary SDK has been configured with credentials.
- */
 function isCloudinaryConfigured() {
   return isConfigured;
 }
 
-/**
- * Upload an in-memory file Buffer to Cloudinary.
- *
- * @param {Buffer} buffer            - File contents (from multer memoryStorage).
- * @param {string} folder            - Target folder, e.g. CLOUDINARY_FOLDERS.products.
- * @param {object} [options]         - Extra Cloudinary upload options.
- * @returns {Promise<{ secure_url: string, public_id: string }>}
- */
 function uploadBuffer(buffer, folder, options = {}) {
   if (!isConfigured) {
     return Promise.reject(
@@ -70,14 +41,17 @@ function uploadBuffer(buffer, folder, options = {}) {
             ApiError.internal(err.message || "Cloudinary upload failed"),
           );
         }
+
         if (!result || !result.secure_url || !result.public_id) {
           return reject(
             ApiError.internal("Cloudinary returned an unexpected response"),
           );
         }
+
         return resolve({
           secure_url: result.secure_url,
           public_id: result.public_id,
+          format: result.format,
         });
       },
     );
@@ -87,25 +61,58 @@ function uploadBuffer(buffer, folder, options = {}) {
 }
 
 /**
- * Delete a Cloudinary asset by public_id.
- * Best-effort: never throws. Returns true when the asset was deleted
- * (or did not exist), false when Cloudinary is not configured or the
- * call failed.
- *
- * @param {string} publicId
- * @returns {Promise<boolean>}
+ * Generate a short-lived download URL for a private/authenticated asset.
+ * Call this only after verifying the requesting user's authorization.
  */
-async function deleteAsset(publicId) {
+async function getAuthenticatedDownloadUrl(publicId) {
+  if (!isConfigured || !cloudinary) {
+    throw ApiError.internal("Cloudinary is not configured");
+  }
+
+  if (!publicId || typeof publicId !== "string") {
+    throw ApiError.badRequest("Invalid Cloudinary asset ID");
+  }
+
+  const resource = await cloudinary.api.resource(publicId, {
+    resource_type: "image",
+    type: "authenticated",
+  });
+
+  if (!resource || !resource.format) {
+    throw ApiError.notFound("Payment proof is unavailable");
+  }
+
+  const downloadUrl = cloudinary.utils.private_download_url(
+    publicId,
+    resource.format,
+    {
+      resource_type: "image",
+      type: "authenticated",
+      expires_at: Math.floor(Date.now() / 1000) + 60,
+    },
+  );
+
+  return {
+    downloadUrl,
+    format: resource.format,
+  };
+}
+
+/**
+ * Delete an asset. Existing callers continue to delete public assets;
+ * private callers can pass { type: "authenticated" }.
+ */
+async function deleteAsset(publicId, options = {}) {
   if (!publicId || typeof publicId !== "string") return false;
-  if (!isConfigured) return false;
+  if (!isConfigured || !cloudinary) return false;
 
   try {
     const result = await cloudinary.uploader.destroy(publicId, {
       resource_type: "image",
+      type: options.type || "upload",
       invalidate: true,
     });
-    // Cloudinary returns { result: "ok" } on success,
-    // or { result: "not found" } when the asset doesn't exist.
+
     return result && (result.result === "ok" || result.result === "not found");
   } catch {
     return false;
@@ -115,6 +122,7 @@ async function deleteAsset(publicId) {
 module.exports = {
   isCloudinaryConfigured,
   uploadBuffer,
+  getAuthenticatedDownloadUrl,
   deleteAsset,
   CLOUDINARY_FOLDERS,
 };

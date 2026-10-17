@@ -50,6 +50,7 @@ const CLOUDINARY_FOLDERS = Object.freeze({
   giftBoxes: "habiba/gift-boxes",
   wrapStyles: "habiba/wrap-styles",
   ribbons: "habiba/ribbons",
+  paymentProofs: "habiba/payment-proofs",
 });
 
 module.exports = {
