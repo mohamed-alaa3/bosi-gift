@@ -5,6 +5,7 @@ const { buildImageUrl } = require("../utils/buildImageUrl");
 const GiftBox = require("../models/GiftBox");
 const WrapStyle = require("../models/WrapStyle");
 const Ribbon = require("../models/Ribbon");
+const { resolveSelectedOptions } = require("../utils/productOptions");
 
 /**
  * Parse selectedOptions (may come as JSON string from multipart or as array from JSON body).
@@ -361,7 +362,11 @@ async function addItem(
   }
 
   const cart = await getOrCreateCart(userId);
-  const parsedOptions = parseSelectedOptions(selectedOptions);
+  // Validate against the product's real options; store the canonical snapshot.
+  const parsedOptions = resolveSelectedOptions(
+    product,
+    parseSelectedOptions(selectedOptions),
+  );
 
   const normalizeOpts = (opts) =>
     [...opts]
@@ -379,7 +384,7 @@ async function addItem(
     (item) =>
       item.type === "product" &&
       item.product &&
-      item.product.toString() === productId &&
+      item.product.toString() === String(productId) &&
       normalizeOpts(item.selectedOptions || []) === incomingKey,
   );
 

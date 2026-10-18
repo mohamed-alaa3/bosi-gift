@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, timeout } from 'rxjs';
@@ -31,6 +31,7 @@ export class BestSellersComponent implements OnInit {
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
+  private router = inject(Router);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   protected readonly state = signal<LoadState>('loading');
@@ -39,6 +40,13 @@ export class BestSellersComponent implements OnInit {
   // Skeleton placeholders — a fixed-length array
   protected readonly skeletons = Array.from({ length: MAX_ITEMS }, (_, i) => i);
   protected onAddToCart(product: Product): void {
+    if (product.options?.length) {
+      // Needs a choice (color/size/…): send the customer to the product page.
+      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
+      void this.router.navigate(['/products', product.slug]);
+      return;
+    }
+
     if (!this.authStore.isAuthenticated()) {
       this.toast.info(this.translate.instant('toast.signInToAddToCart'));
       return;

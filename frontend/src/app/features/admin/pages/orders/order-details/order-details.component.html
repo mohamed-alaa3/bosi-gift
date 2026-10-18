@@ -196,7 +196,7 @@
 
         <div class="admin-order-details__item-info">
           <p class="admin-order-details__item-name">{{ item.nameSnapshot | localized }}</p>
-          @if (item.selectedOptions.length > 0) {
+          @if (item.selectedOptions?.length) {
             <p class="admin-order-details__item-options">
               @for (opt of item.selectedOptions; track opt.name.en; let last = $last) {
                 <span>{{ opt.name | localized }}: {{ opt.value | localized }}</span>@if (!last) {<span>, </span>}

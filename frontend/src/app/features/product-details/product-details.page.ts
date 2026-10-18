@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, switchMap, timeout } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -70,6 +70,7 @@ export class ProductDetailsPage implements OnInit {
   private wishlistStore = inject(WishlistStore);
   private authStore = inject(AuthStore);
   private uiStore = inject(UiStore);
+  private router = inject(Router);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
@@ -103,6 +104,13 @@ export class ProductDetailsPage implements OnInit {
     ];
   });
   protected addRelatedToCart(product: Product): void {
+    if (product.options?.length) {
+      // Needs a choice (color/size/…): send the customer to the product page.
+      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
+      void this.router.navigate(['/products', product.slug]);
+      return;
+    }
+
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToAddToCart'));
       return;
@@ -295,6 +303,16 @@ this.toast.success(this.translate.instant(res.added ? 'toast.addedToWishlist' : 
 
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToAddToCart'));
+      return;
+    }
+
+    // Every option group (color, size, …) needs a value before adding.
+    const chosen = this.selectedOptions();
+    const missingOption = (product.options ?? []).some(
+      (g) => !chosen.some((o) => o.name.en === g.name.en),
+    );
+    if (missingOption) {
+      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
       return;
     }
 

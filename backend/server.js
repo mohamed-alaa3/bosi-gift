@@ -17,7 +17,7 @@ async function start() {
 
   server.listen(env.port, () => {
     console.log(
-      `[server] Habiba API running on ${env.apiBaseUrl} (${env.nodeEnv})`,
+      `[server] Bosi Gift API running on ${env.apiBaseUrl} (${env.nodeEnv})`,
     );
   });
 

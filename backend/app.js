@@ -78,7 +78,7 @@ app.use("/api", generalLimiter);
 
 // Health check BEFORE rate limit if desired — leave as is
 app.get("/", (req, res) => {
-  res.json({ success: true, message: "Habiba Store API" });
+  res.json({ success: true, message: "Bosi Gift API" });
 });
 
 // Routes

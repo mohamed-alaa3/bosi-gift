@@ -13,9 +13,14 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { catchError, of, timeout } from 'rxjs';
 import { GiftIconComponent } from '../../../../shared/components/gift-icon/gift-icon.component';
+import { LocalizedPipe } from '../../../../shared/pipes/localized.pipe';
 
 import { LanguageService } from '../../../../core/services/language.service';
+import { BannerService } from '../../../../core/services/banner.service';
+import { Banner, LocalizedText } from '../../../../core/models';
 
 export interface HeroSlide {
   id: string;
@@ -33,7 +38,17 @@ export interface HeroSlide {
   };
   /** Optional: focal point for background image on mobile */
   focalPoint?: string; // e.g. 'center', 'top'
+  /** Set when the slide comes from an admin-managed banner. */
+  banner?: {
+    title: LocalizedText;
+    subtitle: LocalizedText;
+    buttonText: LocalizedText;
+    buttonLink: string;
+  };
 }
+
+const BANNERS_TIMEOUT_MS = 4000;
+const FALLBACK_IMAGE = 'assets/images/hero/hero-main.jpg';
 
 const AUTOPLAY_INTERVAL_MS = 5500;
 const TRANSITION_MS = 700;
@@ -41,21 +56,23 @@ const TRANSITION_MS = 700;
 @Component({
   selector: 'app-hero',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe, GiftIconComponent],
+  imports: [CommonModule, RouterLink, TranslatePipe, LocalizedPipe, GiftIconComponent],
   templateUrl: './hero.component.html',
   styleUrl: './hero.component.scss',
 })
 export class HeroComponent {
   private language = inject(LanguageService);
   private destroyRef = inject(DestroyRef);
+  private bannerService = inject(BannerService);
 
   readonly autoplay = input<boolean>(true);
   readonly intervalMs = input<number>(AUTOPLAY_INTERVAL_MS);
 
-  protected readonly slides: HeroSlide[] = [
+  /** Built-in slides — used only when no active hero banners are available. */
+  private readonly fallbackSlides: HeroSlide[] = [
     {
       id: 'slide-1',
-      image: 'assets/images/hero/hero-main.jpg',
+      image: FALLBACK_IMAGE,
       eyebrowKey: 'home.hero.eyebrow',
       titleKey: 'home.hero.title',
       subtitleKey: 'home.hero.subtitle',
@@ -63,17 +80,10 @@ export class HeroComponent {
       secondaryCta: { labelKey: 'home.hero.giftGuide', link: '/gifts' },
       focalPoint: 'center',
     },
-    {
-  id: 'slide-2',
-  image: 'assets/images/hero/hero-main.jpg',  // نفس الصورة مؤقتًا
-  eyebrowKey: 'home.hero.eyebrow',
-  titleKey: 'home.hero.title',
-  subtitleKey: 'home.hero.subtitle',
-  primaryCta: { labelKey: 'home.hero.shopNow', link: '/shop' },
-  secondaryCta: { labelKey: 'home.hero.giftGuide', link: '/gifts' },
-},
-    // Additional slides can be added later (or loaded from the backend).
   ];
+
+  /** Empty until the banners request settles, so the hero never flashes the wrong content. */
+  protected readonly slides = signal<HeroSlide[]>([]);
 
   protected readonly currentIndex = signal(0);
   protected readonly isPaused = signal(false);
@@ -84,9 +94,9 @@ export class HeroComponent {
   private autoplayId?: number;
   private readonly sliderRef = viewChild<ElementRef<HTMLElement>>('sliderEl');
 
-  protected readonly currentSlide = computed(() => this.slides[this.currentIndex()]);
-  protected readonly totalSlides = this.slides.length;
-  protected readonly hasMultipleSlides = computed(() => this.slides.length > 1);
+  protected readonly currentSlide = computed(() => this.slides()[this.currentIndex()]);
+  protected readonly totalSlides = computed(() => this.slides().length);
+  protected readonly hasMultipleSlides = computed(() => this.slides().length > 1);
 
   constructor() {
     // Detect reduced motion preference
@@ -111,6 +121,62 @@ export class HeroComponent {
     });
 
     this.destroyRef.onDestroy(() => this.stopAutoplay());
+
+    this.loadBanners();
+  }
+
+  /** Loads active hero banners from the API; falls back to the built-in slide. */
+  private loadBanners(): void {
+    this.bannerService
+      .list('hero')
+      .pipe(
+        timeout(BANNERS_TIMEOUT_MS),
+        catchError(() => of(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((res) => {
+        const banners = (res?.success && Array.isArray(res.data) ? res.data : []).filter(
+          (b) => b && b.isActive !== false && !!(b.imageUrl || b.image),
+        );
+        this.currentIndex.set(0);
+        this.slides.set(
+          banners.length > 0 ? banners.map((b) => this.toSlide(b)) : this.fallbackSlides,
+        );
+      });
+  }
+
+  private toSlide(b: Banner): HeroSlide {
+    return {
+      id: `banner-${b._id}`,
+      image: b.imageUrl || b.image,
+      eyebrowKey: '',
+      titleKey: '',
+      subtitleKey: '',
+      primaryCta: { labelKey: '', link: b.buttonLink || '' },
+      focalPoint: 'center',
+      banner: {
+        title: b.title,
+        subtitle: b.subtitle,
+        buttonText: b.buttonText,
+        buttonLink: b.buttonLink || '',
+      },
+    };
+  }
+
+  /** CSS background: banner image first, built-in image as a safety net if it fails to load. */
+  protected backgroundFor(slide: HeroSlide): string {
+    const url = (u: string) => `url("${u.replace(/"/g, '%22')}")`;
+    return slide.banner && slide.image !== FALLBACK_IMAGE
+      ? `${url(slide.image)}, ${url(FALLBACK_IMAGE)}`
+      : url(slide.image);
+  }
+
+  protected isExternal(link: string): boolean {
+    return /^(https?:)?\/\//i.test(link) || /^(mailto|tel):/i.test(link);
+  }
+
+  protected internalLink(link: string): string {
+    return link.startsWith('/') ? link : `/${link}`;
   }
 
   // --- Controls ---
@@ -118,14 +184,14 @@ export class HeroComponent {
   protected next(): void {
     if (!this.hasMultipleSlides() || this.isTransitioning()) return;
     this.direction.set(1);
-    this.currentIndex.update((i) => (i + 1) % this.totalSlides);
+    this.currentIndex.update((i) => (i + 1) % this.totalSlides());
     this.flashTransition();
   }
 
   protected prev(): void {
     if (!this.hasMultipleSlides() || this.isTransitioning()) return;
     this.direction.set(-1);
-    this.currentIndex.update((i) => (i - 1 + this.totalSlides) % this.totalSlides);
+    this.currentIndex.update((i) => (i - 1 + this.totalSlides()) % this.totalSlides());
     this.flashTransition();
   }
 
@@ -170,7 +236,7 @@ export class HeroComponent {
       this.goTo(0);
     } else if (event.key === 'End') {
       event.preventDefault();
-      this.goTo(this.totalSlides - 1);
+      this.goTo(this.totalSlides() - 1);
     }
   }
 

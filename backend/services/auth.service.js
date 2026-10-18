@@ -74,6 +74,8 @@ async function verifyEmailOtp({ email, otp }) {
 
   if (!user) throw ApiError.badRequest("Invalid or expired code.");
 
+  if (!user.isActive) throw ApiError.forbidden("Account is disabled");
+
   if (user.isEmailVerified) {
     // Already verified — idempotent: just return a fresh token.
     const token = generateToken({ id: user._id.toString(), role: user.role });

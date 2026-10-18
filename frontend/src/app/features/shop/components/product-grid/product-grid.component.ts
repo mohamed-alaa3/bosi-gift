@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { Component, DestroyRef, inject, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, timeout } from 'rxjs';
@@ -60,6 +61,7 @@ export class ProductGridComponent {
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
+  private router = inject(Router);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
@@ -67,6 +69,13 @@ export class ProductGridComponent {
   readonly products = input<Product[]>([]);
 
   protected onAddToCart(product: Product): void {
+    if (product.options?.length) {
+      // Needs a choice (color/size/…): send the customer to the product page.
+      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
+      void this.router.navigate(['/products', product.slug]);
+      return;
+    }
+
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToAddToCart'));
       return;

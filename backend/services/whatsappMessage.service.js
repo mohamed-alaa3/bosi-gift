@@ -26,6 +26,7 @@ const E = {
   note: "\u{1F4DD}", // 📝
   camera: "\u{1F4F8}", // 📸
   flower: "\u{1F338}", // 🌸
+  option: "\u{2022}", // •
 };
 
 /**
@@ -73,6 +74,20 @@ function formatAddress(addr) {
 }
 
 /**
+ * "اللون: أحمر، المقاس: L" from an item's saved selectedOptions.
+ */
+function formatOptions(options = []) {
+  return (options || [])
+    .map((o) => {
+      const name = o?.name?.ar || o?.name?.en || "";
+      const value = o?.value?.ar || o?.value?.en || "";
+      return name && value ? `${name}: ${value}` : value || "";
+    })
+    .filter(Boolean)
+    .join("، ");
+}
+
+/**
  * Lists order items (products + gift boxes) as lines.
  */
 function formatItems(items = []) {
@@ -87,9 +102,27 @@ function formatItems(items = []) {
         return `${i + 1}. ${boxName} (مخصص - ${inner} عناصر) — ${egp(item.subtotal)}`;
       }
       const name = item.nameSnapshot?.ar || item.nameSnapshot?.en || "منتج";
-      return `${i + 1}. ${name} × ${item.quantity} — ${egp(item.subtotal)}`;
+      const line = `${i + 1}. ${name} × ${item.quantity} — ${egp(item.subtotal)}`;
+      const opts = formatOptions(item.selectedOptions);
+      return opts ? `${line}\n   ${E.option} ${opts}` : line;
     })
     .join("\n");
+}
+
+/**
+ * True only when the order requires an advance payment AND a proof
+ * screenshot was really saved with it.
+ */
+function hasUploadedProof(order) {
+  const advance =
+    order.paymentMethod === PAYMENT_METHODS.DEPOSIT ||
+    order.paymentMethod === PAYMENT_METHODS.FULL;
+  if (!advance) return false;
+  return Boolean(
+    order.hasPaymentProof ||
+      order.paymentProofImage ||
+      order.paymentProofUploadedAt,
+  );
 }
 
 /**
@@ -99,7 +132,7 @@ function buildOrderMessage(order) {
   if (!order) return "";
 
   const lines = [];
-  lines.push(`${E.bag} *طلب جديد من متجر حبيبة*`);
+  lines.push(`${E.bag} *طلب جديد من Bosi Gift*`);
   lines.push("");
   lines.push(`${E.clipboard} رقم الطلب: *${order.orderNumber}*`);
   lines.push("");
@@ -130,17 +163,23 @@ function buildOrderMessage(order) {
   }
   lines.push(`*الإجمالي: ${egp(order.total)}*`);
 
+  // Payment block — derived from the saved payment method/state only.
+  // A transfer screenshot is never proof that payment was verified.
+  const isPaid = order.paymentStatus === "paid";
   if (order.paymentMethod === PAYMENT_METHODS.DEPOSIT) {
     lines.push("");
     lines.push(
-      `${E.wallet} *العربون المطلوب الآن:* ${egp(order.amountDueNow)}`,
+      `${E.wallet} *${isPaid ? "العربون المدفوع" : "العربون المحوّل (قيد المراجعة)"}:* ${egp(order.amountDueNow)}`,
     );
     lines.push(`الباقي عند الاستلام: ${egp(order.remainingAmount)}`);
   } else if (order.paymentMethod === PAYMENT_METHODS.FULL) {
     lines.push("");
     lines.push(
-      `${E.wallet} *المبلغ المدفوع مقدمًا:* ${egp(order.amountDueNow)}`,
+      `${E.wallet} *${isPaid ? "المبلغ المدفوع مقدمًا" : "المبلغ المحوّل مقدمًا (قيد المراجعة)"}:* ${egp(order.amountDueNow)}`,
     );
+  } else {
+    lines.push("");
+    lines.push(`${E.wallet} *المطلوب عند الاستلام:* ${egp(order.total)}`);
   }
 
   lines.push("");
@@ -152,8 +191,11 @@ function buildOrderMessage(order) {
     lines.push(order.notes);
   }
 
-  lines.push("");
-  lines.push(`${E.camera} تم رفع صورة إثبات التحويل على الموقع.`);
+  // Only for advance-payment orders whose screenshot was actually saved.
+  if (hasUploadedProof(order)) {
+    lines.push("");
+    lines.push(`${E.camera} تم رفع صورة إثبات التحويل على الموقع (قيد المراجعة).`);
+  }
   lines.push("");
   lines.push(`برجاء تأكيد الطلب. شكرًا لكم ${E.flower}`);
 

@@ -14,6 +14,18 @@ export interface User {
   updatedAt: string;
 }
 
+/** Row returned by the admin user-management API (no secrets). */
+export interface AdminUser {
+  _id: ObjectId;
+  name: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  isActive: boolean;
+  isEmailVerified: boolean;
+  createdAt: string;
+}
+
 // ─── Auth ─────────────────────────────────────────────────────
 
 export interface LoginPayload {

@@ -181,6 +181,14 @@ export const routes: Routes = [
             (m) => m.AdminBannerFormComponent,
           ),
       },
+      // Users
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./features/admin/pages/users/users.component').then(
+            (m) => m.AdminUsersComponent,
+          ),
+      },
       // Newsletter
       {
         path: 'newsletter',

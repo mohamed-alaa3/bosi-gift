@@ -15,19 +15,19 @@
     class="hero__track"
     [class.is-transitioning]="isTransitioning() && !prefersReducedMotion()"
   >
-    @for (slide of slides; track slide.id; let i = $index) {
+    @for (slide of slides(); track slide.id; let i = $index) {
       <div
         class="hero__slide"
         [class.is-active]="i === currentIndex()"
         [attr.aria-hidden]="i !== currentIndex()"
         [attr.aria-roledescription]="'slide'"
-        [attr.aria-label]="(i + 1) + ' of ' + totalSlides"
+        [attr.aria-label]="(i + 1) + ' of ' + totalSlides()"
         role="group"
       >
         <!-- Background image -->
         <div
           class="hero__bg"
-          [style.background-image]="'url(' + slide.image + ')'"
+          [style.background-image]="backgroundFor(slide)"
           [style.background-position]="slide.focalPoint || 'center'"
           aria-hidden="true"
         ></div>
@@ -37,28 +37,51 @@
 
         <!-- Content -->
         <div class="hero__content">
-          <p class="hero__eyebrow">{{ slide.eyebrowKey | translate }}</p>
-          <h1 class="hero__title">{{ slide.titleKey | translate }}</h1>
-          <p class="hero__subtitle">{{ slide.subtitleKey | translate }}</p>
-
-          <div class="hero__actions">
-            <a
-              [routerLink]="slide.primaryCta.link"
-              class="hero__cta hero__cta--primary"
-            >
-              <span>{{ slide.primaryCta.labelKey | translate }}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-
-            @if (slide.secondaryCta; as secondary) {
-              <a
-                [routerLink]="secondary.link"
-                class="hero__cta hero__cta--outline"
-              >
-                {{ secondary.labelKey | translate }}
-              </a>
+          @if (slide.banner; as b) {
+            <h1 class="hero__title">{{ b.title | localized }}</h1>
+            @if ((b.subtitle | localized); as sub) {
+              <p class="hero__subtitle">{{ sub }}</p>
             }
-          </div>
+
+            @if ((b.buttonText | localized); as label) {
+              @if (b.buttonLink) {
+                <div class="hero__actions">
+                  @if (isExternal(b.buttonLink)) {
+                    <a [href]="b.buttonLink" class="hero__cta hero__cta--primary" rel="noopener">
+                      <span>{{ label }}</span>
+                    </a>
+                  } @else {
+                    <a [routerLink]="internalLink(b.buttonLink)" class="hero__cta hero__cta--primary">
+                      <span>{{ label }}</span>
+                    </a>
+                  }
+                </div>
+              }
+            }
+          } @else {
+            <p class="hero__eyebrow">{{ slide.eyebrowKey | translate }}</p>
+            <h1 class="hero__title">{{ slide.titleKey | translate }}</h1>
+            <p class="hero__subtitle">{{ slide.subtitleKey | translate }}</p>
+
+            <div class="hero__actions">
+              <a
+                [routerLink]="slide.primaryCta.link"
+                class="hero__cta hero__cta--primary"
+              >
+                <span>{{ slide.primaryCta.labelKey | translate }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+
+              @if (slide.secondaryCta; as secondary) {
+                <a
+                  [routerLink]="secondary.link"
+                  class="hero__cta hero__cta--outline"
+                >
+                  {{ secondary.labelKey | translate }}
+                </a>
+              }
+            </div>
+          }
         </div>
       </div>
     }
@@ -100,7 +123,7 @@
   <!-- Dots -->
   @if (hasMultipleSlides()) {
     <div class="hero__dots" role="tablist" aria-label="Slide indicators">
-      @for (slide of slides; track slide.id; let i = $index) {
+      @for (slide of slides(); track slide.id; let i = $index) {
         <button
           type="button"
           class="hero__dot"
