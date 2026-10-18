@@ -273,7 +273,12 @@
     "chooseGiftBoxImage": "Please choose a gift box image",
     "chooseWrapStyleImage": "Please choose a wrap style image",
     "fileNotSupported": "\"{{name}}\" is not a supported image type",
-    "fileTooLarge": "\"{{name}}\" is larger than 5 MB"
+    "fileTooLarge": "\"{{name}}\" is larger than 5 MB",
+    "userSuspended": "Account suspended",
+    "userReactivated": "Account reactivated",
+    "userDeleted": "Account deleted",
+    "userActionFailed": "Couldn't complete that action",
+    "selectOptionsFirst": "Please choose all product options first"
   },
   "notFoundPage": {
     "title": "Page not found",
@@ -671,7 +676,8 @@
       "wrapStyles": "Wrap Styles",
       "ribbons": "Ribbons",
       "coupons": "Coupons",
-      "reviews": "Reviews"
+      "reviews": "Reviews",
+      "users": "Users"
     },
     "giftBoxes": {
       "title": "Gift Boxes",
@@ -1155,6 +1161,41 @@
       "total": "{{count}} reviews",
       "errName": "Enter the customer name (2+ characters).",
       "errProduct": "Choose a product."
+    },
+    "users": {
+      "title": "Users",
+      "subtitle": "Manage customer accounts.",
+      "total": "accounts",
+      "searchPlaceholder": "Search by name, email or phone...",
+      "allStatus": "All",
+      "activeOnly": "Active",
+      "suspendedOnly": "Suspended",
+      "colName": "Name",
+      "colEmail": "Email",
+      "colPhone": "Phone",
+      "colRole": "Role",
+      "colStatus": "Status",
+      "colJoined": "Registered",
+      "roleCustomer": "Customer",
+      "roleAdmin": "Admin",
+      "active": "Active",
+      "suspended": "Suspended",
+      "unverified": "Unverified",
+      "suspend": "Suspend",
+      "reactivate": "Reactivate",
+      "delete": "Delete",
+      "you": "You",
+      "protected": "Protected account",
+      "suspendTitle": "Suspend this account?",
+      "suspendMessage": "{{name}} will be signed out of protected areas immediately and will not be able to log in until reactivated.",
+      "reactivateTitle": "Reactivate this account?",
+      "reactivateMessage": "{{name}} will be able to log in and use their account again.",
+      "deleteTitle": "Delete this account permanently?",
+      "deleteMessage": "{{name}}'s account, cart, wishlist and saved addresses will be deleted. Past orders are kept for your records. This cannot be undone.",
+      "emptyTitle": "No users found",
+      "emptyText": "Try a different search or filter.",
+      "errorTitle": "Couldn't load users",
+      "errorText": "There was a problem. Please try again."
     }
   },
   "shop": {

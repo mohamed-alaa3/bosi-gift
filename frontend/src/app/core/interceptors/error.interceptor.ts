@@ -32,6 +32,8 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         message = apiError?.message || 'Your session has expired. Please sign in again.';
       } else if (error.status === 403) {
         message = apiError?.message || "You don't have permission to do that.";
+        // A suspended account's stored token is no longer valid: drop the local session.
+        if (apiError?.message === 'Account is disabled') authStore.clear();
       } else if (error.status >= 500) {
         message = 'Server error. Please try again later.';
       }

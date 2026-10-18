@@ -14,6 +14,7 @@ const { buildImageUrl } = require("../utils/buildImageUrl");
 const { assertTransition } = require("../utils/orderTransitions");
 const { computePricing } = require("./orderPricing.service");
 const { buildOrderMessage } = require("./whatsappMessage.service");
+const { resolveSelectedOptions } = require("../utils/productOptions");
 const cloudinaryService = require("./cloudinary.service");
 const { CLOUDINARY_FOLDERS } = require("../config/cloudinary");
 const {
@@ -253,6 +254,8 @@ async function buildCartSnapshot(userId) {
 
   const orderItems = [];
   let subtotal = 0;
+  // Units already claimed per product across lines (same product, different options)
+  const claimed = new Map();
 
   for (const item of cart.items) {
     if (item.type === "gift-box" && item.giftBox) {
@@ -278,11 +281,20 @@ async function buildCartSnapshot(userId) {
       throw ApiError.conflict(`Product is no longer available`);
     }
 
-    if (product.stock < item.quantity) {
+    const key = product._id.toString();
+    const totalClaimed = (claimed.get(key) || 0) + item.quantity;
+    if (product.stock < totalClaimed) {
       throw ApiError.conflict(
         `${product.name.en || product.name.ar}: only ${product.stock} left in stock`,
       );
     }
+    claimed.set(key, totalClaimed);
+
+    // Re-validate options against the live product; persist a canonical snapshot.
+    const selectedOptions = resolveSelectedOptions(
+      product,
+      item.selectedOptions || [],
+    );
 
     const unitPrice = effectivePrice(product);
     const lineSubtotal = unitPrice * item.quantity;
@@ -294,7 +306,7 @@ async function buildCartSnapshot(userId) {
       imageSnapshot: product.images?.[0] || "",
       priceAtPurchase: unitPrice,
       quantity: item.quantity,
-      selectedOptions: item.selectedOptions || [],
+      selectedOptions,
       subtotal: lineSubtotal,
       giftBox: null,
     });

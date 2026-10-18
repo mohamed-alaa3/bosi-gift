@@ -5,6 +5,7 @@ const authorize = require("../middleware/authorize");
 const adminCouponRoutes = require("./adminCoupon.routes");
 const adminSettingRoutes = require("./adminSetting.routes");
 const adminReviewRoutes = require("./adminReview.routes");
+const userRoutes = require("./user.routes");
 
 const router = express.Router();
 
@@ -22,6 +23,9 @@ router.use("/coupons", adminCouponRoutes);
 
 // Reviews moderation + manual testimonials → /api/admin/reviews
 router.use("/reviews", adminReviewRoutes);
+
+// User management (list / suspend / reactivate / delete) → /api/admin/users
+router.use("/users", userRoutes);
 
 // Store settings → /api/admin/settings
 router.use("/settings", adminSettingRoutes);

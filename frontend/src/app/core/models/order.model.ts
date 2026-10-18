@@ -16,7 +16,7 @@ export interface OrderItem {
   imageUrl?: string;
   priceAtPurchase: number;
   quantity: number;
-  selectedOptions: SelectedOption[];
+  selectedOptions?: SelectedOption[]; // absent on orders created before options were saved
   subtotal: number;
   type?: 'product' | 'gift-box';
   giftBox?: any;

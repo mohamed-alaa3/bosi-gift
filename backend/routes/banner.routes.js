@@ -2,6 +2,7 @@ const express = require("express");
 const bannerController = require("../controllers/banner.controller");
 const authenticate = require("../middleware/authenticate");
 const authorize = require("../middleware/authorize");
+const optionalAuthenticate = require("../middleware/optionalAuthenticate");
 const { uploadBannerImage } = require("../middleware/upload");
 const {
   createBannerValidator,
@@ -11,8 +12,8 @@ const {
 
 const router = express.Router();
 
-// Public (list only)
-router.get("/", bannerController.list);
+// Public list (active only). Admins sending a token may pass includeInactive=true.
+router.get("/", optionalAuthenticate, bannerController.list);
 
 // Admin only
 router.get(

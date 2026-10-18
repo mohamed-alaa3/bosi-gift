@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, of, timeout } from 'rxjs';
 
@@ -152,6 +152,7 @@ export class GiftShowcaseComponent implements OnInit {
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
+  private router = inject(Router);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private language = inject(LanguageService);
@@ -185,6 +186,13 @@ export class GiftShowcaseComponent implements OnInit {
   }
 
   protected onAddToCart(product: Product): void {
+    if (product.options?.length) {
+      // Needs a choice (color/size/…): send the customer to the product page.
+      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
+      void this.router.navigate(['/products', product.slug]);
+      return;
+    }
+
     if (!this.authStore.isAuthenticated()) {
       this.toast.info(this.translate.instant('toast.signInToAddToCart'));
       return;

@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 
 import { RevealOnScrollDirective } from '../../shared/directives/reveal-on-scroll.directive';
 import { HeroComponent } from './components/hero/hero.component';
+import { BannerStripComponent } from './components/banner-strip/banner-strip.component';
 import { ShopByCategoryComponent } from './components/shop-by-category/shop-by-category.component';
 import { ShopByOccasionComponent } from './components/shop-by-occasion/shop-by-occasion.component';
 import { ShopByRecipientComponent } from './components/shop-by-recipient/shop-by-recipient.component';
@@ -28,6 +29,7 @@ import { TrustBadgesComponent } from './components/trust-badges/trust-badges.com
     CommonModule,
     RevealOnScrollDirective,
     HeroComponent,
+    BannerStripComponent,
     TrustBadgesComponent,
     ShopByRecipientComponent,
     ShopByOccasionComponent,
@@ -47,6 +49,8 @@ import { TrustBadgesComponent } from './components/trust-badges/trust-badges.com
       <app-trust-badges />
     </div>
 
+    <app-banner-strip position="promo" />
+
     <app-shop-by-recipient />
 
     <app-shop-by-occasion />
@@ -58,6 +62,8 @@ import { TrustBadgesComponent } from './components/trust-badges/trust-badges.com
     <app-gift-showcase kind="boxes" />
 
     <app-gift-showcase kind="featured" />
+
+    <app-banner-strip position="home-mid" />
 
     <!-- shop-by-category reveals its own header + card grid internally -->
     <app-shop-by-category />

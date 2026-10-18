@@ -273,7 +273,12 @@
     "chooseGiftBoxImage": "يرجى اختيار صورة لبوكس الهدايا",
     "chooseWrapStyleImage": "يرجى اختيار صورة لطريقة التغليف",
     "fileNotSupported": "\"{{name}}\" ليس نوع صورة مدعوم",
-    "fileTooLarge": "\"{{name}}\" أكبر من 5 ميجابايت"
+    "fileTooLarge": "\"{{name}}\" أكبر من 5 ميجابايت",
+    "userSuspended": "تم إيقاف الحساب",
+    "userReactivated": "تمت إعادة تفعيل الحساب",
+    "userDeleted": "تم حذف الحساب",
+    "userActionFailed": "تعذّر إتمام هذا الإجراء",
+    "selectOptionsFirst": "يرجى اختيار جميع خيارات المنتج أولًا"
   },
   "notFoundPage": {
     "title": "الصفحة غير موجودة",
@@ -672,7 +677,8 @@
       "newsletter": "النشرة البريدية",
       "contact": "رسائل التواصل",
       "settings": "الإعدادات",
-      "reviews": "التقييمات"
+      "reviews": "التقييمات",
+      "users": "المستخدمون"
     },
     "giftBoxes": {
       "title": "بوكسات الهدايا",
@@ -1156,6 +1162,41 @@
       "total": "{{count}} تقييم",
       "errName": "اكتب اسم العميل (حرفين على الأقل).",
       "errProduct": "اختار المنتج."
+    },
+    "users": {
+      "title": "المستخدمون",
+      "subtitle": "إدارة حسابات العملاء.",
+      "total": "حساب",
+      "searchPlaceholder": "ابحث بالاسم أو البريد أو الهاتف...",
+      "allStatus": "الكل",
+      "activeOnly": "نشط",
+      "suspendedOnly": "موقوف",
+      "colName": "الاسم",
+      "colEmail": "البريد الإلكتروني",
+      "colPhone": "الهاتف",
+      "colRole": "الدور",
+      "colStatus": "الحالة",
+      "colJoined": "تاريخ التسجيل",
+      "roleCustomer": "عميل",
+      "roleAdmin": "مدير",
+      "active": "نشط",
+      "suspended": "موقوف",
+      "unverified": "غير مؤكد",
+      "suspend": "إيقاف",
+      "reactivate": "إعادة تفعيل",
+      "delete": "حذف",
+      "you": "أنت",
+      "protected": "حساب محمي",
+      "suspendTitle": "إيقاف هذا الحساب؟",
+      "suspendMessage": "سيتم تسجيل خروج {{name}} من المناطق المحمية فورًا ولن يتمكن من تسجيل الدخول حتى تتم إعادة تفعيل الحساب.",
+      "reactivateTitle": "إعادة تفعيل هذا الحساب؟",
+      "reactivateMessage": "سيتمكن {{name}} من تسجيل الدخول واستخدام حسابه مرة أخرى.",
+      "deleteTitle": "حذف هذا الحساب نهائيًا؟",
+      "deleteMessage": "سيتم حذف حساب {{name}} وسلة التسوق وقائمة المفضلة والعناوين المحفوظة. تُحفظ الطلبات السابقة في سجلاتك. لا يمكن التراجع عن هذا الإجراء.",
+      "emptyTitle": "لا يوجد مستخدمون",
+      "emptyText": "جرّب بحثًا أو تصفية مختلفة.",
+      "errorTitle": "تعذّر تحميل المستخدمين",
+      "errorText": "حدثت مشكلة. يرجى المحاولة مرة أخرى."
     }
   },
   "shop": {

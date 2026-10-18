@@ -1,0 +1,161 @@
+<div class="admin-users">
+  <header class="admin-users__header">
+    <div>
+      <h1 class="admin-users__title">{{ 'admin.users.title' | translate }}</h1>
+      <p class="admin-users__subtitle">
+        {{ 'admin.users.subtitle' | translate }}
+        @if (state() === 'success') {
+          <strong>{{ total() }}</strong> {{ 'admin.users.total' | translate }}
+        }
+      </p>
+    </div>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="admin-users__toolbar">
+    <div class="admin-users__search">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input
+        type="search"
+        class="admin-users__search-input"
+        [placeholder]="'admin.users.searchPlaceholder' | translate"
+        [value]="searchTerm()"
+        (input)="onSearch($event)"
+        maxlength="100"
+      />
+    </div>
+  </div>
+
+  <!-- Filter pills -->
+  <div class="admin-users__filters" role="tablist">
+    @for (opt of statusOptions; track opt.value) {
+      <button
+        type="button"
+        class="admin-users__filter"
+        [class.is-active]="statusFilter() === opt.value"
+        (click)="setStatus(opt.value)"
+      >
+        {{ opt.labelKey | translate }}
+      </button>
+    }
+  </div>
+
+  @if (state() === 'loading') {
+    <div class="admin-users__loader">
+      <app-loader size="lg" variant="spinner" />
+    </div>
+  }
+
+  @if (state() === 'error') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.users.errorTitle' | translate"
+      [message]="'admin.users.errorText' | translate"
+      [actionLabel]="'common.retry' | translate"
+      (actionClick)="load()"
+    />
+  }
+
+  @if (state() === 'empty') {
+    <app-empty-state
+      icon="inbox"
+      [title]="'admin.users.emptyTitle' | translate"
+      [message]="'admin.users.emptyText' | translate"
+    />
+  }
+
+  @if (state() === 'success') {
+    <div class="admin-users__table-wrap">
+      <table class="admin-users__table">
+        <thead>
+          <tr>
+            <th>{{ 'admin.users.colName' | translate }}</th>
+            <th>{{ 'admin.users.colPhone' | translate }}</th>
+            <th>{{ 'admin.users.colRole' | translate }}</th>
+            <th>{{ 'admin.users.colStatus' | translate }}</th>
+            <th>{{ 'admin.users.colJoined' | translate }}</th>
+            <th class="admin-users__col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (u of users(); track u._id) {
+            <tr>
+              <td>
+                <div class="admin-users__person">
+                  <span class="admin-users__name">
+                    {{ u.name }}
+                    @if (u._id === currentUserId()) {
+                      <span class="admin-users__badge">{{ 'admin.users.you' | translate }}</span>
+                    }
+                  </span>
+                  <span class="admin-users__sub" dir="ltr">{{ u.email }}</span>
+                  @if (!u.isEmailVerified) {
+                    <span class="admin-users__sub">{{ 'admin.users.unverified' | translate }}</span>
+                  }
+                </div>
+              </td>
+              <td><span class="admin-users__sub" dir="ltr">{{ u.phone || '—' }}</span></td>
+              <td>
+                <span class="admin-users__badge" [class.admin-users__badge--admin]="u.role === 'admin'">
+                  {{ (u.role === 'admin' ? 'admin.users.roleAdmin' : 'admin.users.roleCustomer') | translate }}
+                </span>
+              </td>
+              <td>
+                <span class="admin-users__status" [class.is-active]="u.isActive" [class.is-suspended]="!u.isActive">
+                  <span class="admin-users__status-dot"></span>
+                  {{ (u.isActive ? 'admin.users.active' : 'admin.users.suspended') | translate }}
+                </span>
+              </td>
+              <td><span class="admin-users__date">{{ u.createdAt | date: 'mediumDate' }}</span></td>
+              <td class="admin-users__col-actions">
+                @if (canManage(u)) {
+                  <div class="admin-users__actions">
+                    @if (u.isActive) {
+                      <button type="button" class="admin-users__action-text" [disabled]="processingId() === u._id" (click)="ask(u, 'suspend')">
+                        {{ 'admin.users.suspend' | translate }}
+                      </button>
+                    } @else {
+                      <button type="button" class="admin-users__action-text" [disabled]="processingId() === u._id" (click)="ask(u, 'reactivate')">
+                        {{ 'admin.users.reactivate' | translate }}
+                      </button>
+                    }
+                    <button
+                      type="button"
+                      class="admin-users__action admin-users__action--danger"
+                      [disabled]="processingId() === u._id"
+                      (click)="ask(u, 'delete')"
+                      [attr.aria-label]="'admin.users.delete' | translate"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+                    </button>
+                  </div>
+                } @else {
+                  <span class="admin-users__protected">{{ 'admin.users.protected' | translate }}</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="admin-users__pagination">
+        <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPageChange($event)" />
+      </div>
+    }
+  }
+
+  @if (dialog(); as d) {
+    <app-confirm-dialog
+      [isOpen]="true"
+      [title]="d.title"
+      [message]="d.message"
+      [confirmText]="d.confirmText"
+      [cancelText]="'common.cancel' | translate"
+      [variant]="d.variant"
+      (confirmed)="confirm()"
+      (cancelled)="cancel()"
+    />
+  }
+</div>

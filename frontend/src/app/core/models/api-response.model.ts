@@ -1,5 +1,5 @@
 /**
- * Standard response envelopes returned by the Habiba backend.
+ * Standard response envelopes returned by the Bosi Gift backend.
  * Every successful response has `success: true` and a `data` payload.
  * List endpoints also include `meta` for pagination.
  */
