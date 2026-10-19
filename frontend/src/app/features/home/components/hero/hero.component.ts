@@ -25,6 +25,7 @@ import { Banner, LocalizedText } from '../../../../core/models';
 export interface HeroSlide {
   id: string;
   image: string;               // e.g. 'assets/images/hero/hero-1.jpg'
+  mobileImage?: string;         // optional portrait image for narrow screens
   eyebrowKey: string;          // translation key
   titleKey: string;
   subtitleKey: string;
@@ -149,6 +150,7 @@ export class HeroComponent {
     return {
       id: `banner-${b._id}`,
       image: b.imageUrl || b.image,
+      mobileImage: b.mobileImageUrl || b.mobileImage || undefined,
       eyebrowKey: '',
       titleKey: '',
       subtitleKey: '',
@@ -161,6 +163,24 @@ export class HeroComponent {
         buttonLink: b.buttonLink || '',
       },
     };
+  }
+
+  /** Prefer the mobile image on narrow screens; gracefully retry desktop then the built-in fallback. */
+  protected onHeroImageError(event: Event, slide: HeroSlide): void {
+    const image = event.currentTarget as HTMLImageElement | null;
+    if (!image) return;
+
+    const picture = image.parentElement;
+    const mobileSource = picture?.querySelector('source');
+    if (slide.mobileImage && mobileSource && image.currentSrc !== image.src) {
+      mobileSource.remove();
+      image.src = slide.image;
+      return;
+    }
+
+    if (image.src.endsWith(FALLBACK_IMAGE)) return;
+    picture?.querySelectorAll('source').forEach((source) => source.remove());
+    image.src = FALLBACK_IMAGE;
   }
 
   /** CSS background: banner image first, built-in image as a safety net if it fails to load. */
