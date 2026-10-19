@@ -14,6 +14,26 @@ async function uploadBannerImageToCloudinary(file) {
   return { image: secure_url, imagePublicId: public_id };
 }
 
+async function uploadBannerImages(files = {}) {
+  const desktopFile = files.image?.[0];
+  const mobileFile = files.mobileImage?.[0];
+  if (!desktopFile && !mobileFile) return {};
+
+  let desktop = {};
+  try {
+    if (desktopFile) desktop = await uploadBannerImageToCloudinary(desktopFile);
+    const mobile = mobileFile
+      ? await uploadBannerImageToCloudinary(mobileFile)
+      : {};
+    return { ...desktop, ...mobile, mobileImage: mobile.image || "", mobileImagePublicId: mobile.imagePublicId || "" };
+  } catch (error) {
+    if (desktop.imagePublicId) {
+      await cloudinaryService.deleteAsset(desktop.imagePublicId).catch(() => {});
+    }
+    throw error;
+  }
+}
+
 /**
  * GET /api/banners?position=hero
  * Public (only active). Admin can pass includeInactive=true.
@@ -41,13 +61,8 @@ const getOne = asyncHandler(async (req, res) => {
  * POST /api/banners  (admin)
  */
 const create = asyncHandler(async (req, res) => {
-  const { image, imagePublicId } = await uploadBannerImageToCloudinary(
-    req.file,
-  );
-  const data = await bannerService.createBanner(req.body, {
-    image,
-    imagePublicId,
-  });
+  const imagePayload = await uploadBannerImages(req.files);
+  const data = await bannerService.createBanner(req.body, imagePayload);
   return ok(res, data, undefined, 201);
 });
 
@@ -55,9 +70,7 @@ const create = asyncHandler(async (req, res) => {
  * PATCH /api/banners/:id  (admin)
  */
 const update = asyncHandler(async (req, res) => {
-  const newImage = req.file
-    ? await uploadBannerImageToCloudinary(req.file)
-    : undefined;
+  const newImage = await uploadBannerImages(req.files);
   const data = await bannerService.updateBanner(
     req.params.id,
     req.body,
