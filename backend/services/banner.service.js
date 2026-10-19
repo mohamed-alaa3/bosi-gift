@@ -57,6 +57,7 @@ async function createBanner(data, imagePayload) {
   const mobileImagePublicId = imagePayload?.mobileImagePublicId || "";
 
   if (!image) {
+    if (mobileImagePublicId) await deleteImageBestEffort(mobileImagePublicId);
     throw ApiError.badRequest("Banner image is required");
   }
 
