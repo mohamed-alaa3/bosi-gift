@@ -20,16 +20,20 @@ async function uploadBannerImages(files = {}) {
   if (!desktopFile && !mobileFile) return {};
 
   let desktop = {};
+  let mobile = {};
   try {
     if (desktopFile) desktop = await uploadBannerImageToCloudinary(desktopFile);
-    const mobile = mobileFile
-      ? await uploadBannerImageToCloudinary(mobileFile)
-      : {};
-    return { ...desktop, ...mobile, mobileImage: mobile.image || "", mobileImagePublicId: mobile.imagePublicId || "" };
+    if (mobileFile) mobile = await uploadBannerImageToCloudinary(mobileFile);
+    return {
+      ...desktop,
+      mobileImage: mobile.image || "",
+      mobileImagePublicId: mobile.imagePublicId || "",
+    };
   } catch (error) {
-    if (desktop.imagePublicId) {
-      await cloudinaryService.deleteAsset(desktop.imagePublicId).catch(() => {});
-    }
+    await Promise.all([
+      desktop.imagePublicId ? cloudinaryService.deleteAsset(desktop.imagePublicId) : Promise.resolve(),
+      mobile.imagePublicId ? cloudinaryService.deleteAsset(mobile.imagePublicId) : Promise.resolve(),
+    ]);
     throw error;
   }
 }
