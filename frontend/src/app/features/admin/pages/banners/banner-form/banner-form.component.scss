@@ -51,6 +51,37 @@
         border-radius: var(--radius-lg);
     }
 
+    &__image-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+        gap: 1.25rem;
+
+        @media (max-width: 639px) {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    &__image-title {
+        align-self: flex-start;
+        margin: 0;
+        color: var(--text);
+        font-size: 0.9375rem;
+        font-weight: 700;
+
+        span {
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+    }
+
+    &__image-help {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        line-height: 1.45;
+        text-align: center;
+    }
+
     &__image-section {
         display: flex;
         flex-direction: column;
@@ -74,6 +105,11 @@
         height: 100%;
         object-fit: cover;
         display: block;
+    }
+
+    &__preview--mobile {
+        max-width: 320px;
+        aspect-ratio: 4 / 5;
     }
 
     &__preview-placeholder {

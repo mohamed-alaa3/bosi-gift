@@ -42,7 +42,10 @@ const uploadProductImages = createUploader(env.upload.maxFilesPerProduct).array(
 );
 
 const uploadCategoryImage = createUploader(1).single("image");
-const uploadBannerImage = createUploader(1).single("image");
+const uploadBannerImage = createUploader(2).fields([
+  { name: "image", maxCount: 1 },
+  { name: "mobileImage", maxCount: 1 },
+]);
 const uploadGiftBoxImage = createUploader(1).single("image");
 const uploadWrapStyleImage = createUploader(1).single("image");
 const uploadRibbonImage = createUploader(1).single("image");

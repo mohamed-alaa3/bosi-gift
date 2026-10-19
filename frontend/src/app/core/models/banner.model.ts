@@ -8,6 +8,9 @@ export interface Banner {
   subtitle: LocalizedText;
   image: string;
   imageUrl?: string;
+  /** Optional portrait image used on narrow screens. */
+  mobileImage?: string;
+  mobileImageUrl?: string;
   buttonText: LocalizedText;
   buttonLink: string;
   position: BannerPosition;
