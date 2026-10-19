@@ -95,7 +95,13 @@ async function createBanner(data, imagePayload) {
  */
 async function updateBanner(id, data, newImage) {
   const banner = await Banner.findById(id);
-  if (!banner) throw ApiError.notFound("Banner not found");
+  if (!banner) {
+    await Promise.all([
+      newImage?.imagePublicId ? deleteImageBestEffort(newImage.imagePublicId) : Promise.resolve(),
+      newImage?.mobileImagePublicId ? deleteImageBestEffort(newImage.mobileImagePublicId) : Promise.resolve(),
+    ]);
+    throw ApiError.notFound("Banner not found");
+  }
 
   if (data.title !== undefined) banner.title = data.title;
   if (data.subtitle !== undefined) banner.subtitle = data.subtitle;
