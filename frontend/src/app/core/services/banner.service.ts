@@ -67,6 +67,7 @@ export class BannerService {
     if (payload.sortOrder !== undefined) form.append('sortOrder', String(payload.sortOrder));
 
     if (image) form.append('image', image);
+    if (mobileImage) form.append('mobileImage', mobileImage);
 
     return form;
   }
