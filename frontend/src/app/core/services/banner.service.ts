@@ -28,14 +28,22 @@ export class BannerService {
     return this.http.get<ApiSuccessResponse<Banner>>(`${this.endpoint}/${id}`);
   }
 
-  create(payload: BannerPayload, image: File): Observable<ApiSuccessResponse<Banner>> {
-    return this.http.post<ApiSuccessResponse<Banner>>(this.endpoint, this.toFormData(payload, image));
+  create(payload: BannerPayload, image: File, mobileImage?: File): Observable<ApiSuccessResponse<Banner>> {
+    return this.http.post<ApiSuccessResponse<Banner>>(
+      this.endpoint,
+      this.toFormData(payload, image, mobileImage),
+    );
   }
 
-  update(id: ObjectId, payload: Partial<BannerPayload>, image?: File): Observable<ApiSuccessResponse<Banner>> {
+  update(
+    id: ObjectId,
+    payload: Partial<BannerPayload>,
+    image?: File,
+    mobileImage?: File,
+  ): Observable<ApiSuccessResponse<Banner>> {
     return this.http.patch<ApiSuccessResponse<Banner>>(
       `${this.endpoint}/${id}`,
-      this.toFormData(payload, image)
+      this.toFormData(payload, image, mobileImage),
     );
   }
 
@@ -43,7 +51,11 @@ export class BannerService {
     return this.http.delete<ApiSuccessResponse<{ _id: ObjectId }>>(`${this.endpoint}/${id}`);
   }
 
-  private toFormData(payload: Partial<BannerPayload>, image?: File): FormData {
+  private toFormData(
+    payload: Partial<BannerPayload>,
+    image?: File,
+    mobileImage?: File,
+  ): FormData {
     const form = new FormData();
 
     if (payload.title) {
