@@ -654,6 +654,7 @@
   "errors": {
     "required": "This field is required",
     "invalidEmail": "Please enter a valid email address",
+    "invalidEgyptPhone": "Enter a valid Egyptian mobile number (010, 011, 012 or 015 followed by 8 digits).",
     "passwordMismatch": "Passwords do not match",
     "networkError": "Network error. Please try again.",
     "unauthorized": "Please sign in to continue.",
@@ -1085,6 +1086,7 @@
       "errors": {
         "required": "This field is required.",
         "depositRange": "Enter an amount between 1 and 100,000.",
+        "minOrderRange": "Enter an amount between 0 and 1,000,000.",
         "percentRange": "Enter a percentage between 0 and 100.",
         "phone": "Enter a valid Egyptian mobile number, e.g. 01012345678.",
         "instapay": "Enter a mobile number or an InstaPay address, e.g. name@instapay.",
@@ -1114,6 +1116,8 @@
         "description": "Customers pay outside the site by manual transfer, then upload a screenshot as proof.",
         "depositAmount": "Deposit amount",
         "depositHint": "Paid now with the deposit option. The rest is paid in cash on delivery.",
+        "depositMinOrder": "Minimum order amount for partial advance payment",
+        "depositMinOrderHint": "Orders below this final total (after coupons, with shipping) can't use the deposit option. Separate from the deposit amount.",
         "discountPercent": "Full-payment discount",
         "discountHint": "Taken off the products (after any coupon, before shipping) when the customer pays everything in advance.",
         "vodafone": "Vodafone Cash number",
@@ -1238,6 +1242,14 @@
     "activeFilters": "Active filters",
     "removeFilter": "Remove filter"
   },
+  "quickAdd": {
+    "title": "Choose your options",
+    "chooseOptions": "Please choose:",
+    "optionsUnavailable": "This product's options aren't available right now. Please try again later.",
+    "quantity": "Quantity",
+    "onlyLeft": "Only {{count}} available",
+    "maxInCart": "You already have the maximum available quantity of this item in your cart."
+  },
   "product": {
     "addToCart": "Add to Cart",
     "addToWishlist": "Add to Wishlist",
@@ -1320,6 +1332,8 @@
     "shippingAddress": "Shipping Address",
     "fullName": "Full Name",
     "phone": "Phone Number",
+    "optional": "(Optional)",
+    "phonePlaceholder": "e.g. 01012345678",
     "country": "Country",
     "governorate": "Governorate",
     "governoratePlaceholder": "Choose your governorate",
@@ -1348,6 +1362,7 @@
     "paymentCodDesc": "Pay in cash when your order arrives.",
     "paymentDeposit": "Deposit + rest on delivery",
     "paymentDepositDesc": "Pay a deposit now, the rest in cash on delivery.",
+    "depositMinOrder": "Partial payment is available for orders of EGP {{amount}} or more.",
     "paymentFull": "Pay in full in advance",
     "paymentFullDesc": "Pay the entire amount now and get a discount.",
     "paymentFullBadge": "Discount",

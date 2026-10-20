@@ -28,6 +28,7 @@ const ERROR_CODES = Object.freeze({
 const LIMITS = Object.freeze({
   maxFee: 100000,
   maxDeposit: 100000,
+  maxDepositMinOrder: 1000000,
   storeName: 80,
   storePhone: 30,
   storeEmail: 120,
@@ -106,6 +107,7 @@ function paymentView(doc) {
   const p = doc.payment;
   return {
     depositAmount: p.depositAmount,
+    depositMinOrderAmount: p.depositMinOrderAmount ?? 200,
     fullPaymentDiscountPercent: p.fullPaymentDiscountPercent,
     vodafoneCashNumber: p.vodafoneCashNumber || "",
     instapayNumber: p.instapayNumber || "",
@@ -141,6 +143,7 @@ function toPublicView(doc) {
   return {
     governorates: governorateViews(doc, { withRegion: false }),
     depositAmount: payment.depositAmount,
+    depositMinOrderAmount: payment.depositMinOrderAmount,
     fullPaymentDiscountPercent: payment.fullPaymentDiscountPercent,
     vodafoneCashNumber: payment.vodafoneCashNumber,
     instapayNumber: payment.instapayNumber,
@@ -238,6 +241,13 @@ function validatePatch(patch) {
         if (!isNumber(p.depositAmount)) add("payment.depositAmount", ERROR_CODES.INVALID_TYPE);
         else if (p.depositAmount < 1 || p.depositAmount > LIMITS.maxDeposit) add("payment.depositAmount", ERROR_CODES.OUT_OF_RANGE);
         else out.depositAmount = round2(p.depositAmount);
+      }
+
+      if (p.depositMinOrderAmount !== undefined) {
+        const v = p.depositMinOrderAmount;
+        if (!isNumber(v)) add("payment.depositMinOrderAmount", ERROR_CODES.INVALID_TYPE);
+        else if (v < 0 || v > LIMITS.maxDepositMinOrder) add("payment.depositMinOrderAmount", ERROR_CODES.OUT_OF_RANGE);
+        else out.depositMinOrderAmount = round2(v);
       }
 
       if (p.fullPaymentDiscountPercent !== undefined) {

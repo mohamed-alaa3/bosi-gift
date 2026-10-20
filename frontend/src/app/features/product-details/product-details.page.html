@@ -51,7 +51,7 @@
 
           @if (hasDiscount()) {
             <span class="product-details__badge product-details__badge--sale">
-              -{{ discountPercent() }}%
+              <span class="product-details__badge-pct">-{{ discountPercent() }}%</span>
             </span>
           }
         </div>

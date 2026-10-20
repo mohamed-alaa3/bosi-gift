@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, timeout } from 'rxjs';
@@ -8,6 +8,7 @@ import { CartService } from '../../../../core/services/cart.service';
 import { WishlistService } from '../../../../core/services/wishlist.service';
 import { AuthStore } from '../../../../core/stores/auth.store';
 import { ToastService } from '../../../../core/services/toast.service';
+import { QuickAddService } from '../../../../core/services/quick-add.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { Product } from '../../../../core/models';
 import { ProductCardComponent } from '../../../../shared/components/product-card/product-card.component';
@@ -31,8 +32,8 @@ export class BestSellersComponent implements OnInit {
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
-  private router = inject(Router);
   private toast = inject(ToastService);
+  private quickAdd = inject(QuickAddService);
   private translate = inject(TranslateService);
   protected readonly state = signal<LoadState>('loading');
   protected readonly products = signal<Product[]>([]);
@@ -41,9 +42,8 @@ export class BestSellersComponent implements OnInit {
   protected readonly skeletons = Array.from({ length: MAX_ITEMS }, (_, i) => i);
   protected onAddToCart(product: Product): void {
     if (product.options?.length) {
-      // Needs a choice (color/size/…): send the customer to the product page.
-      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
-      void this.router.navigate(['/products', product.slug]);
+      // Needs a choice (color/size/…): pick it in the Quick Add modal.
+      this.quickAdd.open(product);
       return;
     }
 

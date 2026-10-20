@@ -14,6 +14,9 @@ export interface PaymentOption {
   badgeKey?: string;
   /** Whether the option is currently offered (depends on Settings) */
   available: boolean;
+  /** Optional explanation shown while the option is unavailable (i18n key) */
+  unavailableNoteKey?: string;
+  unavailableNoteParams?: Record<string, unknown>;
 }
 
 @Component({
@@ -56,6 +59,11 @@ export interface PaymentOption {
               <span class="payment-method__desc">
                 {{ option.descKey | translate }}
               </span>
+              @if (!option.available && option.unavailableNoteKey) {
+                <span class="payment-method__desc payment-method__desc--note" role="note">
+                  {{ option.unavailableNoteKey | translate: option.unavailableNoteParams }}
+                </span>
+              }
             </div>
 
             <span class="payment-method__radio" aria-hidden="true"></span>
@@ -191,6 +199,11 @@ export interface PaymentOption {
         font-size: 0.8125rem;
         line-height: 1.5;
         color: var(--text-muted);
+      }
+
+      .payment-method__desc--note {
+        color: var(--danger);
+        font-weight: 600;
       }
 
       .payment-method__note {

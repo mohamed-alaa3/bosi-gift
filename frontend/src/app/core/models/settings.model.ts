@@ -26,6 +26,8 @@ export interface PublicSettings {
   governorates: PublicGovernorate[];
   /** Amount (EGP) paid now with the deposit option. */
   depositAmount: number;
+  /** Minimum final order total (EGP) required to use the deposit option. */
+  depositMinOrderAmount: number;
   /** % off the products when paying in full in advance. */
   fullPaymentDiscountPercent: number;
   /** Empty string = method not offered. */
@@ -41,6 +43,7 @@ export interface AdminGovernorate extends PublicGovernorate {
 
 export interface PaymentSettings {
   depositAmount: number;
+  depositMinOrderAmount: number;
   fullPaymentDiscountPercent: number;
   vodafoneCashNumber: string;
   instapayNumber: string;

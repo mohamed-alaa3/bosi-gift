@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { Component, DestroyRef, inject, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, timeout } from 'rxjs';
@@ -11,6 +10,7 @@ import { CartService } from '../../../../core/services/cart.service';
 import { WishlistService } from '../../../../core/services/wishlist.service';
 import { AuthStore } from '../../../../core/stores/auth.store';
 import { ToastService } from '../../../../core/services/toast.service';
+import { QuickAddService } from '../../../../core/services/quick-add.service';
 
 const FETCH_TIMEOUT_MS = 8000;
 
@@ -61,8 +61,8 @@ export class ProductGridComponent {
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
-  private router = inject(Router);
   private toast = inject(ToastService);
+  private quickAdd = inject(QuickAddService);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
 
@@ -70,9 +70,8 @@ export class ProductGridComponent {
 
   protected onAddToCart(product: Product): void {
     if (product.options?.length) {
-      // Needs a choice (color/size/…): send the customer to the product page.
-      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
-      void this.router.navigate(['/products', product.slug]);
+      // Needs a choice (color/size/…): pick it in the Quick Add modal.
+      this.quickAdd.open(product);
       return;
     }
 

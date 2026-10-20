@@ -67,6 +67,9 @@
         text-transform: uppercase;
     }
 
+    // Keep "-20%" in reading order inside RTL pages (same as the product card).
+    &__badge-pct { unicode-bidi: isolate; direction: ltr; }
+
     &__thumbs {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));

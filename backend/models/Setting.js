@@ -33,6 +33,10 @@ const settingSchema = new mongoose.Schema(
     payment: {
       // Amount (EGP) the customer transfers now with the "deposit" option
       depositAmount: { type: Number, min: 1, default: 100 },
+      // Minimum FINAL order total (EGP) required to use the deposit option.
+      // Separate from depositAmount. Existing documents without the field read
+      // as the default (200) and are not rewritten until an admin saves.
+      depositMinOrderAmount: { type: Number, min: 0, default: 200 },
       // Discount (%) on the merchandise for the "pay in full" option
       fullPaymentDiscountPercent: { type: Number, min: 0, max: 100, default: 3 },
       // Numbers customers transfer money to (empty = method not offered)

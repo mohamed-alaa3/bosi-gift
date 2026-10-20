@@ -428,13 +428,16 @@ async function quoteOrder(userId, input) {
     couponDiscount,
     paymentMethod,
     depositAmount: payment.depositAmount,
+    depositMinOrderAmount: payment.depositMinOrderAmount,
     fullPaymentDiscountPercent: payment.fullPaymentDiscountPercent,
   });
 
   return {
     governorate: { key: gov.key, name: gov.name, fee: gov.fee },
+    depositEligible: pricing.depositEligible,
     paymentSettings: {
       depositAmount: payment.depositAmount,
+      depositMinOrderAmount: payment.depositMinOrderAmount,
       fullPaymentDiscountPercent: payment.fullPaymentDiscountPercent,
       vodafoneCashNumber: payment.vodafoneCashNumber,
       instapayNumber: payment.instapayNumber,
@@ -513,9 +516,24 @@ async function createOrder(userId, input) {
     couponDiscount,
     paymentMethod,
     depositAmount: payment.depositAmount,
+    depositMinOrderAmount: payment.depositMinOrderAmount,
     fullPaymentDiscountPercent:
       payment.paymentDiscountPercent ?? payment.fullPaymentDiscountPercent,
   });
+
+  // ---- 4b. Deposit minimum (server-side, from persisted settings) ----
+  if (paymentMethod === PAYMENT_METHODS.DEPOSIT && !pricing.depositEligible) {
+    throw ApiError.badRequest(
+      `Partial payment is available for orders of EGP ${payment.depositMinOrderAmount} or more.`,
+      [
+        {
+          field: "paymentMethod",
+          message: "DEPOSIT_BELOW_MINIMUM",
+          minAmount: payment.depositMinOrderAmount,
+        },
+      ],
+    );
+  }
 
   // ---- 5. Price guard ----
   // The frontend sends back the amountDueNow it showed to the customer.

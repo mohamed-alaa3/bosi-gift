@@ -216,6 +216,20 @@
             </div>
 
             <div class="settings-field">
+              <label class="settings-label" for="pay-deposit-min">{{ 'admin.settings.payment.depositMinOrder' | translate }} *</label>
+              <div class="settings-input-group">
+                <input id="pay-deposit-min" type="number" inputmode="decimal" min="0" step="1" class="settings-input" formControlName="depositMinOrderAmount"
+                  [class.is-invalid]="errorKey(paymentForm.controls.depositMinOrderAmount, 'minOrder')" />
+                <span class="settings-unit">{{ 'admin.settings.egp' | translate }}</span>
+              </div>
+              @if (errorKey(paymentForm.controls.depositMinOrderAmount, 'minOrder'); as key) {
+                <p class="settings-error" role="alert">{{ key | translate }}</p>
+              } @else {
+                <p class="settings-hint">{{ 'admin.settings.payment.depositMinOrderHint' | translate }}</p>
+              }
+            </div>
+
+            <div class="settings-field">
               <label class="settings-label" for="pay-discount">{{ 'admin.settings.payment.discountPercent' | translate }} *</label>
               <div class="settings-input-group">
                 <input id="pay-discount" type="number" inputmode="decimal" min="0" max="100" step="0.5" class="settings-input" formControlName="fullPaymentDiscountPercent"

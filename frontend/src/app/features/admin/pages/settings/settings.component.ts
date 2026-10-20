@@ -59,6 +59,7 @@ const TABS: readonly { id: TabId; labelKey: string }[] = [
 const FETCH_TIMEOUT_MS = 10000;
 const MAX_FEE = 100000;
 const MAX_DEPOSIT = 100000;
+const MAX_DEPOSIT_MIN_ORDER = 1000000;
 
 const round2 = (n: number): number => Math.round(n * 100) / 100;
 
@@ -148,6 +149,11 @@ export class AdminSettingsComponent implements OnInit {
       Validators.min(1),
       Validators.max(MAX_DEPOSIT),
     ]),
+    depositMinOrderAmount: new FormControl<number | null>(null, [
+      Validators.required,
+      Validators.min(0),
+      Validators.max(MAX_DEPOSIT_MIN_ORDER),
+    ]),
     fullPaymentDiscountPercent: new FormControl<number | null>(null, [
       Validators.required,
       Validators.min(0),
@@ -172,6 +178,7 @@ export class AdminSettingsComponent implements OnInit {
     return diff<PaymentSettings>(
       {
         depositAmount: v.depositAmount ?? saved.depositAmount,
+        depositMinOrderAmount: v.depositMinOrderAmount ?? saved.depositMinOrderAmount,
         fullPaymentDiscountPercent: v.fullPaymentDiscountPercent ?? saved.fullPaymentDiscountPercent,
         vodafoneCashNumber: (v.vodafoneCashNumber ?? '').trim(),
         instapayNumber: (v.instapayNumber ?? '').trim(),
@@ -460,14 +467,15 @@ export class AdminSettingsComponent implements OnInit {
   /** i18n key of the error to show for a control, or null. */
   protected errorKey(
     control: FormControl<number | null> | FormControl<string>,
-    kind: 'deposit' | 'percent' | 'phone' | 'instapay' | 'text',
+    kind: 'deposit' | 'minOrder' | 'percent' | 'phone' | 'instapay' | 'text',
   ): string | null {
     if (!control.invalid || !(control.touched || control.dirty)) return null;
     const e = control.errors ?? {};
 
     if (e['required']) return 'admin.settings.errors.required';
     if (e['min'] || e['max']) {
-      return kind === 'percent' ? 'admin.settings.errors.percentRange' : 'admin.settings.errors.depositRange';
+      if (kind === 'percent') return 'admin.settings.errors.percentRange';
+      return kind === 'minOrder' ? 'admin.settings.errors.minOrderRange' : 'admin.settings.errors.depositRange';
     }
     if (e['phone']) return 'admin.settings.errors.phone';
     if (e['instapay']) return 'admin.settings.errors.instapay';
