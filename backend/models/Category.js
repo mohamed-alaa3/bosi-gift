@@ -39,7 +39,7 @@ const categorySchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    ctive: {
+    isActive: {
       type: Boolean,
       default: true,
       index: true,
