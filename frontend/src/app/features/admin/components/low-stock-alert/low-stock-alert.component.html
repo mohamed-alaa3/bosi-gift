@@ -30,7 +30,7 @@
             }
           </div>
           <span class="low-stock__count" [class.is-zero]="p.stock === 0">
-            {{ p.stock }}
+            {{ p.stock | localDigits }}
           </span>
         </li>
       }

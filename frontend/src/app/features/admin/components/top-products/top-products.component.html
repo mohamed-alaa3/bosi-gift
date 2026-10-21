@@ -16,7 +16,7 @@
     <ul class="top-products__list">
       @for (p of products(); track p.productId; let i = $index) {
         <li class="top-products__item">
-          <span class="top-products__rank" [class.is-top]="i < 3">{{ i + 1 }}</span>
+          <span class="top-products__rank" [class.is-top]="i < 3">{{ i + 1 | localDigits }}</span>
 
           <div class="top-products__media">
             @if (p.image) {
@@ -35,7 +35,7 @@
               ></div>
             </div>
             <p class="top-products__sales">
-              {{ p.totalSold }} {{ 'admin.dashboard.sales' | translate }}
+              {{ p.totalSold | localDigits }} {{ 'admin.dashboard.sales' | translate }}
             </p>
           </div>
 

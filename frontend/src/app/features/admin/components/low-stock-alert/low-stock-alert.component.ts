@@ -5,11 +5,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { LowStockProduct } from '../../../../core/services/admin-stats.service';
 import { LocalizedPipe } from '../../../../shared/pipes/localized.pipe';
+import { LocalDigitsPipe } from '../../../../shared/pipes/local-digits.pipe';
 
 @Component({
   selector: 'app-admin-low-stock-alert',
   standalone: true,
-  imports: [CommonModule, RouterLink, TranslatePipe, LocalizedPipe],
+  imports: [CommonModule, RouterLink, TranslatePipe, LocalizedPipe, LocalDigitsPipe],
   templateUrl: './low-stock-alert.component.html',
   styleUrl: './low-stock-alert.component.scss',
 })

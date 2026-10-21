@@ -5,11 +5,12 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { RecentOrder } from '../../../../core/services/admin-stats.service';
 import { PricePipe } from '../../../../shared/pipes/price.pipe';
+import { LocalDigitsPipe } from '../../../../shared/pipes/local-digits.pipe';
 
 @Component({
   selector: 'app-admin-recent-orders',
   standalone: true,
-  imports: [CommonModule, DatePipe, RouterLink, TranslatePipe, PricePipe],
+  imports: [CommonModule, DatePipe, RouterLink, TranslatePipe, PricePipe, LocalDigitsPipe],
   templateUrl: './recent-orders.component.html',
   styleUrl: './recent-orders.component.scss',
 })

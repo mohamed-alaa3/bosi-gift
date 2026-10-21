@@ -1,6 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
+
+import { LanguageService } from '../../../../core/services/language.service';
+import { formatMoney, formatNumber, localizeDigits } from '../../../../shared/utils/format';
+import { LocalDigitsPipe } from '../../../../shared/pipes/local-digits.pipe';
 
 export interface RevenuePoint {
   date: string;
@@ -11,11 +15,13 @@ export interface RevenuePoint {
 @Component({
   selector: 'app-admin-revenue-chart',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, LocalDigitsPipe],
   templateUrl: './revenue-chart.component.html',
   styleUrl: './revenue-chart.component.scss',
 })
 export class AdminRevenueChartComponent {
+  private language = inject(LanguageService);
+
   readonly points = input<RevenuePoint[]>([]);
   readonly loading = input<boolean>(false);
 
@@ -111,23 +117,20 @@ export class AdminRevenueChartComponent {
 
   // Helpers
   private formatValue(value: number): string {
-    if (value >= 1000) return `${(value / 1000).toFixed(1)}k`;
-    return value.toFixed(0);
+    const lang = this.language.current();
+    const suffix = lang === 'ar' ? ' ألف' : 'k';
+    if (value >= 1000) return `${formatNumber(value / 1000, lang, 1)}${suffix}`;
+    return formatNumber(value, lang);
   }
 
   protected formatDate(date: string): string {
     if (!date) return '';
     const parts = date.split('-');
     if (parts.length < 3) return date;
-    return `${parts[1]}/${parts[2]}`;
+    return localizeDigits(`${parts[1]}/${parts[2]}`, this.language.current());
   }
 
   protected formatCurrency(v: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(v);
+    return formatMoney(v, this.language.current());
   }
 }

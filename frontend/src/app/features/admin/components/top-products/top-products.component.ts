@@ -5,12 +5,13 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { TopProduct } from '../../../../core/services/admin-stats.service';
 import { LocalizedPipe } from '../../../../shared/pipes/localized.pipe';
 import { PricePipe } from '../../../../shared/pipes/price.pipe';
+import { LocalDigitsPipe } from '../../../../shared/pipes/local-digits.pipe';
 import { SafeImagePipe } from '../../../../shared/pipes/safe-image.pipe';
 
 @Component({
   selector: 'app-admin-top-products',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, LocalizedPipe, PricePipe, SafeImagePipe],
+  imports: [CommonModule, TranslatePipe, LocalizedPipe, PricePipe, SafeImagePipe, LocalDigitsPipe],
   templateUrl: './top-products.component.html',
   styleUrl: './top-products.component.scss',
 })

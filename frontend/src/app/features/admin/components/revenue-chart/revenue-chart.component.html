@@ -9,7 +9,7 @@
       <div class="revenue-chart__kpi">
         <p class="revenue-chart__kpi-label">{{ 'admin.dashboard.lastDay' | translate }}</p>
         <p class="revenue-chart__kpi-value">{{ formatCurrency(cp.revenue) }}</p>
-        <p class="revenue-chart__kpi-orders">{{ cp.orders }} {{ 'admin.dashboard.orders' | translate }}</p>
+        <p class="revenue-chart__kpi-orders">{{ cp.orders | localDigits }} {{ 'admin.dashboard.orders' | translate }}</p>
       </div>
     }
   </header>
