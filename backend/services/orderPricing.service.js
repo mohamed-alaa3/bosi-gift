@@ -27,6 +27,7 @@ const round2 = (n) => Math.round(n * 100) / 100;
  * @param {number} [input.couponDiscount=0] Absolute discount from the coupon
  * @param {string} input.paymentMethod      'cod' | 'deposit' | 'full'
  * @param {number} [input.depositAmount]    Required for 'deposit' — from settings
+ * @param {number} [input.depositMinOrderAmount=0] Minimum final total to use 'deposit' — from settings
  * @param {number} [input.fullPaymentDiscountPercent=0] For 'full' — from settings
  * @returns {{
  *   subtotal: number,
@@ -37,6 +38,7 @@ const round2 = (n) => Math.round(n * 100) / 100;
  *   total: number,
  *   amountDueNow: number,
  *   remainingAmount: number,
+ *   depositEligible: boolean,
  * }}
  */
 function computePricing(input) {
@@ -47,6 +49,7 @@ function computePricing(input) {
     couponDiscount = 0,
     paymentMethod,
     depositAmount = 0,
+    depositMinOrderAmount = 0,
     fullPaymentDiscountPercent = 0,
   } = input || {};
 
@@ -102,6 +105,16 @@ function computePricing(input) {
 
   const remainingAmount = round2(Math.max(0, total - amountDueNow));
 
+  // ---- Deposit eligibility ----
+  // Judged on the final total the customer would pay with the deposit option
+  // (after coupon, with shipping + tax, no full-payment discount).
+  const depositOrderTotal = Math.max(
+    0,
+    round2(subtotal + shippingFee + tax - safeCouponDiscount),
+  );
+  const minDeposit = round2(Math.max(0, Number(depositMinOrderAmount) || 0));
+  const depositEligible = depositOrderTotal >= minDeposit;
+
   return {
     subtotal: round2(subtotal),
     shippingFee: round2(shippingFee),
@@ -111,6 +124,7 @@ function computePricing(input) {
     total,
     amountDueNow,
     remainingAmount,
+    depositEligible,
   };
 }
 

@@ -49,7 +49,12 @@ section.product-details {
 
     // Sale badge -> gift tag
     .product-details__badge--sale {
-        border-radius: 0 999px 999px 0;
+        // Logical radii: flat on the attached (start) edge, rounded on the end
+        // edge — a physical `0 999px 999px 0` leaves the flat side on the
+        // wrong edge in RTL.
+        border-radius: 0;
+        border-start-end-radius: 999px;
+        border-end-end-radius: 999px;
         inset-inline-start: 0;
         box-shadow: 0 4px 10px rgba(var(--brand-primary-rgb), 0.25);
     }

@@ -103,6 +103,7 @@
               <app-input
                 formControlName="email"
                 type="email"
+                [required]="true"
                 [label]="'checkout.email' | translate"
                 [placeholder]="'checkout.emailPlaceholder' | translate"
                 [error]="showError('email') ? errorFor('email') : ''"
@@ -119,6 +120,7 @@
               <div class="checkout__grid">
                 <app-input
                   formControlName="fullName"
+                  [required]="true"
                   [label]="'checkout.fullName' | translate"
                   [error]="showError('fullName') ? errorFor('fullName') : ''"
                   autocomplete="name"
@@ -126,6 +128,8 @@
                 <app-input
                   formControlName="phone"
                   type="tel"
+                  [required]="true"
+                  [placeholder]="'checkout.phonePlaceholder' | translate"
                   [label]="'checkout.phone' | translate"
                   [error]="showError('phone') ? errorFor('phone') : ''"
                   autocomplete="tel"
@@ -135,6 +139,7 @@
               <div class="checkout__grid">
                 <app-input
                   formControlName="country"
+                  [required]="true"
                   [label]="'checkout.country' | translate"
                   [error]="showError('country') ? errorFor('country') : ''"
                   autocomplete="country"
@@ -152,19 +157,21 @@
               <div class="checkout__grid">
                 <app-input
                   formControlName="city"
+                  [required]="true"
                   [label]="'checkout.city' | translate"
                   [error]="showError('city') ? errorFor('city') : ''"
                   autocomplete="address-level2"
                 />
                 <app-input
                   formControlName="area"
-                  [label]="'checkout.area' | translate"
+                  [label]="('checkout.area' | translate) + ' ' + ('checkout.optional' | translate)"
                   autocomplete="address-level3"
                 />
               </div>
 
               <app-input
                 formControlName="street"
+                [required]="true"
                 [label]="'checkout.street' | translate"
                 [error]="showError('street') ? errorFor('street') : ''"
                 autocomplete="address-line1"
@@ -173,17 +180,17 @@
               <div class="checkout__grid">
                 <app-input
                   formControlName="building"
-                  [label]="'checkout.building' | translate"
+                  [label]="('checkout.building' | translate) + ' ' + ('checkout.optional' | translate)"
                 />
                 <app-input
                   formControlName="apartment"
-                  [label]="'checkout.apartment' | translate"
+                  [label]="('checkout.apartment' | translate) + ' ' + ('checkout.optional' | translate)"
                 />
               </div>
 
               <app-input
                 formControlName="postalCode"
-                [label]="'checkout.postalCode' | translate"
+                [label]="('checkout.postalCode' | translate) + ' ' + ('checkout.optional' | translate)"
                 autocomplete="postal-code"
               />
             </section>

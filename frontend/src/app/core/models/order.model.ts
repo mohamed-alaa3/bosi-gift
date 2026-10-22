@@ -79,6 +79,7 @@ export interface QuoteGovernorate {
 
 export interface QuotePaymentSettings {
   depositAmount: number;
+  depositMinOrderAmount: number;
   fullPaymentDiscountPercent: number;
   vodafoneCashNumber: string;
   instapayNumber: string;
@@ -102,6 +103,8 @@ export interface QuoteResponse {
   total: number;
   amountDueNow: number;
   remainingAmount: number;
+  /** Server verdict: is this order large enough for the deposit option? */
+  depositEligible: boolean;
 }
 
 // ---------- Create ----------

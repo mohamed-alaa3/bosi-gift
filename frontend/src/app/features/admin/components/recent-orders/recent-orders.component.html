@@ -22,7 +22,7 @@
           <a [routerLink]="['/admin/orders', order._id]" class="recent-orders__item">
             <div class="recent-orders__info">
               <p class="recent-orders__number">{{ order.orderNumber }}</p>
-              <p class="recent-orders__date">{{ order.createdAt | date:'short' }}</p>
+              <p class="recent-orders__date">{{ order.createdAt | date:'short' | localDigits }}</p>
             </div>
 
             <div class="recent-orders__right">

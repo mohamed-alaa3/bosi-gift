@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, switchMap, timeout } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { ProductService } from '../../core/services/product.service';
 import { CartService } from '../../core/services/cart.service';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
+import { QuickAddService } from '../../core/services/quick-add.service';
 import { CartStore } from '../../core/stores/cart.store';
 import { UiStore } from '../../core/stores/ui.store';
 import { WishlistService } from '../../core/services/wishlist.service';
@@ -71,9 +72,9 @@ export class ProductDetailsPage implements OnInit {
   private wishlistStore = inject(WishlistStore);
   private authStore = inject(AuthStore);
   private uiStore = inject(UiStore);
-  private router = inject(Router);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+  private quickAdd = inject(QuickAddService);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
 
@@ -106,18 +107,17 @@ export class ProductDetailsPage implements OnInit {
     ];
   });
   protected addRelatedToCart(product: Product): void {
-    if (product.options?.length) {
-      // Needs a choice (color/size/…): send the customer to the product page.
-      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
-      void this.router.navigate(['/products', product.slug]);
-      return;
-    }
-
     if (!this.authStore.isAuthenticated()) {
-this.toast.info(this.translate.instant('toast.signInToAddToCart'));
+      this.toast.info(this.translate.instant('toast.signInToAddToCart'));
       this.authService.redirectToRegister();
       return;
     }
+    if (product.options?.length) {
+      // Needs a choice (color/size/…): pick it in the Quick Add modal.
+      this.quickAdd.open(product);
+      return;
+    }
+
 
     this.cartService
       .add({ productId: product._id, quantity: 1, selectedOptions: [] })
@@ -355,7 +355,7 @@ this.toast.info(this.translate.instant('toast.signInToSaveToWishlist'));
     }
 
     // Same single-flight toggle the product cards use, so heart state and
-    // toast text always agree (the toast is based on what was actually done).
+    // toast text always agree (the toast reflects what was actually done).
     this.wishlistService
       .toggle(product._id)
       .pipe(

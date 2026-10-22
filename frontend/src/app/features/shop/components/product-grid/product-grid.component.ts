@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
 import { Component, DestroyRef, inject, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, timeout } from 'rxjs';
@@ -12,6 +11,7 @@ import { WishlistService } from '../../../../core/services/wishlist.service';
 import { AuthStore } from '../../../../core/stores/auth.store';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { QuickAddService } from '../../../../core/services/quick-add.service';
 
 const FETCH_TIMEOUT_MS = 8000;
 
@@ -62,27 +62,26 @@ export class ProductGridComponent {
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
-  private router = inject(Router);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+  private quickAdd = inject(QuickAddService);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
 
   readonly products = input<Product[]>([]);
 
   protected onAddToCart(product: Product): void {
-    if (product.options?.length) {
-      // Needs a choice (color/size/…): send the customer to the product page.
-      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
-      void this.router.navigate(['/products', product.slug]);
-      return;
-    }
-
     if (!this.authStore.isAuthenticated()) {
-this.toast.info(this.translate.instant('toast.signInToAddToCart'));
+      this.toast.info(this.translate.instant('toast.signInToAddToCart'));
       this.authService.redirectToRegister();
       return;
     }
+    if (product.options?.length) {
+      // Needs a choice (color/size/…): pick it in the Quick Add modal.
+      this.quickAdd.open(product);
+      return;
+    }
+
 
     this.cartService
       .add({ productId: product._id, quantity: 1, selectedOptions: [] })

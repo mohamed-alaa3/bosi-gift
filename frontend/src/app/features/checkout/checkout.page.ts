@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, timeout } from 'rxjs';
@@ -54,12 +54,20 @@ import {
 } from './components/payment-method/payment-method.component';
 import { CheckoutPaymentProofComponent } from './components/payment-proof/payment-proof.component';
 import { RevealOnScrollDirective } from '../../shared/directives/reveal-on-scroll.directive';
+import { normalizeEgyptMobile } from '../../shared/utils/egypt-payment';
 
 type LoadState = 'loading' | 'ready' | 'empty' | 'error';
 type FlowState = 'form' | 'submitting' | 'confirmed';
 
 const FETCH_TIMEOUT_MS = 10000;
 const GOV_NONE = '';
+
+/** Empty is left to `required`; anything else must be a valid Egyptian mobile. */
+function egyptMobileValidator(control: AbstractControl): ValidationErrors | null {
+  const value = String(control.value ?? '').trim();
+  if (!value) return null;
+  return normalizeEgyptMobile(value) ? null : { egyptPhone: true };
+}
 
 @Component({
   selector: 'app-checkout-page',
@@ -117,6 +125,7 @@ export class CheckoutPage implements OnInit {
   // ---------- Settings ----------
   protected readonly governorates = signal<PublicGovernorate[]>([]);
   protected readonly depositAmount = signal<number>(0);
+  protected readonly depositMinOrderAmount = signal<number>(0);
   protected readonly fullPaymentDiscountPercent = signal<number>(0);
   protected readonly vodafoneCashNumber = signal<string>('');
   protected readonly instapayNumber = signal<string>('');
@@ -156,7 +165,7 @@ export class CheckoutPage implements OnInit {
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     fullName: ['', [Validators.required, Validators.minLength(2)]],
-    phone: ['', [Validators.required]],
+    phone: ['', [Validators.required, egyptMobileValidator]],
     country: ['Egypt', [Validators.required]],
     governorate: [GOV_NONE, [Validators.required]],
     city: ['', [Validators.required]],
@@ -184,6 +193,14 @@ export class CheckoutPage implements OnInit {
     return this.governorates().find((g) => g.key === key) ?? null;
   });
 
+  /**
+   * Deposit is offered only when the final order total reaches the admin
+   * threshold. The server's quote is authoritative (it knows tax, coupon and
+   * shipping); until a quote exists we don't block — the server re-checks
+   * at order creation anyway.
+   */
+  protected readonly depositEligible = computed(() => this.quote()?.depositEligible ?? true);
+
   protected readonly paymentOptions = computed<PaymentOption[]>(() => {
     const hasAnyNumber = !!this.vodafoneCashNumber() || !!this.instapayNumber();
     return [
@@ -197,7 +214,12 @@ export class CheckoutPage implements OnInit {
         value: 'deposit',
         titleKey: 'checkout.paymentDeposit',
         descKey: 'checkout.paymentDepositDesc',
-        available: hasAnyNumber && this.depositAmount() > 0,
+        available: hasAnyNumber && this.depositAmount() > 0 && this.depositEligible(),
+        unavailableNoteKey:
+          hasAnyNumber && this.depositAmount() > 0 && !this.depositEligible()
+            ? 'checkout.depositMinOrder'
+            : undefined,
+        unavailableNoteParams: { amount: this.depositMinOrderAmount() },
       },
       {
         value: 'full',
@@ -263,6 +285,7 @@ export class CheckoutPage implements OnInit {
         if (!data) return;
         this.governorates.set(data.governorates);
         this.depositAmount.set(data.depositAmount);
+        this.depositMinOrderAmount.set(data.depositMinOrderAmount ?? 0);
         this.fullPaymentDiscountPercent.set(data.fullPaymentDiscountPercent);
         this.vodafoneCashNumber.set(data.vodafoneCashNumber);
         this.instapayNumber.set(data.instapayNumber);
@@ -344,15 +367,18 @@ export class CheckoutPage implements OnInit {
    */
   protected refreshQuote(): void {
     const gov = this.form.controls.governorate.value;
-    const method = this.paymentMethod();
-    if (!gov || !method) {
+    // Before a method is chosen we still quote (as COD) so the payment step
+    // knows whether the deposit option is eligible.
+    const method: PaymentMethod = this.paymentMethod() || 'cod';
+    if (!gov) {
       this.quote.set(null);
       return;
     }
 
     // Address is required for the quote — build a partial snapshot.
     const v = this.form.getRawValue();
-    if (!v.fullName || !v.phone || !v.city || !v.street) {
+    const phone = normalizeEgyptMobile(v.phone);
+    if (!v.fullName || !phone || !v.city || !v.street) {
       this.quote.set(null);
       return;
     }
@@ -364,7 +390,7 @@ export class CheckoutPage implements OnInit {
       .quote({
         shippingAddress: {
           fullName: v.fullName,
-          phone: v.phone,
+          phone,
           country: v.country,
           city: v.city,
           area: v.area,
@@ -392,7 +418,27 @@ export class CheckoutPage implements OnInit {
         if (!res?.success || !res.data) return;
         this.quote.set(res.data);
         this.priceChangedNotice.set(false);
+        this.dropDepositIfIneligible(res.data);
       });
+  }
+
+  /**
+   * The order became too small for the deposit option (coupon, shipping, ...):
+   * clear the selection, send the customer back to the payment step and say why.
+   */
+  private dropDepositIfIneligible(q: QuoteResponse): void {
+    if (this.paymentMethod() !== 'deposit' || q.depositEligible) return;
+    this.paymentMethod.set('');
+    this.paymentProofMethod.set('');
+    this.paymentProofFile.set(null);
+    const step = this.currentStep();
+    if (step === 'proof' || step === 'review') this.currentStep.set('payment');
+    this.toast.warning(
+      this.translate.instant('checkout.depositMinOrder', {
+        amount: q.paymentSettings.depositMinOrderAmount,
+      }),
+    );
+    this.refreshQuote();
   }
 
   private handleQuoteError(err: unknown): void {
@@ -475,6 +521,7 @@ export class CheckoutPage implements OnInit {
     }
     if (!valid) return;
 
+    this.refreshQuote();
     this.goToStep('shipping');
   }
 
@@ -483,6 +530,7 @@ export class CheckoutPage implements OnInit {
   }
 
   protected continueFromCoupon(): void {
+    this.refreshQuote();
     this.goToStep('payment');
   }
 
@@ -528,6 +576,7 @@ export class CheckoutPage implements OnInit {
     if (c.errors['required']) return this.translate.instant('errors.required');
     if (c.errors['email']) return this.translate.instant('errors.invalidEmail');
     if (c.errors['minlength']) return this.translate.instant('errors.tooShort');
+    if (c.errors['egyptPhone']) return this.translate.instant('errors.invalidEgyptPhone');
     return this.translate.instant('errors.invalid');
   }
 
@@ -545,7 +594,7 @@ export class CheckoutPage implements OnInit {
     const v = this.form.getRawValue();
     const shippingAddress: AddressSnapshot = {
       fullName: v.fullName,
-      phone: v.phone,
+      phone: normalizeEgyptMobile(v.phone) ?? v.phone,
       country: v.country,
       city: v.city,
       area: v.area,
@@ -603,6 +652,25 @@ export class CheckoutPage implements OnInit {
 
   private handleCreateError(err: unknown): void {
     if (err instanceof HttpErrorResponse) {
+      // Deposit below the admin minimum (the server is the authority)
+      const fieldErrors: unknown = err.error?.errors;
+      if (
+        Array.isArray(fieldErrors) &&
+        fieldErrors.some((e: { message?: string }) => e?.message === 'DEPOSIT_BELOW_MINIMUM')
+      ) {
+        this.paymentMethod.set('');
+        this.paymentProofMethod.set('');
+        this.paymentProofFile.set(null);
+        this.currentStep.set('payment');
+        this.toast.warning(
+          this.translate.instant('checkout.depositMinOrder', {
+            amount: this.depositMinOrderAmount(),
+          }),
+        );
+        this.loadSettings();
+        this.refreshQuote();
+        return;
+      }
       // PRICE_CHANGED
       if (err.status === 409) {
         this.priceChangedNotice.set(true);

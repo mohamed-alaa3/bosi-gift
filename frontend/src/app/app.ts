@@ -12,11 +12,12 @@ import { WishlistService } from './core/services/wishlist.service';
 
 import { CartDrawerComponent } from './features/cart/components/cart-drawer/cart-drawer.component';
 import { ToastComponent } from './shared/components/toast/toast.component';
+import { QuickAddModalComponent } from './shared/components/quick-add-modal/quick-add-modal.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CartDrawerComponent, ToastComponent],
+  imports: [RouterOutlet, CartDrawerComponent, ToastComponent, QuickAddModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

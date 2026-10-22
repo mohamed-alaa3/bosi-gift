@@ -24,13 +24,21 @@
         [attr.aria-label]="(i + 1) + ' of ' + totalSlides()"
         role="group"
       >
-        <!-- Background image -->
-        <div
-          class="hero__bg"
-          [style.background-image]="backgroundFor(slide)"
-          [style.background-position]="slide.focalPoint || 'center'"
-          aria-hidden="true"
-        ></div>
+        <!-- Responsive banner image: mobile source is optional and falls back to desktop. -->
+        <picture class="hero__picture" aria-hidden="true">
+          @if (slide.mobileImage) {
+            <source [srcset]="slide.mobileImage" media="(max-width: 640px)" />
+          }
+          <img
+            class="hero__image"
+            [src]="slide.image"
+            [alt]="''"
+            [style.object-position]="slide.focalPoint || 'center'"
+            (error)="onHeroImageError($event, slide)"
+            decoding="async"
+            [attr.fetchpriority]="i === 0 ? 'high' : 'auto'"
+          />
+        </picture>
 
         <!-- Overlay -->
         <div class="hero__overlay" aria-hidden="true"></div>

@@ -4,6 +4,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, forkJoin, of, timeout } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { LanguageService } from '../../../../core/services/language.service';
+import { formatMoney, formatNumber, formatPercent } from '../../../../shared/utils/format';
+
 import {
   AdminStatsService,
   StatsOverview,
@@ -39,6 +42,7 @@ const FETCH_TIMEOUT_MS = 10000;
 })
 export class AdminDashboardComponent implements OnInit {
   private statsService = inject(AdminStatsService);
+  private language = inject(LanguageService);
   private destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(true);
@@ -108,21 +112,16 @@ export class AdminDashboardComponent implements OnInit {
       });
   }
 
-  // Format helpers for KPI cards
+  // Format helpers for KPI cards (EGP, Arabic digits in Arabic)
   protected formatCurrency(v: number): string {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(v);
+    return formatMoney(v, this.language.current());
   }
 
   protected formatNumber(v: number): string {
-    return new Intl.NumberFormat('en-US').format(v);
+    return formatNumber(v, this.language.current());
   }
 
   protected formatPercent(v: number): string {
-    return `${v.toFixed(1)}%`;
+    return formatPercent(v, this.language.current());
   }
 }

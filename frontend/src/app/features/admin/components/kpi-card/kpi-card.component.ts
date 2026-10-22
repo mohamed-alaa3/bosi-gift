@@ -1,5 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
+
+import { LanguageService } from '../../../../core/services/language.service';
+import { formatPercent } from '../../../../shared/utils/format';
 
 @Component({
   selector: 'app-admin-kpi-card',
@@ -16,7 +19,13 @@ export class AdminKpiCardComponent {
   readonly iconColor = input<'primary' | 'success' | 'info' | 'warning' | 'danger'>('primary');
   readonly loading = input<boolean>(false);
 
+  private language = inject(LanguageService);
+
   protected absGrowth(): number {
     return Math.abs(this.growth() ?? 0);
+  }
+
+  protected growthText(): string {
+    return formatPercent(this.absGrowth(), this.language.current());
   }
 }

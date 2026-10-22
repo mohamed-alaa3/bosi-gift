@@ -9,6 +9,7 @@ const { buildImageUrl } = require("../utils/buildImageUrl");
 function withImageUrl(banner) {
   const obj = banner.toJSON();
   if (obj.image) obj.imageUrl = buildImageUrl(obj.image);
+  if (obj.mobileImage) obj.mobileImageUrl = buildImageUrl(obj.mobileImage);
   return obj;
 }
 
@@ -47,13 +48,16 @@ async function getBannerById(id) {
  * Create a banner. Requires an uploaded image.
  *
  * @param {object} data
- * @param {{ image: string, imagePublicId: string }} imagePayload
+ * @param {{ image?: string, imagePublicId?: string, mobileImage?: string, mobileImagePublicId?: string }} imagePayload
  */
 async function createBanner(data, imagePayload) {
   const image = imagePayload?.image || "";
   const imagePublicId = imagePayload?.imagePublicId || "";
+  const mobileImage = imagePayload?.mobileImage || "";
+  const mobileImagePublicId = imagePayload?.mobileImagePublicId || "";
 
   if (!image) {
+    if (mobileImagePublicId) await deleteImageBestEffort(mobileImagePublicId);
     throw ApiError.badRequest("Banner image is required");
   }
 
@@ -66,14 +70,17 @@ async function createBanner(data, imagePayload) {
       position: data.position,
       image,
       imagePublicId,
+      mobileImage,
+      mobileImagePublicId,
       isActive: data.isActive !== undefined ? data.isActive : true,
       sortOrder: data.sortOrder || 0,
     });
     return withImageUrl(banner);
   } catch (err) {
-    if (imagePublicId) {
-      await deleteImageBestEffort(imagePublicId);
-    }
+    await Promise.all([
+      imagePublicId ? deleteImageBestEffort(imagePublicId) : Promise.resolve(),
+      mobileImagePublicId ? deleteImageBestEffort(mobileImagePublicId) : Promise.resolve(),
+    ]);
     throw err;
   }
 }
@@ -84,11 +91,17 @@ async function createBanner(data, imagePayload) {
  *
  * @param {string} id
  * @param {object} data
- * @param {{ image: string, imagePublicId: string }|undefined} newImage
+ * @param {{ image?: string, imagePublicId?: string, mobileImage?: string, mobileImagePublicId?: string }|undefined} newImage
  */
 async function updateBanner(id, data, newImage) {
   const banner = await Banner.findById(id);
-  if (!banner) throw ApiError.notFound("Banner not found");
+  if (!banner) {
+    await Promise.all([
+      newImage?.imagePublicId ? deleteImageBestEffort(newImage.imagePublicId) : Promise.resolve(),
+      newImage?.mobileImagePublicId ? deleteImageBestEffort(newImage.mobileImagePublicId) : Promise.resolve(),
+    ]);
+    throw ApiError.notFound("Banner not found");
+  }
 
   if (data.title !== undefined) banner.title = data.title;
   if (data.subtitle !== undefined) banner.subtitle = data.subtitle;
@@ -98,22 +111,29 @@ async function updateBanner(id, data, newImage) {
   if (data.isActive !== undefined) banner.isActive = data.isActive;
   if (data.sortOrder !== undefined) banner.sortOrder = data.sortOrder;
 
-  if (newImage && newImage.image) {
-    const oldImage = banner.image;
+  const oldImagesToDelete = [];
+  if (newImage?.image) {
+    oldImagesToDelete.push(banner.imagePublicId || banner.image);
     banner.image = newImage.image;
     banner.imagePublicId = newImage.imagePublicId || "";
-
-    await deleteImageBestEffort(oldImage);
+  }
+  if (newImage?.mobileImage) {
+    oldImagesToDelete.push(banner.mobileImagePublicId || banner.mobileImage);
+    banner.mobileImage = newImage.mobileImage;
+    banner.mobileImagePublicId = newImage.mobileImagePublicId || "";
   }
 
   try {
     await banner.save();
   } catch (err) {
-    if (newImage && newImage.imagePublicId) {
-      await deleteImageBestEffort(newImage.imagePublicId);
-    }
+    await Promise.all([
+      newImage?.imagePublicId ? deleteImageBestEffort(newImage.imagePublicId) : Promise.resolve(),
+      newImage?.mobileImagePublicId ? deleteImageBestEffort(newImage.mobileImagePublicId) : Promise.resolve(),
+    ]);
     throw err;
   }
+
+  await Promise.all(oldImagesToDelete.map(deleteImageBestEffort));
 
   return withImageUrl(banner);
 }
@@ -125,9 +145,10 @@ async function deleteBanner(id) {
   const banner = await Banner.findById(id);
   if (!banner) throw ApiError.notFound("Banner not found");
 
-  if (banner.image) {
-    await deleteImageBestEffort(banner.image);
-  }
+  await Promise.all([
+    deleteImageBestEffort(banner.imagePublicId || banner.image),
+    deleteImageBestEffort(banner.mobileImagePublicId || banner.mobileImage),
+  ]);
 
   await banner.deleteOne();
   return { _id: id };

@@ -1,5 +1,6 @@
 const { body, param } = require("express-validator");
 const { runValidation } = require("./_common");
+const { normalizeEgyptMobile } = require("../utils/egyptPayment");
 const {
   ORDER_STATUS_VALUES,
   PAYMENT_METHOD_VALUES,
@@ -53,7 +54,13 @@ const addressValidators = (required = true) => {
       .notEmpty()
       .withMessage("Shipping address phone is required")
       .isLength({ max: 20 })
-      .withMessage("Shipping address phone is too long"),
+      .withMessage("Shipping address phone is too long")
+      .custom((v) => normalizeEgyptMobile(v) !== null)
+      .withMessage(
+        "Enter a valid Egyptian mobile number (010, 011, 012 or 015 followed by 8 digits)",
+      )
+      // Store one canonical form: 01XXXXXXXXX
+      .customSanitizer((v) => normalizeEgyptMobile(v) || v),
 
     body("shippingAddress.country")
       .trim()

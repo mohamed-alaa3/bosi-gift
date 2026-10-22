@@ -1,0 +1,105 @@
+<app-modal
+  [isOpen]="!!product()"
+  size="md"
+  [ariaLabel]="'quickAdd.title' | translate"
+  (closed)="close()"
+>
+  <h2 modal-header class="quick-add__title">{{ 'quickAdd.title' | translate }}</h2>
+
+  @if (product(); as p) {
+    <div class="quick-add">
+      <div class="quick-add__summary">
+        @if (image()) {
+          <img
+            class="quick-add__image img-fallback"
+            [src]="image() | safeImage"
+            [alt]="p.name | localized"
+          />
+        } @else {
+          <div class="quick-add__image quick-add__image--empty" aria-hidden="true"></div>
+        }
+        <div class="quick-add__meta">
+          <p class="quick-add__name">{{ p.name | localized }}</p>
+          <p class="quick-add__price">
+            <span class="quick-add__price-current">{{ unitPrice() | price }}</span>
+            @if (hasDiscount()) {
+              <span class="quick-add__price-old">{{ p.price | price }}</span>
+            }
+          </p>
+        </div>
+      </div>
+
+      @if (isOutOfStock()) {
+        <p class="quick-add__notice quick-add__notice--error" role="alert">
+          {{ 'product.outOfStockNote' | translate }}
+        </p>
+      } @else if (hasUnavailableGroup()) {
+        <p class="quick-add__notice quick-add__notice--error" role="alert">
+          {{ 'quickAdd.optionsUnavailable' | translate }}
+        </p>
+      } @else {
+        @for (group of p.options; track group.name.en) {
+          <fieldset class="quick-add__group">
+            <legend class="quick-add__label">
+              {{ group.name | localized }}
+              <span class="quick-add__required" aria-hidden="true">*</span>
+            </legend>
+            <div class="quick-add__values" role="radiogroup" [attr.aria-label]="group.name | localized">
+              @for (value of group.values; track value.name.en) {
+                <button
+                  type="button"
+                  role="radio"
+                  class="quick-add__option"
+                  [class.is-active]="isSelected(group.name, value.name)"
+                  [attr.aria-checked]="isSelected(group.name, value.name)"
+                  (click)="select(group.name, value.name)"
+                >
+                  {{ value.name | localized }}
+                </button>
+              }
+            </div>
+          </fieldset>
+        }
+
+        @if (missing().length > 0) {
+          <p class="quick-add__notice" role="status">
+            {{ 'quickAdd.chooseOptions' | translate }}
+            @for (g of missing(); track g.name.en; let last = $last) {
+              <strong>{{ g.name | localized }}</strong>@if (!last) {<span> / </span>}
+            }
+          </p>
+        }
+
+        @if (atCartLimit()) {
+          <p class="quick-add__notice quick-add__notice--error" role="alert">
+            {{ 'quickAdd.maxInCart' | translate }}
+          </p>
+        } @else {
+          <div class="quick-add__qty">
+            <span class="quick-add__label">{{ 'quickAdd.quantity' | translate }}</span>
+            <app-quantity-stepper [min]="1" [max]="maxQty()" (valueChange)="onQuantity($event)" />
+            @if (quantity() >= maxQty()) {
+              <span class="quick-add__stock">
+                {{ 'quickAdd.onlyLeft' | translate: { count: maxQty() } }}
+              </span>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <div modal-footer class="quick-add__footer">
+    <button type="button" class="quick-add__btn quick-add__btn--ghost" (click)="close()">
+      {{ 'common.cancel' | translate }}
+    </button>
+    <button
+      type="button"
+      class="quick-add__btn quick-add__btn--primary"
+      [disabled]="!canAdd()"
+      (click)="add()"
+    >
+      {{ 'product.addToCart' | translate }}
+    </button>
+  </div>
+</app-modal>

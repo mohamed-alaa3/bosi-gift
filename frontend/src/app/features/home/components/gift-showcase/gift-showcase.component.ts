@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, OnInit, computed, inject, input, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { catchError, of, timeout } from 'rxjs';
 
@@ -10,6 +10,7 @@ import { LanguageService } from '../../../../core/services/language.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { QuickAddService } from '../../../../core/services/quick-add.service';
 import { WishlistService } from '../../../../core/services/wishlist.service';
 import { AuthStore } from '../../../../core/stores/auth.store';
 import { ProductCardComponent } from '../../../../shared/components/product-card/product-card.component';
@@ -153,9 +154,9 @@ export class GiftShowcaseComponent implements OnInit {
   private cartService = inject(CartService);
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
-  private router = inject(Router);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+  private quickAdd = inject(QuickAddService);
   private translate = inject(TranslateService);
   private language = inject(LanguageService);
   private destroyRef = inject(DestroyRef);
@@ -188,18 +189,17 @@ export class GiftShowcaseComponent implements OnInit {
   }
 
   protected onAddToCart(product: Product): void {
-    if (product.options?.length) {
-      // Needs a choice (color/size/…): send the customer to the product page.
-      this.toast.info(this.translate.instant('toast.selectOptionsFirst'));
-      void this.router.navigate(['/products', product.slug]);
-      return;
-    }
-
     if (!this.authStore.isAuthenticated()) {
       this.toast.info(this.translate.instant('toast.signInToAddToCart'));
       this.authService.redirectToRegister();
       return;
     }
+    if (product.options?.length) {
+      // Needs a choice (color/size/…): pick it in the Quick Add modal.
+      this.quickAdd.open(product);
+      return;
+    }
+
     this.cartService
       .add({ productId: product._id, quantity: 1, selectedOptions: [] })
       .pipe(

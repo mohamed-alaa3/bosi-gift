@@ -33,6 +33,15 @@ const bannerSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    // Optional mobile-specific image; existing banners remain valid without it.
+    mobileImage: {
+      type: String,
+      default: "",
+    },
+    mobileImagePublicId: {
+      type: String,
+      default: "",
+    },
     buttonText: {
       type: translationSchema,
       default: () => ({}),

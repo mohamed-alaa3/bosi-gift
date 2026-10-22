@@ -37,7 +37,9 @@ export class AdminBannerFormComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly submitting = signal(false);
   protected readonly selectedImage = signal<File | null>(null);
+  protected readonly selectedMobileImage = signal<File | null>(null);
   protected readonly previewUrl = signal<string>('');
+  protected readonly mobilePreviewUrl = signal<string>('');
 
   protected readonly positionOptions: Array<{ value: BannerPosition; labelKey: string }> = [
     { value: 'hero', labelKey: 'admin.banners.positionHero' },
@@ -100,6 +102,7 @@ export class AdminBannerFormComponent implements OnInit {
         });
 
         this.previewUrl.set(b.imageUrl || b.image || '');
+        this.mobilePreviewUrl.set(b.mobileImageUrl || b.mobileImage || '');
       });
   }
 
@@ -123,6 +126,28 @@ this.toast.error(this.translate.instant('toast.imageTooLarge'));
 
     const reader = new FileReader();
     reader.onload = () => this.previewUrl.set(String(reader.result));
+    reader.readAsDataURL(file);
+  }
+
+  protected onMobileImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+      this.toast.error(this.translate.instant('toast.invalidImageType'));
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      this.toast.error(this.translate.instant('toast.imageTooLarge'));
+      input.value = '';
+      return;
+    }
+
+    this.selectedMobileImage.set(file);
+    const reader = new FileReader();
+    reader.onload = () => this.mobilePreviewUrl.set(String(reader.result));
     reader.readAsDataURL(file);
   }
 
@@ -152,10 +177,11 @@ this.toast.error(this.translate.instant('toast.chooseBannerImage'));
     };
 
     const image = this.selectedImage() ?? undefined;
+    const mobileImage = this.selectedMobileImage() ?? undefined;
 
     const op$ = id
-      ? this.bannerService.update(id, payload, image)
-      : this.bannerService.create(payload, image!);
+      ? this.bannerService.update(id, payload, image, mobileImage)
+      : this.bannerService.create(payload, image!, mobileImage);
 
     op$
       .pipe(
