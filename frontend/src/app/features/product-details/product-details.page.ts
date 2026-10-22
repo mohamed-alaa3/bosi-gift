@@ -7,6 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { TranslateService } from '@ngx-translate/core';
 import { ProductService } from '../../core/services/product.service';
 import { CartService } from '../../core/services/cart.service';
+import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/toast.service';
 import { CartStore } from '../../core/stores/cart.store';
 import { UiStore } from '../../core/stores/ui.store';
@@ -71,6 +72,7 @@ export class ProductDetailsPage implements OnInit {
   private authStore = inject(AuthStore);
   private uiStore = inject(UiStore);
   private router = inject(Router);
+  private authService = inject(AuthService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
@@ -113,6 +115,7 @@ export class ProductDetailsPage implements OnInit {
 
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToAddToCart'));
+      this.authService.redirectToRegister();
       return;
     }
 
@@ -133,6 +136,7 @@ this.toast.success(this.translate.instant('toast.addedToCart'));
   protected toggleRelatedWishlist(product: Product): void {
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToSaveToWishlist'));
+      this.authService.redirectToRegister();
       return;
     }
 
@@ -303,6 +307,7 @@ this.toast.success(this.translate.instant(res.added ? 'toast.addedToWishlist' : 
 
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToAddToCart'));
+      this.authService.redirectToRegister();
       return;
     }
 
@@ -345,24 +350,25 @@ this.toast.success(this.translate.instant('toast.addedToCart'));
 
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToSaveToWishlist'));
+      this.authService.redirectToRegister();
       return;
     }
 
-    const action = this.inWishlist()
-      ? this.wishlistService.remove(product._id)
-      : this.wishlistService.add(product._id);
-
-    action
+    // Same single-flight toggle the product cards use, so heart state and
+    // toast text always agree (the toast is based on what was actually done).
+    this.wishlistService
+      .toggle(product._id)
       .pipe(
         timeout(FETCH_TIMEOUT_MS),
         catchError(() => of(null)),
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((res) => {
-        if (res?.success) {
-this.toast.success(
-  this.translate.instant(this.inWishlist() ? 'toast.removedFromWishlist' : 'toast.addedToWishlist'),
-);        }
+        if (res) {
+          this.toast.success(
+            this.translate.instant(res.added ? 'toast.addedToWishlist' : 'toast.removedFromWishlist'),
+          );
+        }
       });
   }
 

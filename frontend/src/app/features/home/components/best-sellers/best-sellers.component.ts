@@ -7,6 +7,7 @@ import { catchError, of, timeout } from 'rxjs';
 import { CartService } from '../../../../core/services/cart.service';
 import { WishlistService } from '../../../../core/services/wishlist.service';
 import { AuthStore } from '../../../../core/stores/auth.store';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { ProductService } from '../../../../core/services/product.service';
 import { Product } from '../../../../core/models';
@@ -32,6 +33,7 @@ export class BestSellersComponent implements OnInit {
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
   private router = inject(Router);
+  private authService = inject(AuthService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   protected readonly state = signal<LoadState>('loading');
@@ -49,6 +51,7 @@ export class BestSellersComponent implements OnInit {
 
     if (!this.authStore.isAuthenticated()) {
       this.toast.info(this.translate.instant('toast.signInToAddToCart'));
+      this.authService.redirectToRegister();
       return;
     }
 
@@ -70,6 +73,7 @@ export class BestSellersComponent implements OnInit {
   protected onToggleWishlist(product: Product): void {
     if (!this.authStore.isAuthenticated()) {
       this.toast.info(this.translate.instant('toast.signInToSaveToWishlist'));
+      this.authService.redirectToRegister();
       return;
     }
 

@@ -8,6 +8,7 @@ import { Product, ProductQuery } from '../../../../core/models';
 import { CartService } from '../../../../core/services/cart.service';
 import { LanguageService } from '../../../../core/services/language.service';
 import { ProductService } from '../../../../core/services/product.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { WishlistService } from '../../../../core/services/wishlist.service';
 import { AuthStore } from '../../../../core/stores/auth.store';
@@ -153,6 +154,7 @@ export class GiftShowcaseComponent implements OnInit {
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
   private router = inject(Router);
+  private authService = inject(AuthService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private language = inject(LanguageService);
@@ -195,6 +197,7 @@ export class GiftShowcaseComponent implements OnInit {
 
     if (!this.authStore.isAuthenticated()) {
       this.toast.info(this.translate.instant('toast.signInToAddToCart'));
+      this.authService.redirectToRegister();
       return;
     }
     this.cartService
@@ -212,6 +215,7 @@ export class GiftShowcaseComponent implements OnInit {
   protected onToggleWishlist(product: Product): void {
     if (!this.authStore.isAuthenticated()) {
       this.toast.info(this.translate.instant('toast.signInToSaveToWishlist'));
+      this.authService.redirectToRegister();
       return;
     }
     this.wishlistService

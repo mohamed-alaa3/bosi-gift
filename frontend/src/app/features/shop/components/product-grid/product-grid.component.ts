@@ -10,6 +10,7 @@ import { RevealOnScrollDirective } from '../../../../shared/directives/reveal-on
 import { CartService } from '../../../../core/services/cart.service';
 import { WishlistService } from '../../../../core/services/wishlist.service';
 import { AuthStore } from '../../../../core/stores/auth.store';
+import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
 const FETCH_TIMEOUT_MS = 8000;
@@ -62,6 +63,7 @@ export class ProductGridComponent {
   private wishlistService = inject(WishlistService);
   private authStore = inject(AuthStore);
   private router = inject(Router);
+  private authService = inject(AuthService);
   private toast = inject(ToastService);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
@@ -78,6 +80,7 @@ export class ProductGridComponent {
 
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToAddToCart'));
+      this.authService.redirectToRegister();
       return;
     }
 
@@ -98,6 +101,7 @@ this.toast.success(this.translate.instant('toast.addedToCart'));
   protected onToggleWishlist(product: Product): void {
     if (!this.authStore.isAuthenticated()) {
 this.toast.info(this.translate.instant('toast.signInToSaveToWishlist'));
+      this.authService.redirectToRegister();
       return;
     }
 

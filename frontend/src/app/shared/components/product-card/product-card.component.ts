@@ -10,6 +10,7 @@ import { RatingStarsComponent } from '../rating-stars/rating-stars.component';
 import { Product, LocalizedText } from '../../../core/models';
 import { LanguageService } from '../../../core/services/language.service';
 import { WishlistStore } from '../../../core/stores/wishlist.store';
+import { AuthStore } from '../../../core/stores/auth.store';
 
 @Component({
   selector: 'app-product-card',
@@ -70,6 +71,7 @@ export class ProductCardComponent {
   protected readonly productLink = computed(() => ['/products', this.product().slug]);
 
   private readonly wishlistStore = inject(WishlistStore);
+  private readonly authStore = inject(AuthStore);
 
   /** Heart state: explicit input OR the server-synced wishlist store. */
   protected readonly isInWishlist = computed(
@@ -90,6 +92,13 @@ export class ProductCardComponent {
     event.preventDefault();
     event.stopPropagation();
     if (this.isOutOfStock() || this.addingToCart() || this.addedToCart()) return;
+
+    // Signed-out visitors (or products that need an option choice) are redirected
+    // by the parent — don't flash a fake "added" tick for them.
+    if (!this.authStore.isAuthenticated() || this.product().options?.length) {
+      this.addToCart.emit(this.product());
+      return;
+    }
 
     this.addingToCart.set(true);
     this.addToCart.emit(this.product());

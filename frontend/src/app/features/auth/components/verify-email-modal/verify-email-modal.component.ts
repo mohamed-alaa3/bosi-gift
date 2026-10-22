@@ -153,7 +153,7 @@ export class VerifyEmailModalComponent {
         this.close();
 
         // Navigate home after a short delay so the toast is visible.
-        setTimeout(() => this.router.navigate(['/']), 300);
+        setTimeout(() => this.router.navigateByUrl(this.safeRedirect()), 300);
       });
   }
 
@@ -213,6 +213,12 @@ export class VerifyEmailModalComponent {
     this.otpDigits.set(Array(OTP_LENGTH).fill(''));
     this.clearResendTimer();
     this.resendIn.set(0);
+  }
+
+  /** Return URL from `?redirect=` — internal paths only (no open redirects). */
+  private safeRedirect(): string {
+    const r = new URLSearchParams(window.location.search).get('redirect');
+    return r && r.startsWith('/') && !r.startsWith('//') ? r : '/';
   }
 
   private prefetchUserData(): void {

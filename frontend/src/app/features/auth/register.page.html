@@ -18,7 +18,7 @@
 
       <!-- Tabs -->
       <div class="auth__tabs" role="tablist">
-        <a routerLink="/auth/login" class="auth__tab" role="tab" aria-selected="false">
+        <a routerLink="/auth/login" queryParamsHandling="preserve" class="auth__tab" role="tab" aria-selected="false">
           {{ 'auth.login' | translate }}
         </a>
         <a routerLink="/auth/register" class="auth__tab is-active" role="tab" aria-selected="true">

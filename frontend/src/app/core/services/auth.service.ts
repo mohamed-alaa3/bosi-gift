@@ -5,6 +5,8 @@ import { Observable, tap } from 'rxjs';
 
 import { API_BASE_URL } from '../tokens/api-base-url.token';
 import { AuthStore } from '../stores/auth.store';
+import { CartStore } from '../stores/cart.store';
+import { WishlistStore } from '../stores/wishlist.store';
 import {
   ApiSuccessResponse,
   AuthResponse,
@@ -30,6 +32,8 @@ export class AuthService {
   private router = inject(Router);
   private baseUrl = inject(API_BASE_URL);
   private authStore = inject(AuthStore);
+  private cartStore = inject(CartStore);
+  private wishlistStore = inject(WishlistStore);
 
   private readonly endpoint = `${this.baseUrl}/auth`;
 
@@ -121,8 +125,22 @@ export class AuthService {
     );
   }
 
+  /**
+   * Sends a signed-out visitor to the registration page, remembering the page
+   * they were on so they come back to it after signing up / verifying.
+   */
+  redirectToRegister(): void {
+    const returnUrl = this.router.url;
+    void this.router.navigate(['/auth/register'], {
+      queryParams: returnUrl && returnUrl !== '/' ? { redirect: returnUrl } : {},
+    });
+  }
+
   logout(redirectToLogin: boolean = true): void {
     this.authStore.clear();
+    // Don't leak the previous user's cart / wishlist hearts into the next session.
+    this.cartStore.clear();
+    this.wishlistStore.clear();
     if (redirectToLogin) {
       this.router.navigate(['/auth/login']);
     }
