@@ -426,7 +426,7 @@ export class BoxPreviewComponent {
     // Guard: authentication
     if (!this.authStore.isAuthenticated()) {
       this.toast.info(this.translate.instant('toast.signInToAddToCart'));
-      this.router.navigate(['/auth/login'], {
+      this.router.navigate(['/auth/register'], {
         queryParams: { redirect: '/gifts' },
       });
       return;
